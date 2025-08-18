@@ -19,7 +19,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
   
   bool _isLoading = false;
   bool _obscurePassword = true;
-  final String baseUrl = "http://localhost:8000/api";
+  final String baseUrl = "https://shrew-concrete-cobra.ngrok-free.app/api";
 
   Future<void> _adminLogin() async {
     if (!_formKey.currentState!.validate()) return;

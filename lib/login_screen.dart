@@ -24,7 +24,7 @@ class _LoginPageState extends State<LoginPage> {
   bool _otpSent = false;
   bool _isLoading = false;
 
-  final String baseUrl = "http://localhost:8000/api"; // Replace with your actual URL
+  final String baseUrl = "https://shrew-concrete-cobra.ngrok-free.app/api"; // Replace with your actual URL
 
   Future<void> _sendOtp() async {
     final email = _emailController.text.trim();

@@ -13,7 +13,7 @@ class AdminScreen extends StatefulWidget {
 
 class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStateMixin {
   final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
-  final String baseUrl = "http://localhost:8000/api";
+  final String baseUrl = "https://shrew-concrete-cobra.ngrok-free.app/api";
   
   late TabController _tabController;
   List<dynamic> pendingVolunteers = [];

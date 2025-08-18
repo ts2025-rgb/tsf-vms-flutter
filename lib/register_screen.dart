@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
-import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -77,8 +76,11 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController _childProtectionUndertakingController = TextEditingController();
   bool _poshPolicyAccepted = false;
 
+  // Submit loading state
+  bool _isSubmitting = false;
+
   final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
-  final String baseUrl = "http://localhost:8000/api";
+  final String baseUrl = "https://shrew-concrete-cobra.ngrok-free.app/api";
 
   // Multi-select options
   final List<String> _skillsOptions = [
@@ -243,6 +245,20 @@ class _RegisterPageState extends State<RegisterPage> {
       return;
     }
 
+    setState(() {
+      _isSubmitting = true;
+    });
+
+    print('=== REGISTRATION VALIDATION DEBUG ===');
+    print('Form validation passed: ${_formKey.currentState!.validate()}');
+    print('Files check:');
+    print('  _photoFile: ${_photoFile?.name ?? 'null'}');
+    print('  _aadharFile: ${_aadharFile?.name ?? 'null'}');
+    print('  _referencePhotoFile: ${_referencePhotoFile?.name ?? 'null'}');
+    print('  _referenceAadharFile: ${_referenceAadharFile?.name ?? 'null'}');
+    print('  _fileError: $_fileError');
+    print('=====================================');
+
     final uri = Uri.parse('$baseUrl/auth/register');
     final request = http.MultipartRequest("POST", uri);
 
@@ -303,24 +319,65 @@ class _RegisterPageState extends State<RegisterPage> {
     await addFile('referenceAadhar', _referenceAadharFile);
 
     try {
+      print('=== REGISTRATION REQUEST DEBUG ===');
+      print('Sending registration request to: ${uri.toString()}');
+      print('Request fields:');
+      request.fields.forEach((key, value) {
+        print('  $key: $value');
+      });
+      print('Request files:');
+      for (var file in request.files) {
+        print('  ${file.field}: ${file.filename} (${file.length} bytes)');
+      }
+      print('=====================================');
+
       final response = await request.send();
       final responseBody = await response.stream.bytesToString();
+      
+      print('=== REGISTRATION RESPONSE DEBUG ===');
+      print('Status Code: ${response.statusCode}');
+      print('Response Headers: ${response.headers}');
+      print('Response Body: $responseBody');
+      print('====================================');
+
       final decoded = json.decode(responseBody);
 
       if (response.statusCode == 200 && decoded["success"] == true) {
+        print('Registration successful!');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Registration successful", style: GoogleFonts.poppins())),
+          SnackBar(
+            content: Text("Registration successful! Redirecting to login...", style: GoogleFonts.poppins()),
+            backgroundColor: Colors.green,
+          ),
         );
-        Navigator.pushReplacementNamed(context, "/home");
+        // Wait a moment to show the success message, then navigate to login
+        await Future.delayed(const Duration(milliseconds: 1500));
+        Navigator.pushReplacementNamed(context, "/login");
       } else {
+        print('Registration failed - Status: ${response.statusCode}, Success: ${decoded["success"]}');
+        print('Error message: ${decoded["message"]}');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(decoded["message"] ?? "Registration failed", style: GoogleFonts.poppins())),
+          SnackBar(
+            content: Text(decoded["message"] ?? "Registration failed", style: GoogleFonts.poppins()),
+            backgroundColor: Colors.red,
+          ),
         );
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('=== REGISTRATION ERROR DEBUG ===');
+      print('Error: $e');
+      print('Stack trace: $stackTrace');
+      print('=================================');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Failed to register", style: GoogleFonts.poppins())),
+        SnackBar(
+          content: Text("Failed to register. Please try again.", style: GoogleFonts.poppins()),
+          backgroundColor: Colors.red,
+        ),
       );
+    } finally {
+      setState(() {
+        _isSubmitting = false;
+      });
     }
   }
 
@@ -328,19 +385,32 @@ class _RegisterPageState extends State<RegisterPage> {
   List<Step> get _steps => [
     // 1. Personal Details
     Step(
-      title: const Text("Personal"),
+      title: Text("Personal Details", style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
       isActive: _currentStep >= 0,
       content: Column(
         children: [
           TextFormField(
             controller: _fullNameController,
-            decoration: const InputDecoration(labelText: "Full Name"),
+            style: GoogleFonts.poppins(),
+            decoration: InputDecoration(
+              labelText: "Full Name",
+              prefixIcon: const Icon(Icons.person_outline, color: Colors.teal),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            ),
             validator: (v) => v == null || v.isEmpty ? "Required" : null,
           ),
+          const SizedBox(height: 16),
           TextFormField(
             controller: _dobController,
             readOnly: true,
-            decoration: const InputDecoration(labelText: "Date of Birth"),
+            style: GoogleFonts.poppins(),
+            decoration: InputDecoration(
+              labelText: "Date of Birth",
+              prefixIcon: const Icon(Icons.calendar_today_outlined, color: Colors.teal),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            ),
             onTap: () async {
               final picked = await showDatePicker(
                 context: context,
@@ -354,106 +424,238 @@ class _RegisterPageState extends State<RegisterPage> {
             },
             validator: (v) => v == null || v.isEmpty ? "Required" : null,
           ),
+          const SizedBox(height: 16),
           DropdownButtonFormField<String>(
             value: _gender,
-            items: _genderOptions.map((g) => DropdownMenuItem(value: g, child: Text(g))).toList(),
+            items: _genderOptions.map((g) => DropdownMenuItem(
+              value: g, 
+              child: Text(g, style: GoogleFonts.poppins())
+            )).toList(),
             onChanged: (v) => setState(() => _gender = v),
-            decoration: const InputDecoration(labelText: "Gender"),
+            style: GoogleFonts.poppins(),
+            decoration: InputDecoration(
+              labelText: "Gender",
+              prefixIcon: const Icon(Icons.wc_outlined, color: Colors.teal),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            ),
             validator: (v) => v == null ? "Required" : null,
           ),
+          const SizedBox(height: 16),
           TextFormField(
             controller: _phoneController,
-            decoration: const InputDecoration(labelText: "Phone"),
+            style: GoogleFonts.poppins(),
+            keyboardType: TextInputType.phone,
+            decoration: InputDecoration(
+              labelText: "Phone Number",
+              prefixIcon: const Icon(Icons.phone_outlined, color: Colors.teal),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            ),
             validator: (v) => v == null || v.isEmpty ? "Required" : null,
           ),
+          const SizedBox(height: 16),
           TextFormField(
             controller: _addressController,
-            decoration: const InputDecoration(labelText: "Address"),
+            style: GoogleFonts.poppins(),
+            maxLines: 3,
+            decoration: InputDecoration(
+              labelText: "Address",
+              prefixIcon: const Icon(Icons.home_outlined, color: Colors.teal),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            ),
             validator: (v) => v == null || v.isEmpty ? "Required" : null,
           ),
+          const SizedBox(height: 16),
           DropdownButtonFormField<String>(
             value: _currentLocationController.text.isEmpty ? null : _currentLocationController.text,
-            items: _locationOptions.map((l) => DropdownMenuItem(value: l, child: Text(l))).toList(),
+            items: _locationOptions.map((l) => DropdownMenuItem(
+              value: l, 
+              child: Text(l, style: GoogleFonts.poppins())
+            )).toList(),
             onChanged: (v) => setState(() => _currentLocationController.text = v ?? ""),
-            decoration: const InputDecoration(labelText: "Current Location"),
+            style: GoogleFonts.poppins(),
+            decoration: InputDecoration(
+              labelText: "Current Location",
+              prefixIcon: const Icon(Icons.location_on_outlined, color: Colors.teal),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            ),
             validator: (v) => v == null ? "Required" : null,
           ),
+          const SizedBox(height: 16),
           DropdownButtonFormField<String>(
             value: _bloodGroupController.text.isEmpty ? null : _bloodGroupController.text,
-            items: _bloodGroups.map((b) => DropdownMenuItem(value: b, child: Text(b))).toList(),
+            items: _bloodGroups.map((b) => DropdownMenuItem(
+              value: b, 
+              child: Text(b, style: GoogleFonts.poppins())
+            )).toList(),
             onChanged: (v) => setState(() => _bloodGroupController.text = v ?? ""),
-            decoration: const InputDecoration(labelText: "Blood Group"),
+            style: GoogleFonts.poppins(),
+            decoration: InputDecoration(
+              labelText: "Blood Group",
+              prefixIcon: const Icon(Icons.bloodtype_outlined, color: Colors.teal),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            ),
             validator: (v) => v == null ? "Required" : null,
           ),
+          const SizedBox(height: 16),
           TextFormField(
             controller: _socialMediaController,
-            decoration: const InputDecoration(labelText: "Social Media Profile Link(s)"),
+            style: GoogleFonts.poppins(),
+            decoration: InputDecoration(
+              labelText: "Social Media Profile Link(s)",
+              prefixIcon: const Icon(Icons.link_outlined, color: Colors.teal),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              helperText: "Optional",
+            ),
           ),
         ],
       ),
     ),
     // 2. Education & Work
     Step(
-      title: const Text("Education & Work"),
+      title: Text("Education & Work", style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
       isActive: _currentStep >= 1,
       content: Column(
         children: [
           TextFormField(
             controller: _highestQualificationController,
-            decoration: const InputDecoration(labelText: "Highest Qualification"),
+            style: GoogleFonts.poppins(),
+            decoration: InputDecoration(
+              labelText: "Highest Qualification",
+              prefixIcon: const Icon(Icons.school_outlined, color: Colors.teal),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            ),
             validator: (v) => v == null || v.isEmpty ? "Required" : null,
           ),
+          const SizedBox(height: 16),
           TextFormField(
             controller: _currentOccupationController,
-            decoration: const InputDecoration(labelText: "Current Occupation"),
+            style: GoogleFonts.poppins(),
+            decoration: InputDecoration(
+              labelText: "Current Occupation",
+              prefixIcon: const Icon(Icons.work_outline, color: Colors.teal),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            ),
             validator: (v) => v == null || v.isEmpty ? "Required" : null,
           ),
-          SwitchListTile(
-            title: const Text("Corporate Experience?"),
-            value: _corporateExperience,
-            onChanged: (v) => setState(() => _corporateExperience = v),
+          const SizedBox(height: 16),
+          Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey.shade300),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: SwitchListTile(
+              title: Text("Do you have corporate experience?", style: GoogleFonts.poppins()),
+              subtitle: Text("Toggle if you have worked in corporate environment", 
+                style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600])),
+              value: _corporateExperience,
+              onChanged: (v) => setState(() => _corporateExperience = v),
+              activeColor: Colors.teal,
+            ),
           ),
-          if (_corporateExperience)
+          if (_corporateExperience) ...[
+            const SizedBox(height: 16),
             TextFormField(
               controller: _organizationNameController,
-              decoration: const InputDecoration(labelText: "Organization Name"),
+              style: GoogleFonts.poppins(),
+              decoration: InputDecoration(
+                labelText: "Organization Name",
+                prefixIcon: const Icon(Icons.business_outlined, color: Colors.teal),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              ),
             ),
+          ],
         ],
       ),
     ),
     // 3. Volunteering Intent & Preferences
     Step(
-      title: const Text("Volunteering"),
+      title: Text("Volunteering", style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
       isActive: _currentStep >= 2,
       content: Column(
         children: [
-          SwitchListTile(
-            title: const Text("Prior Volunteering?"),
-            value: _priorVolunteering,
-            onChanged: (v) => setState(() => _priorVolunteering = v),
+          Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey.shade300),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: SwitchListTile(
+              title: Text("Have you volunteered before?", style: GoogleFonts.poppins()),
+              subtitle: Text("Toggle if you have prior volunteering experience", 
+                style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600])),
+              value: _priorVolunteering,
+              onChanged: (v) => setState(() => _priorVolunteering = v),
+              activeColor: Colors.teal,
+            ),
           ),
-          if (_priorVolunteering)
+          if (_priorVolunteering) ...[
+            const SizedBox(height: 16),
             TextFormField(
               controller: _priorVolunteeringDescController,
-              decoration: const InputDecoration(labelText: "Describe Prior Volunteering"),
+              style: GoogleFonts.poppins(),
+              maxLines: 3,
+              decoration: InputDecoration(
+                labelText: "Describe Your Prior Volunteering Experience",
+                prefixIcon: const Icon(Icons.volunteer_activism_outlined, color: Colors.teal),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              ),
             ),
+          ],
+          const SizedBox(height: 16),
           DropdownButtonFormField<String>(
             value: _interestedProgram,
-            items: _programOptions.map((p) => DropdownMenuItem(value: p, child: Text(p))).toList(),
+            items: _programOptions.map((p) => DropdownMenuItem(
+              value: p, 
+              child: Text(p, style: GoogleFonts.poppins())
+            )).toList(),
             onChanged: (v) => setState(() => _interestedProgram = v),
-            decoration: const InputDecoration(labelText: "Interested Program"),
+            style: GoogleFonts.poppins(),
+            decoration: InputDecoration(
+              labelText: "Interested Program",
+              prefixIcon: const Icon(Icons.campaign_outlined, color: Colors.teal),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            ),
             validator: (v) => v == null ? "Required" : null,
           ),
+          const SizedBox(height: 16),
           TextFormField(
             controller: _whyVolunteerController,
-            decoration: const InputDecoration(labelText: "Why do you want to volunteer?"),
+            style: GoogleFonts.poppins(),
+            maxLines: 4,
+            decoration: InputDecoration(
+              labelText: "Why do you want to volunteer with us?",
+              prefixIcon: const Icon(Icons.favorite_outline, color: Colors.teal),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              helperText: "Tell us your motivation and goals",
+            ),
             validator: (v) => v == null || v.isEmpty ? "Required" : null,
           ),
+          const SizedBox(height: 16),
           DropdownButtonFormField<String>(
             value: _hoursPerWeek,
-            items: _hoursOptions.map((h) => DropdownMenuItem(value: h, child: Text(h))).toList(),
+            items: _hoursOptions.map((h) => DropdownMenuItem(
+              value: h, 
+              child: Text(h, style: GoogleFonts.poppins())
+            )).toList(),
             onChanged: (v) => setState(() => _hoursPerWeek = v),
-            decoration: const InputDecoration(labelText: "Hours per week"),
+            style: GoogleFonts.poppins(),
+            decoration: InputDecoration(
+              labelText: "Hours per week you can contribute",
+              prefixIcon: const Icon(Icons.access_time_outlined, color: Colors.teal),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            ),
             validator: (v) => v == null ? "Required" : null,
           ),
         ],
@@ -461,44 +663,144 @@ class _RegisterPageState extends State<RegisterPage> {
     ),
     // 4. Skills & Role Preferences
     Step(
-      title: const Text("Skills & Roles"),
+      title: Text("Skills & Roles", style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
       isActive: _currentStep >= 3,
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text("Select Skills (multiple):"),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.teal.shade50,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.teal.shade200),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.star_outline, color: Colors.teal.shade700, size: 20),
+                    const SizedBox(width: 8),
+                    Text("Select Your Skills", 
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.w600, 
+                        color: Colors.teal.shade700
+                      )
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text("Choose multiple skills that match your expertise", 
+                  style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600])
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
           Wrap(
             spacing: 8,
+            runSpacing: 8,
             children: _skillsOptions.map((skill) => FilterChip(
-              label: Text(skill),
+              label: Text(skill, style: GoogleFonts.poppins(fontSize: 12)),
               selected: _skills.contains(skill),
               onSelected: (selected) => _toggleMultiSelect(_skills, skill),
+              backgroundColor: Colors.grey.shade100,
+              selectedColor: Colors.teal.shade100,
+              checkmarkColor: Colors.teal.shade700,
+              side: BorderSide(
+                color: _skills.contains(skill) ? Colors.teal : Colors.grey.shade300
+              ),
             )).toList(),
           ),
+          const SizedBox(height: 16),
           TextFormField(
             controller: _skillsDescController,
-            decoration: const InputDecoration(labelText: "Describe your skills"),
+            style: GoogleFonts.poppins(),
+            maxLines: 3,
+            decoration: InputDecoration(
+              labelText: "Describe your skills in detail",
+              prefixIcon: const Icon(Icons.lightbulb_outline, color: Colors.teal),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              helperText: "Elaborate on your selected skills and experience",
+            ),
             validator: (v) => v == null || v.isEmpty ? "Required" : null,
           ),
-          const SizedBox(height: 8),
-          const Text("Preferred Roles (multiple):"),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.green.shade50,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.green.shade200),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.assignment_outlined, color: Colors.green.shade700, size: 20),
+                    const SizedBox(width: 8),
+                    Text("Preferred Roles", 
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.w600, 
+                        color: Colors.green.shade700
+                      )
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text("Select roles you'd like to take on", 
+                  style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600])
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
           Wrap(
             spacing: 8,
+            runSpacing: 8,
             children: _rolesOptions.map((role) => FilterChip(
-              label: Text(role),
+              label: Text(role, style: GoogleFonts.poppins(fontSize: 12)),
               selected: _preferredRoles.contains(role),
               onSelected: (selected) => _toggleMultiSelect(_preferredRoles, role),
+              backgroundColor: Colors.grey.shade100,
+              selectedColor: Colors.green.shade100,
+              checkmarkColor: Colors.green.shade700,
+              side: BorderSide(
+                color: _preferredRoles.contains(role) ? Colors.green : Colors.grey.shade300
+              ),
             )).toList(),
           ),
+          const SizedBox(height: 16),
           TextFormField(
             controller: _specialRequirementsController,
-            decoration: const InputDecoration(labelText: "Special Requirements (if any)"),
+            style: GoogleFonts.poppins(),
+            maxLines: 2,
+            decoration: InputDecoration(
+              labelText: "Special Requirements (if any)",
+              prefixIcon: const Icon(Icons.accessible_outlined, color: Colors.teal),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              helperText: "Any accessibility needs or special accommodations",
+            ),
           ),
+          const SizedBox(height: 16),
           DropdownButtonFormField<String>(
             value: _meiteilon,
-            items: _meiteilonOptions.map((m) => DropdownMenuItem(value: m, child: Text(m))).toList(),
+            items: _meiteilonOptions.map((m) => DropdownMenuItem(
+              value: m, 
+              child: Text(m, style: GoogleFonts.poppins())
+            )).toList(),
             onChanged: (v) => setState(() => _meiteilon = v),
-            decoration: const InputDecoration(labelText: "Can you speak Meiteilon?"),
+            style: GoogleFonts.poppins(),
+            decoration: InputDecoration(
+              labelText: "Can you speak Meiteilon?",
+              prefixIcon: const Icon(Icons.language_outlined, color: Colors.teal),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            ),
             validator: (v) => v == null ? "Required" : null,
           ),
         ],
@@ -506,128 +808,530 @@ class _RegisterPageState extends State<RegisterPage> {
     ),
     // 5. Character Reference & Documents
     Step(
-      title: const Text("Reference & Documents"),
+      title: Text("Reference & Documents", style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
       isActive: _currentStep >= 4,
       content: Column(
         children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.blue.shade50,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.blue.shade200),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.person_pin_outlined, color: Colors.blue.shade700, size: 24),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("Character Reference", 
+                        style: GoogleFonts.poppins(
+                          fontWeight: FontWeight.w600, 
+                          color: Colors.blue.shade700
+                        )
+                      ),
+                      Text("Provide details of someone who can vouch for your character", 
+                        style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600])
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
           TextFormField(
             controller: _referenceNameController,
-            decoration: const InputDecoration(labelText: "Reference Name"),
+            style: GoogleFonts.poppins(),
+            decoration: InputDecoration(
+              labelText: "Reference Full Name",
+              prefixIcon: const Icon(Icons.person_outline, color: Colors.teal),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            ),
             validator: (v) => v == null || v.isEmpty ? "Required" : null,
           ),
+          const SizedBox(height: 16),
           TextFormField(
             controller: _referenceRelationController,
-            decoration: const InputDecoration(labelText: "Reference Relation"),
+            style: GoogleFonts.poppins(),
+            decoration: InputDecoration(
+              labelText: "Relationship with Reference",
+              prefixIcon: const Icon(Icons.family_restroom_outlined, color: Colors.teal),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              helperText: "e.g., Teacher, Supervisor, Family Friend",
+            ),
             validator: (v) => v == null || v.isEmpty ? "Required" : null,
           ),
+          const SizedBox(height: 16),
           TextFormField(
             controller: _referencePhoneController,
-            decoration: const InputDecoration(labelText: "Reference Phone"),
+            style: GoogleFonts.poppins(),
+            keyboardType: TextInputType.phone,
+            decoration: InputDecoration(
+              labelText: "Reference Phone Number",
+              prefixIcon: const Icon(Icons.phone_outlined, color: Colors.teal),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            ),
             validator: (v) => v == null || v.isEmpty ? "Required" : null,
           ),
+          const SizedBox(height: 16),
           TextFormField(
             controller: _referenceAffiliationController,
-            decoration: const InputDecoration(labelText: "Reference Affiliation"),
+            style: GoogleFonts.poppins(),
+            decoration: InputDecoration(
+              labelText: "Reference Affiliation/Organization",
+              prefixIcon: const Icon(Icons.business_outlined, color: Colors.teal),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            ),
             validator: (v) => v == null || v.isEmpty ? "Required" : null,
           ),
+          const SizedBox(height: 24),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.orange.shade50,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.orange.shade200),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.cloud_upload_outlined, color: Colors.orange.shade700, size: 24),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("Document Upload", 
+                        style: GoogleFonts.poppins(
+                          fontWeight: FontWeight.w600, 
+                          color: Colors.orange.shade700
+                        )
+                      ),
+                      Text("Upload required documents (Max 1MB each)", 
+                        style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600])
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
           Row(
             children: [
               Expanded(
-                child: OutlinedButton.icon(
-                  icon: const Icon(Icons.photo),
-                  label: Text(_photoFile == null ? "Upload Photo" : _photoFile!.name),
-                  onPressed: () => _pickFile('photo'),
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.shade300),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: OutlinedButton.icon(
+                    icon: Icon(Icons.photo_camera_outlined, 
+                      color: _photoFile != null ? Colors.green : Colors.teal),
+                    label: Text(
+                      _photoFile == null ? "Your Photo" : "Photo Selected",
+                      style: GoogleFonts.poppins(
+                        color: _photoFile != null ? Colors.green : Colors.teal
+                      )
+                    ),
+                    onPressed: () => _pickFile('photo'),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      side: BorderSide.none,
+                    ),
+                  ),
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 12),
               Expanded(
-                child: OutlinedButton.icon(
-                  icon: const Icon(Icons.picture_as_pdf),
-                  label: Text(_aadharFile == null ? "Upload Aadhar" : _aadharFile!.name),
-                  onPressed: () => _pickFile('aadhar'),
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.shade300),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: OutlinedButton.icon(
+                    icon: Icon(Icons.credit_card_outlined,
+                      color: _aadharFile != null ? Colors.green : Colors.teal),
+                    label: Text(
+                      _aadharFile == null ? "Your Aadhar" : "Aadhar Selected",
+                      style: GoogleFonts.poppins(
+                        color: _aadharFile != null ? Colors.green : Colors.teal
+                      )
+                    ),
+                    onPressed: () => _pickFile('aadhar'),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      side: BorderSide.none,
+                    ),
+                  ),
                 ),
               ),
             ],
           ),
+          const SizedBox(height: 12),
           Row(
             children: [
               Expanded(
-                child: OutlinedButton.icon(
-                  icon: const Icon(Icons.person),
-                  label: Text(_referencePhotoFile == null ? "Reference Photo" : _referencePhotoFile!.name),
-                  onPressed: () => _pickFile('referencePhoto'),
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.shade300),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: OutlinedButton.icon(
+                    icon: Icon(Icons.person_pin_outlined,
+                      color: _referencePhotoFile != null ? Colors.green : Colors.teal),
+                    label: Text(
+                      _referencePhotoFile == null ? "Reference Photo" : "Ref Photo Selected",
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
+                        color: _referencePhotoFile != null ? Colors.green : Colors.teal
+                      )
+                    ),
+                    onPressed: () => _pickFile('referencePhoto'),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      side: BorderSide.none,
+                    ),
+                  ),
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 12),
               Expanded(
-                child: OutlinedButton.icon(
-                  icon: const Icon(Icons.picture_as_pdf),
-                  label: Text(_referenceAadharFile == null ? "Reference Aadhar" : _referenceAadharFile!.name),
-                  onPressed: () => _pickFile('referenceAadhar'),
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.shade300),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: OutlinedButton.icon(
+                    icon: Icon(Icons.badge_outlined,
+                      color: _referenceAadharFile != null ? Colors.green : Colors.teal),
+                    label: Text(
+                      _referenceAadharFile == null ? "Reference Aadhar" : "Ref Aadhar Selected",
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
+                        color: _referenceAadharFile != null ? Colors.green : Colors.teal
+                      )
+                    ),
+                    onPressed: () => _pickFile('referenceAadhar'),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      side: BorderSide.none,
+                    ),
+                  ),
                 ),
               ),
             ],
           ),
           if (_fileError != null)
             Padding(
-              padding: const EdgeInsets.only(top: 8.0),
-              child: Text(_fileError!, style: const TextStyle(color: Colors.red)),
+              padding: const EdgeInsets.only(top: 12.0),
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.red.shade200),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.error_outline, color: Colors.red.shade700, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(_fileError!, 
+                        style: GoogleFonts.poppins(
+                          color: Colors.red.shade700,
+                          fontSize: 12
+                        )
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
         ],
       ),
     ),
     // 6. Situational & Personal Reflection
     Step(
-      title: const Text("Reflection"),
+      title: Text("Reflection", style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
       isActive: _currentStep >= 5,
       content: Column(
         children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.purple.shade50,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.purple.shade200),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.psychology_outlined, color: Colors.purple.shade700, size: 24),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("Personal Reflection", 
+                        style: GoogleFonts.poppins(
+                          fontWeight: FontWeight.w600, 
+                          color: Colors.purple.shade700
+                        )
+                      ),
+                      Text("Help us understand your values and approach to challenges", 
+                        style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600])
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
           TextFormField(
             controller: _trustworthyMeaningController,
-            decoration: const InputDecoration(labelText: "What does trustworthy mean to you?"),
+            style: GoogleFonts.poppins(),
+            maxLines: 4,
+            decoration: InputDecoration(
+              labelText: "What does 'trustworthy' mean to you?",
+              prefixIcon: const Icon(Icons.verified_outlined, color: Colors.teal),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              helperText: "Share your personal definition and examples",
+            ),
             validator: (v) => v == null || v.isEmpty ? "Required" : null,
           ),
+          const SizedBox(height: 16),
           TextFormField(
             controller: _conflictSituationController,
-            decoration: const InputDecoration(labelText: "Describe a conflict situation and how you handled it"),
+            style: GoogleFonts.poppins(),
+            maxLines: 4,
+            decoration: InputDecoration(
+              labelText: "Describe a conflict situation and how you handled it",
+              prefixIcon: const Icon(Icons.mediation_outlined, color: Colors.teal),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              helperText: "Tell us about your problem-solving approach",
+            ),
             validator: (v) => v == null || v.isEmpty ? "Required" : null,
           ),
-          SwitchListTile(
-            title: const Text("Willing to attend orientation?"),
-            value: _willingOrientation,
-            onChanged: (v) => setState(() => _willingOrientation = v),
+          const SizedBox(height: 16),
+          Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey.shade300),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: SwitchListTile(
+              title: Text("Willing to attend orientation sessions?", style: GoogleFonts.poppins()),
+              subtitle: Text("Orientation helps you understand our mission and processes", 
+                style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600])),
+              value: _willingOrientation,
+              onChanged: (v) => setState(() => _willingOrientation = v),
+              activeColor: Colors.teal,
+            ),
           ),
         ],
       ),
     ),
     // 7. Declarations & Policies
     Step(
-      title: const Text("Declarations"),
+      title: Text("Declarations", style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
       isActive: _currentStep >= 6,
       content: Column(
         children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.red.shade50,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.red.shade200),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.policy_outlined, color: Colors.red.shade700, size: 24),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("Policies & Declarations", 
+                        style: GoogleFonts.poppins(
+                          fontWeight: FontWeight.w600, 
+                          color: Colors.red.shade700
+                        )
+                      ),
+                      Text("Important commitments for volunteer safety and conduct", 
+                        style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600])
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
           TextFormField(
             controller: _childProtectionUndertakingController,
-            decoration: const InputDecoration(labelText: "Child Protection Undertaking"),
+            style: GoogleFonts.poppins(),
+            maxLines: 3,
+            decoration: InputDecoration(
+              labelText: "Child Protection Undertaking",
+              prefixIcon: const Icon(Icons.child_care_outlined, color: Colors.teal),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              helperText: "Describe your commitment to child safety and protection",
+            ),
             validator: (v) => v == null || v.isEmpty ? "Required" : null,
           ),
-          SwitchListTile(
-            title: const Text("Accept POSH Policy?"),
-            value: _poshPolicyAccepted,
-            onChanged: (v) => setState(() => _poshPolicyAccepted = v),
+          const SizedBox(height: 16),
+          Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey.shade300),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: SwitchListTile(
+              title: Text("I accept the POSH Policy", style: GoogleFonts.poppins(fontWeight: FontWeight.w500)),
+              subtitle: Text("Prevention of Sexual Harassment policy acceptance is mandatory", 
+                style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600])),
+              value: _poshPolicyAccepted,
+              onChanged: (v) => setState(() => _poshPolicyAccepted = v),
+              activeColor: Colors.teal,
+            ),
           ),
+          if (!_poshPolicyAccepted)
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.orange.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.orange.shade200),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.warning_outlined, color: Colors.orange.shade700, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text("POSH Policy acceptance is required to proceed", 
+                        style: GoogleFonts.poppins(
+                          color: Colors.orange.shade700,
+                          fontSize: 12
+                        )
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
         ],
       ),
     ),
     // 8. Submit
     Step(
-      title: const Text("Submit"),
+      title: Text("Submit", style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
       isActive: _currentStep >= 7,
-      content: Center(
-        child: ElevatedButton(
-          onPressed: _submitForm,
-          child: const Text("Submit Registration"),
-        ),
+      content: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.teal.shade50, Colors.green.shade50],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.teal.shade200),
+            ),
+            child: Column(
+              children: [
+                Icon(Icons.check_circle_outline, size: 48, color: Colors.teal.shade700),
+                const SizedBox(height: 16),
+                Text(
+                  "Ready to Submit",
+                  style: GoogleFonts.poppins(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.teal.shade700,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  "Thank you for completing all sections. Click below to submit your volunteer registration.",
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    color: Colors.grey[700],
+                  ),
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: _isSubmitting ? null : _submitForm,
+                    icon: _isSubmitting 
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Icon(Icons.send_outlined, color: Colors.white),
+                    label: Text(
+                      _isSubmitting ? "Submitting Registration..." : "Submit Registration",
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _isSubmitting ? Colors.grey.shade400 : Colors.teal.shade700,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.blue.shade50,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.blue.shade200),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.info_outline, color: Colors.blue.shade700, size: 20),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    "After submission, our team will review your application and contact you within 3-5 business days.",
+                    style: GoogleFonts.poppins(
+                      color: Colors.blue.shade700,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     ),
   ];
@@ -636,81 +1340,259 @@ class _RegisterPageState extends State<RegisterPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.teal[800],
-        title: Text("Register", style: GoogleFonts.poppins()),
-      ),
       body: _emailVerified
-          ? Form(
-              key: _formKey,
-              child: Stepper(
-                type: StepperType.vertical,
-                currentStep: _currentStep,
-                onStepContinue: () {
-                  if (_currentStep < _steps.length - 1) {
-                    setState(() => _currentStep += 1);
-                  }
-                },
-                onStepCancel: () {
-                  if (_currentStep > 0) {
-                    setState(() => _currentStep -= 1);
-                  }
-                },
-                steps: _steps,
-                controlsBuilder: (context, details) {
-                  return Row(
-                    children: [
-                      if (_currentStep < _steps.length - 1)
-                        ElevatedButton(
-                          onPressed: details.onStepContinue,
-                          child: const Text("Next"),
+          ? Stack(
+              children: [
+                Form(
+                  key: _formKey,
+                  child: Stepper(
+                    type: StepperType.vertical,
+                    currentStep: _currentStep,
+                    onStepContinue: () {
+                      if (_currentStep < _steps.length - 1) {
+                        setState(() => _currentStep += 1);
+                      }
+                    },
+                    onStepCancel: () {
+                      if (_currentStep > 0) {
+                        setState(() => _currentStep -= 1);
+                      }
+                    },
+                    steps: _steps,
+                    controlsBuilder: (context, details) {
+                      return Padding(
+                        padding: const EdgeInsets.only(top: 16.0),
+                        child: Row(
+                          children: [
+                            if (_currentStep < _steps.length - 1)
+                              Expanded(
+                                child: ElevatedButton.icon(
+                                  onPressed: _isSubmitting ? null : details.onStepContinue,
+                                  icon: const Icon(Icons.arrow_forward, color: Colors.white),
+                                  label: Text("Next Step", style: GoogleFonts.poppins(
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
+                                  )),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: _isSubmitting ? Colors.grey.shade400 : Colors.teal.shade700,
+                                    padding: const EdgeInsets.symmetric(vertical: 12),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            if (_currentStep < _steps.length - 1 && _currentStep > 0)
+                              const SizedBox(width: 12),
+                            if (_currentStep > 0)
+                              Expanded(
+                                child: OutlinedButton.icon(
+                                  onPressed: _isSubmitting ? null : details.onStepCancel,
+                                  icon: Icon(Icons.arrow_back, color: _isSubmitting ? Colors.grey.shade400 : Colors.grey.shade600),
+                                  label: Text("Previous", style: GoogleFonts.poppins(
+                                    fontWeight: FontWeight.w500,
+                                    color: _isSubmitting ? Colors.grey.shade400 : Colors.grey.shade600,
+                                  )),
+                                  style: OutlinedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(vertical: 12),
+                                    side: BorderSide(color: _isSubmitting ? Colors.grey.shade300 : Colors.grey.shade300),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
-                      if (_currentStep > 0)
-                        TextButton(
-                          onPressed: details.onStepCancel,
-                          child: const Text("Back"),
+                      );
+                    },
+                  ),
+                ),
+                if (_isSubmitting)
+                  Container(
+                    color: Colors.black.withOpacity(0.3),
+                    child: Center(
+                      child: Container(
+                        padding: const EdgeInsets.all(24),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 10,
+                              spreadRadius: 2,
+                            ),
+                          ],
                         ),
-                    ],
-                  );
-                },
-              ),
-            )
-          : Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Center(
-                child: Form(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      TextFormField(
-                        controller: _emailController,
-                        decoration: const InputDecoration(labelText: "Email"),
-                        keyboardType: TextInputType.emailAddress,
-                        enabled: !_otpSent,
-                        validator: (v) => v == null || v.isEmpty ? "Required" : null,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const SizedBox(
+                              width: 50,
+                              height: 50,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 3,
+                                valueColor: AlwaysStoppedAnimation<Color>(Colors.teal),
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            Text(
+                              "Submitting Registration",
+                              style: GoogleFonts.poppins(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.teal.shade700,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              "Please wait while we process your application...",
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.poppins(
+                                fontSize: 14,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                        const SizedBox(height: 16),
-                      if (!_otpSent)
-                        ElevatedButton(
-                          onPressed: _sendingOtp ? null : _sendOtp,
-                          child: _sendingOtp
-                              ? const CircularProgressIndicator()
-                              : const Text("Send OTP"),
+                    ),
+                  ),
+              ],
+            )
+          : Center(
+              child: SingleChildScrollView(
+                child: Container(
+                  width: MediaQuery.of(context).size.width < 450 ? double.infinity : 400,
+                  padding: const EdgeInsets.all(24.0),
+                  child: Form(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Image.asset('assets/images/logo.png', height: 120),
+                        const SizedBox(height: 20),
+                        Text(
+                          "Tengbang Sintha Foundation",
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.poppins(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.green[800],
+                          ),
                         ),
-                      if (_otpSent && !_emailVerified) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          "Volunteer Registration",
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.poppins(
+                            fontSize: 16,
+                            color: Colors.teal[700],
+                          ),
+                        ),
+                        const SizedBox(height: 28),
+
                         TextFormField(
-                          controller: _otpController,
-                          decoration: const InputDecoration(labelText: "Enter OTP"),
+                          controller: _emailController,
+                          keyboardType: TextInputType.emailAddress,
+                          style: GoogleFonts.poppins(),
+                          decoration: InputDecoration(
+                            labelText: "Email",
+                            prefixIcon: const Icon(Icons.email_outlined, color: Colors.teal),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                          enabled: !_otpSent,
+                          validator: (v) => v == null || v.isEmpty ? "Required" : null,
                         ),
                         const SizedBox(height: 16),
-                        ElevatedButton(
-                          onPressed: _verifyingOtp ? null : _verifyOtp,
-                          child: _verifyingOtp
-                              ? const CircularProgressIndicator()
-                              : const Text("Verify OTP"),
+
+                        if (_otpSent && !_emailVerified)
+                          TextFormField(
+                            controller: _otpController,
+                            style: GoogleFonts.poppins(),
+                            decoration: InputDecoration(
+                              labelText: "Enter OTP",
+                              prefixIcon: const Icon(Icons.lock_clock, color: Colors.teal),
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                            ),
+                          ),
+
+                        const SizedBox(height: 16),
+
+                        if (!_otpSent)
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: _sendingOtp ? null : _sendOtp,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.teal[700],
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              ),
+                              child: _sendingOtp
+                                  ? const SizedBox(
+                                      height: 20,
+                                      width: 20,
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : Text("Send OTP", style: GoogleFonts.poppins(fontSize: 16)),
+                            ),
+                          ),
+
+                        if (_otpSent && !_emailVerified)
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: _verifyingOtp ? null : _verifyOtp,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.green[800],
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              ),
+                              child: _verifyingOtp
+                                  ? const SizedBox(
+                                      height: 20,
+                                      width: 20,
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : Text("Verify OTP", style: GoogleFonts.poppins(fontSize: 16)),
+                            ),
+                          ),
+
+                        const SizedBox(height: 20),
+                        
+                        // Back to login link
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text("Already have an account?", style: GoogleFonts.poppins(fontSize: 14)),
+                            const SizedBox(width: 6),
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.pop(context);
+                              },
+                              child: Text(
+                                "Login",
+                                style: GoogleFonts.poppins(
+                                  fontSize: 14,
+                                  color: Colors.teal[700],
+                                  fontWeight: FontWeight.bold,
+                                  decoration: TextDecoration.underline,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
-                    ],
+                    ),
                   ),
                 ),
               ),

@@ -82,7 +82,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _saveProfile() async {
-    final url = Uri.parse("http://localhost:8000/api/auth/update-profile");
+    final url = Uri.parse("https://shrew-concrete-cobra.ngrok-free.app/api/auth/update-profile");
     final response = await http.patch(
       url,
       headers: {
