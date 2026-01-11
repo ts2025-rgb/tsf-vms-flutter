@@ -1847,9 +1847,89 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.grey.shade50,
+      appBar: _emailVerified ? AppBar(
+        elevation: 0,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+        foregroundColor: Colors.white,
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(Icons.app_registration, size: 24),
+            ),
+            const SizedBox(width: 12),
+            Text("Volunteer Registration", style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
+          ],
+        ),
+      ) : null,
       body: _emailVerified
-          ? Stack(
+          ? Column(
+              children: [
+                // Progress Indicator
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "Step ${_currentStep + 1} of ${_steps.length}",
+                            style: GoogleFonts.poppins(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF6366F1),
+                            ),
+                          ),
+                          Text(
+                            "${((_currentStep + 1) / _steps.length * 100).toInt()}% Complete",
+                            style: GoogleFonts.poppins(
+                              fontSize: 12,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: LinearProgressIndicator(
+                          value: (_currentStep + 1) / _steps.length,
+                          minHeight: 8,
+                          backgroundColor: Colors.grey.shade200,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Color(0xFF6366F1),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: Stack(
               children: [
                 Form(
                   key: _formKey,
@@ -1868,48 +1948,90 @@ class _RegisterPageState extends State<RegisterPage> {
                     },
                     steps: _steps,
                     controlsBuilder: (context, details) {
-                      return Padding(
-                        padding: const EdgeInsets.only(top: 16.0),
+                      return Container(
+                        margin: const EdgeInsets.only(top: 20.0),
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.08),
+                              blurRadius: 16,
+                              offset: Offset(0, 4),
+                            ),
+                          ],
+                        ),
                         child: Row(
                           children: [
-                            if (_currentStep < _steps.length - 1)
-                              Expanded(
-                                child: ElevatedButton.icon(
-                                  onPressed: _isSubmitting ? null : details.onStepContinue,
-                                  icon: const Icon(Icons.arrow_forward, color: Colors.white),
-                                  label: Text("Next Step", style: GoogleFonts.poppins(
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.white,
-                                  )),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: _isSubmitting ? Colors.grey.shade400 : Colors.teal.shade700,
-                                    padding: const EdgeInsets.symmetric(vertical: 12),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            if (_currentStep < _steps.length - 1 && _currentStep > 0)
-                              const SizedBox(width: 12),
                             if (_currentStep > 0)
                               Expanded(
                                 child: OutlinedButton.icon(
                                   onPressed: _isSubmitting ? null : details.onStepCancel,
-                                  icon: Icon(Icons.arrow_back, color: _isSubmitting ? Colors.grey.shade400 : Colors.grey.shade600),
-                                  label: Text("Previous", style: GoogleFonts.poppins(
-                                    fontWeight: FontWeight.w500,
-                                    color: _isSubmitting ? Colors.grey.shade400 : Colors.grey.shade600,
-                                  )),
+                                  icon: Icon(Icons.arrow_back, size: 18),
+                                  label: Text("Back", style: GoogleFonts.poppins()),
                                   style: OutlinedButton.styleFrom(
-                                    padding: const EdgeInsets.symmetric(vertical: 12),
-                                    side: BorderSide(color: _isSubmitting ? Colors.grey.shade300 : Colors.grey.shade300),
+                                    padding: const EdgeInsets.symmetric(vertical: 16),
+                                    side: BorderSide(color: Colors.grey.shade300, width: 1.5),
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
+                                      borderRadius: BorderRadius.circular(12),
                                     ),
                                   ),
                                 ),
                               ),
+                            if (_currentStep > 0) const SizedBox(width: 12),
+                            Expanded(
+                              flex: 2,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
+                                  ),
+                                  borderRadius: BorderRadius.circular(12),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Color(0xFF6366F1).withOpacity(0.3),
+                                      blurRadius: 12,
+                                      offset: Offset(0, 4),
+                                    ),
+                                  ],
+                                ),
+                                child: ElevatedButton.icon(
+                                  onPressed: _isSubmitting ? null : details.onStepContinue,
+                                  icon: _isSubmitting
+                                      ? const SizedBox(
+                                          height: 18,
+                                          width: 18,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                          ),
+                                        )
+                                      : Icon(
+                                          _currentStep == _steps.length - 1
+                                              ? Icons.check_circle
+                                              : Icons.arrow_forward,
+                                          size: 20,
+                                        ),
+                                  label: Text(
+                                    _currentStep == _steps.length - 1 ? "Submit" : "Continue",
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.transparent,
+                                    foregroundColor: Colors.white,
+                                    shadowColor: Colors.transparent,
+                                    padding: const EdgeInsets.symmetric(vertical: 16),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
                           ],
                         ),
                       );
@@ -1936,12 +2058,12 @@ class _RegisterPageState extends State<RegisterPage> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const SizedBox(
+                            SizedBox(
                               width: 50,
                               height: 50,
                               child: CircularProgressIndicator(
                                 strokeWidth: 3,
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.teal),
+                                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF6366F1)),
                               ),
                             ),
                             const SizedBox(height: 20),
@@ -1950,7 +2072,7 @@ class _RegisterPageState extends State<RegisterPage> {
                               style: GoogleFonts.poppins(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w600,
-                                color: Colors.teal.shade700,
+                                color: Color(0xFF6366F1),
                               ),
                             ),
                             const SizedBox(height: 8),
@@ -1967,6 +2089,9 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                     ),
                   ),
+              ],
+            ),
+                ),
               ],
             )
           : Center(
