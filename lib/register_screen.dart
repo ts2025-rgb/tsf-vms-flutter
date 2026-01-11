@@ -48,14 +48,18 @@ class _RegisterPageState extends State<RegisterPage> {
   // Section 3: Volunteering Intent & Preferences
   bool _priorVolunteering = false;
   final TextEditingController _priorVolunteeringDescController = TextEditingController();
-  String? _interestedProgram;
+  List<String> _interestedPrograms = []; // Changed to List for multi-select
   final TextEditingController _whyVolunteerController = TextEditingController();
   String? _hoursPerWeek;
 
   // Section 4: Skills & Role Preferences
   List<String> _skills = [];
+  List<String> _customSkills = []; // Custom skills added by user
+  final TextEditingController _customSkillController = TextEditingController();
   final TextEditingController _skillsDescController = TextEditingController();
   List<String> _preferredRoles = [];
+  List<String> _customRoles = []; // Custom roles added by user
+  final TextEditingController _customRoleController = TextEditingController();
   final TextEditingController _specialRequirementsController = TextEditingController();
   String? _meiteilon;
 
@@ -68,10 +72,10 @@ class _RegisterPageState extends State<RegisterPage> {
   // Section 6: Situational & Personal Reflection
   final TextEditingController _trustworthyMeaningController = TextEditingController();
   final TextEditingController _conflictSituationController = TextEditingController();
-  bool _willingOrientation = false;
+
 
   // Section 7: Declarations & Policies
-  final TextEditingController _childProtectionUndertakingController = TextEditingController();
+  bool _childProtectionAccepted = false;
   bool _poshPolicyAccepted = false;
 
   // Submit loading state
@@ -154,6 +158,7 @@ class _RegisterPageState extends State<RegisterPage> {
     }
   }
 
+
   void _toggleMultiSelect(List<String> list, String value) {
     setState(() {
       if (list.contains(value)) {
@@ -163,6 +168,267 @@ class _RegisterPageState extends State<RegisterPage> {
       }
     });
   }
+
+  Future<void> _showChildProtectionDialog() async {
+    final result = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Row(
+            children: [
+              Icon(Icons.shield_outlined, color: Colors.red.shade700),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  "Child Protection Policy",
+                  style: GoogleFonts.poppins(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 18,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  "As a volunteer working with conflict-affected children in Manipur, India, I acknowledge the importance of ensuring the safety, dignity, and well-being of every child under my care. I commit to upholding the highest standards of conduct and agree to the following:",
+                  style: GoogleFonts.poppins(fontSize: 14, height: 1.5),
+                ),
+                const SizedBox(height: 16),
+                _buildPolicyPoint(
+                  "1.",
+                  "I will treat all children with respect and dignity, ensuring their voices are heard and their rights are protected.",
+                ),
+                _buildPolicyPoint(
+                  "2.",
+                  "I will prioritise the physical and emotional safety of all children, avoiding any behaviour or action that could harm them, and will report any concerns about their welfare immediately to the appropriate authorities.",
+                ),
+                _buildPolicyPoint(
+                  "3.",
+                  "I will maintain the confidentiality of all personal information related to the children, sharing it only with those directly responsible for their care and protection.",
+                ),
+                _buildPolicyPoint(
+                  "4.",
+                  "I will respect and be sensitive to the cultural, religious, and social norms of the children and their communities.",
+                ),
+                _buildPolicyPoint(
+                  "5.",
+                  "I will not discriminate against any child based on gender, ethnicity, religion, or background, ensuring that all children are treated equally.",
+                ),
+                _buildPolicyPoint(
+                  "6.",
+                  "I will maintain professional boundaries at all times and avoid any form of physical, emotional, or verbal abuse.",
+                ),
+                _buildPolicyPoint(
+                  "7.",
+                  "I commit to upholding a strict zero-tolerance policy towards any form of sexual abuse or misconduct involving children. I will immediately report any suspected or confirmed incidents of sexual abuse to the appropriate authorities, without delay.",
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.red.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.red.shade200),
+                  ),
+                  child: Text(
+                    "By accepting this undertaking, I commit to adhering to these principles and understand that any breach of this policy may result in the termination of my volunteer engagement and action of authorities if found with any misconduct towards children under the laws of India. Further any consequences of such misconduct or crime is solely my responsibility.",
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      color: Colors.red.shade900,
+                      fontWeight: FontWeight.w500,
+                      height: 1.5,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text("Decline", style: GoogleFonts.poppins(color: Colors.grey)),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red.shade700,
+                foregroundColor: Colors.white,
+              ),
+              child: Text("I Accept", style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (result == true) {
+      setState(() {
+        _childProtectionAccepted = true;
+      });
+    }
+  }
+
+  Widget _buildPolicyPoint(String number, String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 24,
+            child: Text(
+              number,
+              style: GoogleFonts.poppins(
+                fontWeight: FontWeight.w600,
+                color: Colors.red.shade700,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              text,
+              style: GoogleFonts.poppins(fontSize: 13, height: 1.5),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showPOSHDialog() async {
+    final result = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Row(
+            children: [
+              Icon(Icons.security_outlined, color: Colors.purple.shade700),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  "POSH Declaration",
+                  style: GoogleFonts.poppins(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 18,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  "I hereby declare that I understand and respect the principles of Prevention of Sexual Harassment (POSH) as outlined by the Tengbang Sintha Foundation.",
+                  style: GoogleFonts.poppins(fontSize: 14, height: 1.5, fontWeight: FontWeight.w500),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  "I commit to maintaining a safe, inclusive, and respectful environment for all individuals involved in the program, whether in-person or online.",
+                  style: GoogleFonts.poppins(fontSize: 14, height: 1.5),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  "I pledge to:",
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.purple.shade700,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                _buildPOSHPoint("•", "Uphold dignity and respect in all interactions."),
+                _buildPOSHPoint(
+                  "•",
+                  "Refrain from any form of harassment, discrimination, or inappropriate behavior.",
+                ),
+                _buildPOSHPoint(
+                  "•",
+                  "Report any incidents or concerns to the designated POSH Committee promptly and responsibly.",
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.purple.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.purple.shade200),
+                  ),
+                  child: Text(
+                    "By agreeing to this declaration, I acknowledge my commitment to fostering a harassment-free and respectful environment for all.",
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      color: Colors.purple.shade900,
+                      fontWeight: FontWeight.w500,
+                      height: 1.5,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text("Decline", style: GoogleFonts.poppins(color: Colors.grey)),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.purple.shade700,
+                foregroundColor: Colors.white,
+              ),
+              child: Text("I Accept", style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (result == true) {
+      setState(() {
+        _poshPolicyAccepted = true;
+      });
+    }
+  }
+
+  Widget _buildPOSHPoint(String bullet, String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0, left: 8.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 20,
+            child: Text(
+              bullet,
+              style: GoogleFonts.poppins(
+                fontWeight: FontWeight.w600,
+                color: Colors.purple.shade700,
+                fontSize: 16,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              text,
+              style: GoogleFonts.poppins(fontSize: 13, height: 1.5),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
 
   Future<void> _sendOtp() async {
     setState(() { _sendingOtp = true; });
@@ -273,12 +539,16 @@ class _RegisterPageState extends State<RegisterPage> {
     request.fields['organizationName'] = _organizationNameController.text.trim();
     request.fields['priorVolunteering'] = _priorVolunteering.toString();
     request.fields['priorVolunteeringDesc'] = _priorVolunteeringDescController.text.trim();
-    request.fields['interestedProgram'] = _interestedProgram ?? "";
+    request.fields['interestedProgram'] = json.encode(_interestedPrograms);
     request.fields['whyVolunteer'] = _whyVolunteerController.text.trim();
     request.fields['hoursPerWeek'] = _hoursPerWeek ?? "";
-    request.fields['skills'] = json.encode(_skills);
+    // Combine predefined and custom skills
+    final allSkills = [..._skills, ..._customSkills];
+    request.fields['skills'] = json.encode(allSkills);
     request.fields['skillsDesc'] = _skillsDescController.text.trim();
-    request.fields['preferredRoles'] = json.encode(_preferredRoles);
+    // Combine predefined and custom roles
+    final allRoles = [..._preferredRoles, ..._customRoles];
+    request.fields['preferredRoles'] = json.encode(allRoles);
     request.fields['specialRequirements'] = _specialRequirementsController.text.trim();
     request.fields['meiteilon'] = _meiteilon ?? "";
     request.fields['referenceName'] = _referenceNameController.text.trim();
@@ -287,8 +557,8 @@ class _RegisterPageState extends State<RegisterPage> {
     request.fields['referenceAffiliation'] = _referenceAffiliationController.text.trim();
     request.fields['trustworthyMeaning'] = _trustworthyMeaningController.text.trim();
     request.fields['conflictSituation'] = _conflictSituationController.text.trim();
-    request.fields['willingOrientation'] = _willingOrientation.toString();
-    request.fields['childProtectionUndertaking'] = _childProtectionUndertakingController.text.trim();
+
+    request.fields['childProtectionUndertaking'] = _childProtectionAccepted.toString();
     request.fields['poshPolicyAccepted'] = _poshPolicyAccepted.toString();
 
     // Helper to add files for web and non-web
@@ -506,6 +776,115 @@ class _RegisterPageState extends State<RegisterPage> {
             ),
             validator: (v) => v == null || v.isEmpty ? "Required" : null,
           ),
+          const SizedBox(height: 24),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.orange.shade50,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.orange.shade200),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.cloud_upload_outlined, color: Colors.orange.shade700, size: 24),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("Document Upload", 
+                        style: GoogleFonts.poppins(
+                          fontWeight: FontWeight.w600, 
+                          color: Colors.orange.shade700
+                        )
+                      ),
+                      Text("Upload your photo and Aadhar (Max 1MB each)", 
+                        style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600])
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.shade300),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: OutlinedButton.icon(
+                    icon: Icon(Icons.photo_camera_outlined, 
+                      color: _photoFile != null ? Colors.green : Colors.teal),
+                    label: Text(
+                      _photoFile == null ? "Your Photo" : "Photo Selected",
+                      style: GoogleFonts.poppins(
+                        color: _photoFile != null ? Colors.green : Colors.teal
+                      )
+                    ),
+                    onPressed: () => _pickFile('photo'),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      side: BorderSide.none,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.shade300),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: OutlinedButton.icon(
+                    icon: Icon(Icons.credit_card_outlined,
+                      color: _aadharFile != null ? Colors.green : Colors.teal),
+                    label: Text(
+                      _aadharFile == null ? "Your Aadhar" : "Aadhar Selected",
+                      style: GoogleFonts.poppins(
+                        color: _aadharFile != null ? Colors.green : Colors.teal
+                      )
+                    ),
+                    onPressed: () => _pickFile('aadhar'),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      side: BorderSide.none,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          if (_fileError != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 12.0),
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.red.shade200),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.error_outline, color: Colors.red.shade700, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(_fileError!, 
+                        style: GoogleFonts.poppins(
+                          color: Colors.red.shade700,
+                          fontSize: 12
+                        )
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
         ],
       ),
     ),
@@ -604,21 +983,52 @@ class _RegisterPageState extends State<RegisterPage> {
             ),
           ],
           const SizedBox(height: 16),
-          DropdownButtonFormField<String>(
-            value: _interestedProgram,
-            items: _programOptions.map((p) => DropdownMenuItem(
-              value: p, 
-              child: Text(p, style: GoogleFonts.poppins())
-            )).toList(),
-            onChanged: (v) => setState(() => _interestedProgram = v),
-            style: GoogleFonts.poppins(),
-            decoration: InputDecoration(
-              labelText: "Interested Program",
-              prefixIcon: const Icon(Icons.campaign_outlined, color: Colors.teal),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.indigo.shade50,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.indigo.shade200),
             ),
-            validator: (v) => v == null ? "Required" : null,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.campaign_outlined, color: Colors.indigo.shade700, size: 20),
+                    const SizedBox(width: 8),
+                    Text(
+                      "Interested Programs",
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.w600,
+                        color: Colors.indigo.shade700,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  "Select all programs you're interested in",
+                  style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600]),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: _programOptions.map((program) => FilterChip(
+              label: Text(program, style: GoogleFonts.poppins(fontSize: 12)),
+              selected: _interestedPrograms.contains(program),
+              onSelected: (selected) => _toggleMultiSelect(_interestedPrograms, program),
+              backgroundColor: Colors.grey.shade100,
+              selectedColor: Colors.indigo.shade100,
+              checkmarkColor: Colors.indigo.shade700,
+              side: BorderSide(
+                color: _interestedPrograms.contains(program) ? Colors.indigo : Colors.grey.shade300,
+              ),
+            )).toList(),
           ),
           const SizedBox(height: 16),
           TextFormField(
@@ -706,6 +1116,91 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
             )).toList(),
           ),
+          const SizedBox(height: 20),
+          // Custom Skills Input
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.orange.shade50,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.orange.shade200),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.add_circle_outline, color: Colors.orange.shade700, size: 20),
+                    const SizedBox(width: 8),
+                    Text("Add Custom Skills", 
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.w600, 
+                        color: Colors.orange.shade700
+                      )
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text("Type a skill and press comma (,) or Enter to add", 
+                  style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600])
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _customSkillController,
+            style: GoogleFonts.poppins(),
+            decoration: InputDecoration(
+              labelText: "Type your skill here",
+              hintText: "e.g., Video Editing, Graphic Design, Public Speaking",
+              prefixIcon: const Icon(Icons.edit_outlined, color: Colors.orange),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              filled: true,
+              fillColor: Colors.white,
+            ),
+            onChanged: (value) {
+              // Check if comma is pressed
+              if (value.endsWith(',')) {
+                final skill = value.substring(0, value.length - 1).trim();
+                if (skill.isNotEmpty && !_customSkills.contains(skill)) {
+                  setState(() {
+                    _customSkills.add(skill);
+                    _customSkillController.clear();
+                  });
+                }
+              }
+            },
+            onSubmitted: (value) {
+              final skill = value.trim();
+              if (skill.isNotEmpty && !_customSkills.contains(skill)) {
+                setState(() {
+                  _customSkills.add(skill);
+                  _customSkillController.clear();
+                });
+              }
+            },
+          ),
+          if (_customSkills.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: _customSkills.map((skill) => Chip(
+                label: Text(skill, style: GoogleFonts.poppins(fontSize: 12)),
+                deleteIcon: const Icon(Icons.close, size: 18),
+                onDeleted: () {
+                  setState(() {
+                    _customSkills.remove(skill);
+                  });
+                },
+                backgroundColor: Colors.orange.shade100,
+                deleteIconColor: Colors.orange.shade700,
+                side: BorderSide(color: Colors.orange.shade300),
+              )).toList(),
+            ),
+          ],
           const SizedBox(height: 16),
           TextFormField(
             controller: _skillsDescController,
@@ -766,6 +1261,91 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
             )).toList(),
           ),
+          const SizedBox(height: 20),
+          // Custom Roles Input
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.purple.shade50,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.purple.shade200),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.add_circle_outline, color: Colors.purple.shade700, size: 20),
+                    const SizedBox(width: 8),
+                    Text("Add Custom Roles", 
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.w600, 
+                        color: Colors.purple.shade700
+                      )
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text("Type a role and press comma (,) or Enter to add", 
+                  style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600])
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _customRoleController,
+            style: GoogleFonts.poppins(),
+            decoration: InputDecoration(
+              labelText: "Type your preferred role here",
+              hintText: "e.g., Project Manager, Team Leader, Content Creator",
+              prefixIcon: const Icon(Icons.work_outline, color: Colors.purple),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              filled: true,
+              fillColor: Colors.white,
+            ),
+            onChanged: (value) {
+              // Check if comma is pressed
+              if (value.endsWith(',')) {
+                final role = value.substring(0, value.length - 1).trim();
+                if (role.isNotEmpty && !_customRoles.contains(role)) {
+                  setState(() {
+                    _customRoles.add(role);
+                    _customRoleController.clear();
+                  });
+                }
+              }
+            },
+            onSubmitted: (value) {
+              final role = value.trim();
+              if (role.isNotEmpty && !_customRoles.contains(role)) {
+                setState(() {
+                  _customRoles.add(role);
+                  _customRoleController.clear();
+                });
+              }
+            },
+          ),
+          if (_customRoles.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: _customRoles.map((role) => Chip(
+                label: Text(role, style: GoogleFonts.poppins(fontSize: 12)),
+                deleteIcon: const Icon(Icons.close, size: 18),
+                onDeleted: () {
+                  setState(() {
+                    _customRoles.remove(role);
+                  });
+                },
+                backgroundColor: Colors.purple.shade100,
+                deleteIconColor: Colors.purple.shade700,
+                side: BorderSide(color: Colors.purple.shade300),
+              )).toList(),
+            ),
+          ],
           const SizedBox(height: 16),
           TextFormField(
             controller: _specialRequirementsController,
@@ -885,115 +1465,7 @@ class _RegisterPageState extends State<RegisterPage> {
             ),
             validator: (v) => v == null || v.isEmpty ? "Required" : null,
           ),
-          const SizedBox(height: 24),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.orange.shade50,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.orange.shade200),
-            ),
-            child: Row(
-              children: [
-                Icon(Icons.cloud_upload_outlined, color: Colors.orange.shade700, size: 24),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text("Document Upload", 
-                        style: GoogleFonts.poppins(
-                          fontWeight: FontWeight.w600, 
-                          color: Colors.orange.shade700
-                        )
-                      ),
-                      Text("Upload required documents (Max 1MB each)", 
-                        style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600])
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey.shade300),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: OutlinedButton.icon(
-                    icon: Icon(Icons.photo_camera_outlined, 
-                      color: _photoFile != null ? Colors.green : Colors.teal),
-                    label: Text(
-                      _photoFile == null ? "Your Photo" : "Photo Selected",
-                      style: GoogleFonts.poppins(
-                        color: _photoFile != null ? Colors.green : Colors.teal
-                      )
-                    ),
-                    onPressed: () => _pickFile('photo'),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      side: BorderSide.none,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey.shade300),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: OutlinedButton.icon(
-                    icon: Icon(Icons.credit_card_outlined,
-                      color: _aadharFile != null ? Colors.green : Colors.teal),
-                    label: Text(
-                      _aadharFile == null ? "Your Aadhar" : "Aadhar Selected",
-                      style: GoogleFonts.poppins(
-                        color: _aadharFile != null ? Colors.green : Colors.teal
-                      )
-                    ),
-                    onPressed: () => _pickFile('aadhar'),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      side: BorderSide.none,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          if (_fileError != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 12.0),
-              child: Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.red.shade50,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.red.shade200),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.error_outline, color: Colors.red.shade700, size: 20),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(_fileError!, 
-                        style: GoogleFonts.poppins(
-                          color: Colors.red.shade700,
-                          fontSize: 12
-                        )
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+
         ],
       ),
     ),
@@ -1061,21 +1533,7 @@ class _RegisterPageState extends State<RegisterPage> {
             ),
             validator: (v) => v == null || v.isEmpty ? "Required" : null,
           ),
-          const SizedBox(height: 16),
-          Container(
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey.shade300),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: SwitchListTile(
-              title: Text("Willing to attend orientation sessions?", style: GoogleFonts.poppins()),
-              subtitle: Text("Orientation helps you understand our mission and processes", 
-                style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600])),
-              value: _willingOrientation,
-              onChanged: (v) => setState(() => _willingOrientation = v),
-              activeColor: Colors.teal,
-            ),
-          ),
+
         ],
       ),
     ),
@@ -1116,32 +1574,142 @@ class _RegisterPageState extends State<RegisterPage> {
             ),
           ),
           const SizedBox(height: 16),
-          TextFormField(
-            controller: _childProtectionUndertakingController,
-            style: GoogleFonts.poppins(),
-            maxLines: 3,
-            decoration: InputDecoration(
-              labelText: "Child Protection Undertaking",
-              prefixIcon: const Icon(Icons.child_care_outlined, color: Colors.teal),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-              helperText: "Describe your commitment to child safety and protection",
+          Container(
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: _childProtectionAccepted ? Colors.green.shade300 : Colors.grey.shade300,
+                width: 2,
+              ),
+              borderRadius: BorderRadius.circular(12),
+              color: _childProtectionAccepted ? Colors.green.shade50 : null,
             ),
-            validator: (v) => v == null || v.isEmpty ? "Required" : null,
+            child: CheckboxListTile(
+              title: Text(
+                "I accept the Child Protection Policy Undertaking",
+                style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
+              ),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 4),
+                  Text(
+                    "Click to read the full policy and accept",
+                    style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600]),
+                  ),
+                  if (_childProtectionAccepted) ...[
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Icon(Icons.check_circle, color: Colors.green.shade700, size: 16),
+                        const SizedBox(width: 6),
+                        Text(
+                          "Accepted",
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            color: Colors.green.shade700,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ],
+              ),
+              value: _childProtectionAccepted,
+              onChanged: (bool? value) {
+                if (value == true) {
+                  _showChildProtectionDialog();
+                } else {
+                  setState(() {
+                    _childProtectionAccepted = false;
+                  });
+                }
+              },
+              activeColor: Colors.red.shade700,
+              controlAffinity: ListTileControlAffinity.leading,
+            ),
           ),
+          if (!_childProtectionAccepted)
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.red.shade200),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.warning_outlined, color: Colors.red.shade700, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        "Child Protection Policy acceptance is required to proceed",
+                        style: GoogleFonts.poppins(
+                          color: Colors.red.shade700,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           const SizedBox(height: 16),
           Container(
             decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey.shade300),
+              border: Border.all(
+                color: _poshPolicyAccepted ? Colors.green.shade300 : Colors.grey.shade300,
+                width: 2,
+              ),
               borderRadius: BorderRadius.circular(12),
+              color: _poshPolicyAccepted ? Colors.green.shade50 : null,
             ),
-            child: SwitchListTile(
-              title: Text("I accept the POSH Policy", style: GoogleFonts.poppins(fontWeight: FontWeight.w500)),
-              subtitle: Text("Prevention of Sexual Harassment policy acceptance is mandatory", 
-                style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600])),
+            child: CheckboxListTile(
+              title: Text(
+                "I accept the POSH Policy",
+                style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
+              ),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 4),
+                  Text(
+                    "Prevention of Sexual Harassment - Click to read and accept",
+                    style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600]),
+                  ),
+                  if (_poshPolicyAccepted) ...[
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Icon(Icons.check_circle, color: Colors.green.shade700, size: 16),
+                        const SizedBox(width: 6),
+                        Text(
+                          "Accepted",
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            color: Colors.green.shade700,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ],
+              ),
               value: _poshPolicyAccepted,
-              onChanged: (v) => setState(() => _poshPolicyAccepted = v),
-              activeColor: Colors.teal,
+              onChanged: (bool? value) {
+                if (value == true) {
+                  _showPOSHDialog();
+                } else {
+                  setState(() {
+                    _poshPolicyAccepted = false;
+                  });
+                }
+              },
+              activeColor: Colors.purple.shade700,
+              controlAffinity: ListTileControlAffinity.leading,
             ),
           ),
           if (!_poshPolicyAccepted)
@@ -1159,11 +1727,12 @@ class _RegisterPageState extends State<RegisterPage> {
                     Icon(Icons.warning_outlined, color: Colors.orange.shade700, size: 20),
                     const SizedBox(width: 8),
                     Expanded(
-                      child: Text("POSH Policy acceptance is required to proceed", 
+                      child: Text(
+                        "POSH Policy acceptance is required to proceed",
                         style: GoogleFonts.poppins(
                           color: Colors.orange.shade700,
-                          fontSize: 12
-                        )
+                          fontSize: 12,
+                        ),
                       ),
                     ),
                   ],
