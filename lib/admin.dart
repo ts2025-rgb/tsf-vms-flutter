@@ -1647,6 +1647,13 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
             ),
             actions: [
               IconButton(
+                icon: const Icon(Icons.dashboard_rounded, color: Colors.white),
+                onPressed: () {
+                  Navigator.pushNamed(context, '/admin/vms/dashboard');
+                },
+                tooltip: 'VMS Dashboard',
+              ),
+              IconButton(
                 icon: const Icon(Icons.refresh_rounded, color: Colors.white),
                 onPressed: () async {
                   await _fetchPendingVolunteers();

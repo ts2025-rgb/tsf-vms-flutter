@@ -133,7 +133,7 @@ class _LoginPageState extends State<LoginPage> {
                   Image.asset('assets/images/logo.png', height: 120),
                   const SizedBox(height: 20),
                   Text(
-                    "Tengbang Sintha Foundation",
+                    "Pathways for Purpose",
                     textAlign: TextAlign.center,
                     style: GoogleFonts.poppins(
                       fontSize: 24,

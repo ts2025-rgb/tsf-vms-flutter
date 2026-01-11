@@ -38,8 +38,6 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController _socialMediaController = TextEditingController();
   PlatformFile? _photoFile;
   PlatformFile? _aadharFile;
-  PlatformFile? _referencePhotoFile;
-  PlatformFile? _referenceAadharFile;
 
   // Section 2: Education & Work
   final TextEditingController _highestQualificationController = TextEditingController();
@@ -116,7 +114,7 @@ class _RegisterPageState extends State<RegisterPage> {
   Future<void> _pickFile(String type) async {
     FileType fileType = FileType.custom;
     List<String> allowedExtensions = [];
-    if (type == 'photo' || type == 'referencePhoto') {
+    if (type == 'photo') {
       allowedExtensions = allowedImageTypes;
     } else {
       allowedExtensions = allowedAadharTypes;
@@ -131,7 +129,7 @@ class _RegisterPageState extends State<RegisterPage> {
       final fileSize = file.size;
       final ext = file.extension?.toLowerCase() ?? '';
       bool valid = false;
-      if (type == 'photo' || type == 'referencePhoto') {
+      if (type == 'photo') {
         valid = allowedImageTypes.contains(ext);
       } else {
         valid = allowedAadharTypes.contains(ext);
@@ -152,8 +150,6 @@ class _RegisterPageState extends State<RegisterPage> {
         _fileError = null;
         if (type == 'photo') _photoFile = file;
         if (type == 'aadhar') _aadharFile = file;
-        if (type == 'referencePhoto') _referencePhotoFile = file;
-        if (type == 'referenceAadhar') _referenceAadharFile = file;
       });
     }
   }
@@ -232,7 +228,7 @@ class _RegisterPageState extends State<RegisterPage> {
       );
       return;
     }
-    if (_photoFile == null || _aadharFile == null || _referencePhotoFile == null || _referenceAadharFile == null) {
+    if (_photoFile == null || _aadharFile == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Please upload all required files", style: GoogleFonts.poppins())),
       );
@@ -254,8 +250,6 @@ class _RegisterPageState extends State<RegisterPage> {
     print('Files check:');
     print('  _photoFile: ${_photoFile?.name ?? 'null'}');
     print('  _aadharFile: ${_aadharFile?.name ?? 'null'}');
-    print('  _referencePhotoFile: ${_referencePhotoFile?.name ?? 'null'}');
-    print('  _referenceAadharFile: ${_referenceAadharFile?.name ?? 'null'}');
     print('  _fileError: $_fileError');
     print('=====================================');
 
@@ -315,8 +309,6 @@ class _RegisterPageState extends State<RegisterPage> {
 
     await addFile('photo', _photoFile);
     await addFile('aadhar', _aadharFile);
-    await addFile('referencePhoto', _referencePhotoFile);
-    await addFile('referenceAadhar', _referenceAadharFile);
 
     try {
       print('=== REGISTRATION REQUEST DEBUG ===');
@@ -510,8 +502,9 @@ class _RegisterPageState extends State<RegisterPage> {
               prefixIcon: const Icon(Icons.link_outlined, color: Colors.teal),
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-              helperText: "Optional",
+              helperText: "Instagram, Facebook, LinkedIn, or other social media profile",
             ),
+            validator: (v) => v == null || v.isEmpty ? "Required" : null,
           ),
         ],
       ),
@@ -975,60 +968,6 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey.shade300),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: OutlinedButton.icon(
-                    icon: Icon(Icons.person_pin_outlined,
-                      color: _referencePhotoFile != null ? Colors.green : Colors.teal),
-                    label: Text(
-                      _referencePhotoFile == null ? "Reference Photo" : "Ref Photo Selected",
-                      style: GoogleFonts.poppins(
-                        fontSize: 12,
-                        color: _referencePhotoFile != null ? Colors.green : Colors.teal
-                      )
-                    ),
-                    onPressed: () => _pickFile('referencePhoto'),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      side: BorderSide.none,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey.shade300),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: OutlinedButton.icon(
-                    icon: Icon(Icons.badge_outlined,
-                      color: _referenceAadharFile != null ? Colors.green : Colors.teal),
-                    label: Text(
-                      _referenceAadharFile == null ? "Reference Aadhar" : "Ref Aadhar Selected",
-                      style: GoogleFonts.poppins(
-                        fontSize: 12,
-                        color: _referenceAadharFile != null ? Colors.green : Colors.teal
-                      )
-                    ),
-                    onPressed: () => _pickFile('referenceAadhar'),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      side: BorderSide.none,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
           if (_fileError != null)
             Padding(
               padding: const EdgeInsets.only(top: 12.0),
@@ -1473,7 +1412,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         Image.asset('assets/images/logo.png', height: 120),
                         const SizedBox(height: 20),
                         Text(
-                          "Tengbang Sintha Foundation",
+                          "Pathways for Purpose",
                           textAlign: TextAlign.center,
                           style: GoogleFonts.poppins(
                             fontSize: 24,
