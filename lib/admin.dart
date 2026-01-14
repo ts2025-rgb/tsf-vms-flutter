@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
+import 'admin_mentee_management.dart';
+import 'admin_query_management.dart';
 
 class AdminScreen extends StatefulWidget {
   const AdminScreen({super.key});
@@ -412,17 +414,18 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
                             ),
                             child: CircleAvatar(
                               radius: 32,
-                              backgroundImage: volunteer['photoUrl'] != null
-                                  ? NetworkImage(volunteer['photoUrl'])
-                                  : null,
                               backgroundColor: primaryColor.withOpacity(0.1),
-                              child: volunteer['photoUrl'] == null
-                                  ? Icon(
-                                      Icons.person_rounded,
-                                      size: 32,
-                                      color: primaryColor,
+                              child: volunteer['photoUrl'] != null && volunteer['photoUrl'].toString().isNotEmpty
+                                  ? ClipOval(
+                                      child: Image.network(
+                                        volunteer['photoUrl'],
+                                        width: 64,
+                                        height: 64,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (context, error, stackTrace) => Icon(Icons.person_rounded, size: 32, color: primaryColor),
+                                      ),
                                     )
-                                  : null,
+                                  : Icon(Icons.person_rounded, size: 32, color: primaryColor),
                             ),
                           ),
                           Positioned(
@@ -1015,7 +1018,7 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
         _buildModernInfoRow(Icons.location_on_rounded, 'Address', volunteer['address']),
         _buildModernInfoRow(Icons.location_city_rounded, 'Current Location', volunteer['currentLocation']),
         _buildModernInfoRow(Icons.phone_rounded, 'Phone', volunteer['phone']),
-        _buildModernInfoRow(Icons.verified_user_rounded, 'Email Verified', volunteer['verified']?.toString()),
+        _buildModernInfoRow(Icons.verified_user_rounded, 'Email Verified', volunteer['verified'] == true ? 'Yes' : 'No'),
       ]),
       
       const SizedBox(height: 24),
@@ -1024,7 +1027,7 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
         _buildModernInfoRow(Icons.work_rounded, 'Current Occupation', volunteer['currentOccupation']),
         _buildModernInfoRow(Icons.school_rounded, 'Highest Qualification', volunteer['highestQualification']),
         _buildModernInfoRow(Icons.business_rounded, 'Organization', volunteer['organizationName']?.isNotEmpty == true ? volunteer['organizationName'] : 'Not specified'),
-        _buildModernInfoRow(Icons.corporate_fare_rounded, 'Corporate Experience', volunteer['corporateExperience']?.toString()),
+        _buildModernInfoRow(Icons.corporate_fare_rounded, 'Corporate Experience', volunteer['corporateExperience'] == true ? 'Yes' : 'No'),
         if (volunteer['skills'] != null && volunteer['skills'].isNotEmpty)
           _buildSkillsChips('Skills', volunteer['skills']),
         if (volunteer['preferredRoles'] != null && volunteer['preferredRoles'].isNotEmpty)
@@ -1039,7 +1042,7 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
         _buildModernInfoRow(Icons.schedule_rounded, 'Hours Per Week', volunteer['hoursPerWeek']),
         _buildModernInfoRow(Icons.apps_rounded, 'Interested Program', volunteer['interestedProgram']),
         _buildModernInfoRow(Icons.language_rounded, 'Meiteilon', volunteer['meiteilon']),
-        _buildModernInfoRow(Icons.volunteer_activism_rounded, 'Prior Volunteering', volunteer['priorVolunteering']?.toString()),
+        _buildModernInfoRow(Icons.volunteer_activism_rounded, 'Prior Volunteering', volunteer['priorVolunteering'] == true ? 'Yes' : 'No'),
         if (volunteer['priorVolunteeringDesc'] != null && volunteer['priorVolunteeringDesc'].isNotEmpty)
           _buildTextSection('Prior Volunteering Description', volunteer['priorVolunteeringDesc']),
         if (volunteer['specialRequirements'] != null && volunteer['specialRequirements'].isNotEmpty)
@@ -1061,9 +1064,9 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
       const SizedBox(height: 24),
       
       _buildDetailsSection('Policy & Compliance', [
-        _buildModernInfoRow(Icons.policy_rounded, 'POSH Policy Accepted', volunteer['poshPolicyAccepted']?.toString()),
-        _buildModernInfoRow(Icons.child_care_rounded, 'Child Protection Undertaking', volunteer['childProtectionUndertaking']),
-        _buildModernInfoRow(Icons.school_rounded, 'Willing for Orientation', volunteer['willingOrientation']?.toString()),
+        _buildModernInfoRow(Icons.policy_rounded, 'POSH Policy Accepted', volunteer['poshPolicyAccepted'] == true ? 'Yes' : 'No'),
+        _buildModernInfoRow(Icons.child_care_rounded, 'Child Protection Undertaking', volunteer['childProtectionUndertaking'] == true ? 'Yes' : 'No'),
+        _buildModernInfoRow(Icons.school_rounded, 'Willing for Orientation', volunteer['willingOrientation'] == true ? 'Yes' : 'No'),
       ]),
       
       if (volunteer['socialMedia'] != null && volunteer['socialMedia'].isNotEmpty) ...[
@@ -1646,6 +1649,30 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
               ),
             ),
             actions: [
+              IconButton(
+                icon: const Icon(Icons.people, color: Colors.white),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const AdminMenteeManagementPage(),
+                    ),
+                  );
+                },
+                tooltip: 'Mentee Management',
+              ),
+              IconButton(
+                icon: const Icon(Icons.forum_outlined, color: Colors.white),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const AdminQueryManagementPage(),
+                    ),
+                  );
+                },
+                tooltip: 'Query Management',
+              ),
               IconButton(
                 icon: const Icon(Icons.dashboard_rounded, color: Colors.white),
                 onPressed: () {

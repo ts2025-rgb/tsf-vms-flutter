@@ -48,7 +48,7 @@ class _RegisterPageState extends State<RegisterPage> {
   // Section 3: Volunteering Intent & Preferences
   bool _priorVolunteering = false;
   final TextEditingController _priorVolunteeringDescController = TextEditingController();
-  List<String> _interestedPrograms = []; // Changed to List for multi-select
+  List<String> _interestedProgramIds = []; // Changed to store IDs instead of names
   final TextEditingController _whyVolunteerController = TextEditingController();
   String? _hoursPerWeek;
 
@@ -97,9 +97,10 @@ class _RegisterPageState extends State<RegisterPage> {
     "Documentation", "Parent Counseling & Community Relations", "Content & Social Media",
     "Donation & Recycling", "Volunteer Mobilization", "Rapid Relief"
   ];
-  final List<String> _programOptions = [
-    "Companion Connect", "NLSP Nawa lousing Life Skills Program", "Disaster Response Team", "Admin/HR"
-  ];
+  
+  // Programs - loaded dynamically from API
+  List<Map<String, dynamic>> _availablePrograms = [];
+  bool _loadingPrograms = true;
   final List<String> _genderOptions = ["Male", "Female", "Other"];
   final List<String> _locationOptions = [
     "Imphal, Manipur", "Other Valley Districts", "Hill Districts", "Outside Manipur (including Abroad)"
@@ -114,6 +115,54 @@ class _RegisterPageState extends State<RegisterPage> {
   static const List<String> allowedAadharTypes = ["jpg", "jpeg", "png", "pdf"];
 
   String? _fileError;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchPrograms();
+  }
+
+  Future<void> _fetchPrograms() async {
+    setState(() {
+      _loadingPrograms = true;
+    });
+
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/programs'),
+    
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['success'] == true && data['programs'] != null) {
+          setState(() {
+            _availablePrograms = List<Map<String, dynamic>>.from(
+              (data['programs'] as List).map((p) => {
+                'id': p['id'],
+                'name': p['name'],
+                'description': p['description'] ?? '',
+                'order': p['order'] ?? 0,
+              })
+            );
+            // Sort by order
+            _availablePrograms.sort((a, b) => (a['order'] as int).compareTo(b['order'] as int));
+            _loadingPrograms = false;
+          });
+        }
+      } else {
+        setState(() {
+          _loadingPrograms = false;
+        });
+        print('Failed to load programs: ${response.statusCode}');
+      }
+    } catch (e) {
+      setState(() {
+        _loadingPrograms = false;
+      });
+      print('Error fetching programs: $e');
+    }
+  }
 
   Future<void> _pickFile(String type) async {
     FileType fileType = FileType.custom;
@@ -539,7 +588,7 @@ class _RegisterPageState extends State<RegisterPage> {
     request.fields['organizationName'] = _organizationNameController.text.trim();
     request.fields['priorVolunteering'] = _priorVolunteering.toString();
     request.fields['priorVolunteeringDesc'] = _priorVolunteeringDescController.text.trim();
-    request.fields['interestedProgram'] = json.encode(_interestedPrograms);
+    request.fields['interestedPrograms'] = json.encode(_interestedProgramIds);
     request.fields['whyVolunteer'] = _whyVolunteerController.text.trim();
     request.fields['hoursPerWeek'] = _hoursPerWeek ?? "";
     // Combine predefined and custom skills
@@ -1015,21 +1064,76 @@ class _RegisterPageState extends State<RegisterPage> {
             ),
           ),
           const SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: _programOptions.map((program) => FilterChip(
-              label: Text(program, style: GoogleFonts.poppins(fontSize: 12)),
-              selected: _interestedPrograms.contains(program),
-              onSelected: (selected) => _toggleMultiSelect(_interestedPrograms, program),
-              backgroundColor: Colors.grey.shade100,
-              selectedColor: Colors.indigo.shade100,
-              checkmarkColor: Colors.indigo.shade700,
-              side: BorderSide(
-                color: _interestedPrograms.contains(program) ? Colors.indigo : Colors.grey.shade300,
-              ),
-            )).toList(),
-          ),
+          _loadingPrograms
+              ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Column(
+                      children: [
+                        CircularProgressIndicator(color: Colors.indigo.shade700),
+                        const SizedBox(height: 12),
+                        Text(
+                          "Loading programs...",
+                          style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600]),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              : _availablePrograms.isEmpty
+                  ? Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.orange.shade50,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.orange.shade200),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.warning_outlined, color: Colors.orange.shade700),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              "Unable to load programs. Please check your connection and try again.",
+                              style: GoogleFonts.poppins(fontSize: 12, color: Colors.orange.shade700),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: _availablePrograms.map((program) {
+                        final programId = program['id'] as String;
+                        final programName = program['name'] as String;
+                        final description = program['description'] as String;
+                        final isSelected = _interestedProgramIds.contains(programId);
+                        
+                        return Tooltip(
+                          message: description.isNotEmpty ? description : programName,
+                          child: FilterChip(
+                            label: Text(programName, style: GoogleFonts.poppins(fontSize: 12)),
+                            selected: isSelected,
+                            onSelected: (selected) {
+                              setState(() {
+                                if (selected) {
+                                  _interestedProgramIds.add(programId);
+                                } else {
+                                  _interestedProgramIds.remove(programId);
+                                }
+                              });
+                            },
+                            backgroundColor: Colors.grey.shade100,
+                            selectedColor: Colors.indigo.shade100,
+                            checkmarkColor: Colors.indigo.shade700,
+                            side: BorderSide(
+                              color: isSelected ? Colors.indigo : Colors.grey.shade300,
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
           const SizedBox(height: 16),
           TextFormField(
             controller: _whyVolunteerController,

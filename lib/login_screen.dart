@@ -89,6 +89,10 @@ class _LoginPageState extends State<LoginPage> {
 
       final data = json.decode(res.body);
       if (res.statusCode == 200 && data["success"]) {
+        // Save token separately for API calls
+        await secureStorage.write(key: "token", value: data["token"]);
+        
+        // Also save full userData for profile/home screen
         await secureStorage.write(
           key: "userData",
           value: json.encode({
