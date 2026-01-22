@@ -5,6 +5,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'admin_mentee_management.dart';
 import 'admin_query_management.dart';
+import 'config/api_config.dart';
+import 'config/app_colors.dart';
 
 class AdminScreen extends StatefulWidget {
   const AdminScreen({super.key});
@@ -13,23 +15,24 @@ class AdminScreen extends StatefulWidget {
   State<AdminScreen> createState() => _AdminScreenState();
 }
 
-class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStateMixin {
+class _AdminScreenState extends State<AdminScreen>
+    with SingleTickerProviderStateMixin {
   final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
-  final String baseUrl = "https://shrew-concrete-cobra.ngrok-free.app/api";
-  
+  final String baseUrl = ApiConfig.apiUrl;
+
   late TabController _tabController;
   List<dynamic> pendingVolunteers = [];
   List<dynamic> allVolunteers = [];
   bool isLoading = false;
   String? adminToken;
-  
-  // Theme colors
-  static const primaryColor = Color(0xFF1E88E5);
-  static const secondaryColor = Color(0xFF26A69A);
-  static const backgroundColor = Color(0xFFF8FFFE);
+
+  // Theme colors (using AppColors)
+  static final primaryColor = AppColors.primaryBlue;
+  static final secondaryColor = AppColors.secondaryBlue;
+  static final backgroundColor = AppColors.backgroundLight1;
   static const cardColor = Colors.white;
-  static const textPrimary = Color(0xFF2C3E50);
-  static const textSecondary = Color(0xFF7F8C8D);
+  static final textPrimary = AppColors.textDark;
+  static final textSecondary = AppColors.gray1;
 
   @override
   void initState() {
@@ -99,7 +102,7 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
   Future<void> _approveVolunteer(String volunteerId) async {
     // Show loading indicator
     _showLoadingOverlay();
-    
+
     try {
       final response = await http.patch(
         Uri.parse('$baseUrl/admin/approve/$volunteerId'),
@@ -111,7 +114,7 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
 
       final data = json.decode(response.body);
       Navigator.pop(context); // Hide loading
-      
+
       if (response.statusCode == 200) {
         _showSuccess('Volunteer approved successfully! 🎉');
         await _fetchPendingVolunteers();
@@ -128,7 +131,7 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
   Future<void> _rejectVolunteer(String volunteerId) async {
     // Show loading indicator
     _showLoadingOverlay();
-    
+
     try {
       final response = await http.patch(
         Uri.parse('$baseUrl/admin/reject/$volunteerId'),
@@ -140,7 +143,7 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
 
       final data = json.decode(response.body);
       Navigator.pop(context); // Hide loading
-      
+
       if (response.statusCode == 200) {
         _showSuccess('Volunteer application rejected');
         await _fetchPendingVolunteers();
@@ -158,33 +161,34 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => Container(
-        color: Colors.black.withOpacity(0.3),
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CircularProgressIndicator(color: primaryColor),
-                const SizedBox(height: 16),
-                Text(
-                  'Processing...',
-                  style: GoogleFonts.poppins(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: textPrimary,
-                  ),
+      builder:
+          (context) => Container(
+            color: Colors.black.withOpacity(0.3),
+            child: Center(
+              child: Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
                 ),
-              ],
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CircularProgressIndicator(color: primaryColor),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Processing...',
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: textPrimary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
-        ),
-      ),
     );
   }
 
@@ -241,7 +245,12 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
     Navigator.pushReplacementNamed(context, "/admin-login");
   }
 
-  Widget _buildStatCard(String title, String value, IconData icon, Color color) {
+  Widget _buildStatCard(
+    String title,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -297,24 +306,25 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
     return RefreshIndicator(
       onRefresh: _fetchPendingVolunteers,
       color: primaryColor,
-      child: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : pendingVolunteers.isEmpty
+      child:
+          isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : pendingVolunteers.isEmpty
               ? _buildEmptyState(
-                  'No pending volunteers',
-                  'All volunteer applications have been reviewed!',
-                  Icons.task_alt_rounded,
-                )
+                'No pending volunteers',
+                'All volunteer applications have been reviewed!',
+                Icons.task_alt_rounded,
+              )
               : ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: pendingVolunteers.length,
-                  itemBuilder: (context, index) {
-                    return _buildModernVolunteerCard(
-                      pendingVolunteers[index],
-                      showActions: true,
-                    );
-                  },
-                ),
+                padding: const EdgeInsets.all(16),
+                itemCount: pendingVolunteers.length,
+                itemBuilder: (context, index) {
+                  return _buildModernVolunteerCard(
+                    pendingVolunteers[index],
+                    showActions: true,
+                  );
+                },
+              ),
     );
   }
 
@@ -322,19 +332,20 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
     return RefreshIndicator(
       onRefresh: _fetchAllVolunteers,
       color: primaryColor,
-      child: allVolunteers.isEmpty
-          ? _buildEmptyState(
-              'No volunteers found',
-              'Start by approving some volunteer applications!',
-              Icons.people_outline_rounded,
-            )
-          : ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: allVolunteers.length,
-              itemBuilder: (context, index) {
-                return _buildModernVolunteerCard(allVolunteers[index]);
-              },
-            ),
+      child:
+          allVolunteers.isEmpty
+              ? _buildEmptyState(
+                'No volunteers found',
+                'Start by approving some volunteer applications!',
+                Icons.people_outline_rounded,
+              )
+              : ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: allVolunteers.length,
+                itemBuilder: (context, index) {
+                  return _buildModernVolunteerCard(allVolunteers[index]);
+                },
+              ),
     );
   }
 
@@ -363,17 +374,17 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
           const SizedBox(height: 8),
           Text(
             subtitle,
-            style: GoogleFonts.poppins(
-              fontSize: 14,
-              color: textSecondary,
-            ),
+            style: GoogleFonts.poppins(fontSize: 14, color: textSecondary),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildModernVolunteerCard(Map<String, dynamic> volunteer, {bool showActions = false}) {
+  Widget _buildModernVolunteerCard(
+    Map<String, dynamic> volunteer, {
+    bool showActions = false,
+  }) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       margin: const EdgeInsets.only(bottom: 16),
@@ -408,24 +419,40 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               border: Border.all(
-                                color: _getStatusColor(volunteer['approvalStatus']),
+                                color: _getStatusColor(
+                                  volunteer['approvalStatus'],
+                                ),
                                 width: 3,
                               ),
                             ),
                             child: CircleAvatar(
                               radius: 32,
                               backgroundColor: primaryColor.withOpacity(0.1),
-                              child: volunteer['photoUrl'] != null && volunteer['photoUrl'].toString().isNotEmpty
-                                  ? ClipOval(
-                                      child: Image.network(
-                                        volunteer['photoUrl'],
-                                        width: 64,
-                                        height: 64,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (context, error, stackTrace) => Icon(Icons.person_rounded, size: 32, color: primaryColor),
+                              child:
+                                  volunteer['photoUrl'] != null &&
+                                          volunteer['photoUrl']
+                                              .toString()
+                                              .isNotEmpty
+                                      ? ClipOval(
+                                        child: Image.network(
+                                          volunteer['photoUrl'],
+                                          width: 64,
+                                          height: 64,
+                                          fit: BoxFit.cover,
+                                          errorBuilder:
+                                              (context, error, stackTrace) =>
+                                                  Icon(
+                                                    Icons.person_rounded,
+                                                    size: 32,
+                                                    color: primaryColor,
+                                                  ),
+                                        ),
+                                      )
+                                      : Icon(
+                                        Icons.person_rounded,
+                                        size: 32,
+                                        color: primaryColor,
                                       ),
-                                    )
-                                  : Icon(Icons.person_rounded, size: 32, color: primaryColor),
                             ),
                           ),
                           Positioned(
@@ -435,7 +462,9 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
                               width: 20,
                               height: 20,
                               decoration: BoxDecoration(
-                                color: _getStatusColor(volunteer['approvalStatus']),
+                                color: _getStatusColor(
+                                  volunteer['approvalStatus'],
+                                ),
                                 shape: BoxShape.circle,
                                 border: Border.all(color: cardColor, width: 2),
                               ),
@@ -450,7 +479,7 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
                       ),
                     ),
                     const SizedBox(width: 16),
-                    
+
                     // Volunteer Info
                     Expanded(
                       child: Column(
@@ -487,7 +516,11 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
                           Row(
                             children: [
                               if (volunteer['currentLocation'] != null) ...[
-                                Icon(Icons.location_on_rounded, size: 14, color: textSecondary),
+                                Icon(
+                                  Icons.location_on_rounded,
+                                  size: 14,
+                                  color: textSecondary,
+                                ),
                                 const SizedBox(width: 4),
                                 Expanded(
                                   child: Text(
@@ -502,15 +535,23 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
                                 const SizedBox(width: 8),
                               ],
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 6,
+                                ),
                                 decoration: BoxDecoration(
-                                  color: _getStatusColor(volunteer['approvalStatus']).withOpacity(0.1),
+                                  color: _getStatusColor(
+                                    volunteer['approvalStatus'],
+                                  ).withOpacity(0.1),
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Text(
-                                  volunteer['approvalStatus']?.toUpperCase() ?? 'PENDING',
+                                  volunteer['approvalStatus']?.toUpperCase() ??
+                                      'PENDING',
                                   style: GoogleFonts.poppins(
-                                    color: _getStatusColor(volunteer['approvalStatus']),
+                                    color: _getStatusColor(
+                                      volunteer['approvalStatus'],
+                                    ),
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -519,20 +560,25 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
                             ],
                           ),
                           // Add skills preview tags
-                          if (volunteer['skills'] != null && volunteer['skills'].isNotEmpty) ...[
+                          if (volunteer['skills'] != null &&
+                              volunteer['skills'].isNotEmpty) ...[
                             const SizedBox(height: 12),
                             _buildCompactSkillsPreview(volunteer['skills']),
                           ],
                           // Add preferred roles preview if no skills or to complement skills
-                          if ((volunteer['skills'] == null || volunteer['skills'].isEmpty) && 
-                              volunteer['preferredRoles'] != null && volunteer['preferredRoles'].isNotEmpty) ...[
+                          if ((volunteer['skills'] == null ||
+                                  volunteer['skills'].isEmpty) &&
+                              volunteer['preferredRoles'] != null &&
+                              volunteer['preferredRoles'].isNotEmpty) ...[
                             const SizedBox(height: 12),
-                            _buildCompactRolesPreview(volunteer['preferredRoles']),
+                            _buildCompactRolesPreview(
+                              volunteer['preferredRoles'],
+                            ),
                           ],
                         ],
                       ),
                     ),
-                    
+
                     // Arrow Icon
                     Container(
                       padding: const EdgeInsets.all(8),
@@ -548,7 +594,7 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
                     ),
                   ],
                 ),
-                
+
                 if (showActions) ...[
                   const SizedBox(height: 20),
                   const Divider(height: 1),
@@ -583,24 +629,24 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
     );
   }
 
-  Widget _buildActionButton(String label, IconData icon, Color color, VoidCallback onPressed) {
+  Widget _buildActionButton(
+    String label,
+    IconData icon,
+    Color color,
+    VoidCallback onPressed,
+  ) {
     return ElevatedButton.icon(
       onPressed: onPressed,
       icon: Icon(icon, size: 18),
       label: Text(
         label,
-        style: GoogleFonts.poppins(
-          fontWeight: FontWeight.w600,
-          fontSize: 14,
-        ),
+        style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 14),
       ),
       style: ElevatedButton.styleFrom(
         backgroundColor: color,
         foregroundColor: Colors.white,
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         elevation: 2,
       ),
     );
@@ -608,29 +654,29 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
 
   Widget _buildCompactSkillsPreview(List<dynamic> skills) {
     if (skills.isEmpty) return const SizedBox.shrink();
-    
+
     // Parse the skills properly using our helper function
     List<String> parsedSkills = _parseItemsArray(skills);
     if (parsedSkills.isEmpty) return const SizedBox.shrink();
-    
+
     // Define more vibrant colors for compact skill bubbles
     final List<Color> compactColors = [
-      const Color(0xFF6C5CE7), // Purple
-      const Color(0xFF00B894), // Teal  
-      const Color(0xFFFF6B6B), // Coral Red
-      const Color(0xFF4ECDC4), // Cyan
-      const Color(0xFFFFD93D), // Bright Yellow
-      const Color(0xFFFF9F43), // Orange
-      const Color(0xFF74B9FF), // Light Blue
-      const Color(0xFF55A3FF), // Sky Blue
-      const Color(0xFF1DD1A1), // Mint Green
-      const Color(0xFFFF6348), // Orange Red
+      AppColors.purpleGradientEnd, // Purple
+      AppColors.accentGreen, // Forest Green
+      AppColors.accentOrange, // Coral Orange
+      AppColors.tertiaryBlue, // Cyan
+      AppColors.accentYellow, // Bright Yellow
+      AppColors.accentOrange, // Orange
+      AppColors.secondaryBlue, // Teal Blue
+      AppColors.primaryBlue, // Primary Blue
+      AppColors.accentGreen, // Accent Green
+      AppColors.accentOrange, // Accent Orange
     ];
-    
+
     // Show only first 3 skills in compact view
     final displaySkills = parsedSkills.take(3).toList();
     final hasMore = parsedSkills.length > 3;
-    
+
     return Wrap(
       spacing: 6,
       runSpacing: 4,
@@ -639,17 +685,14 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
           final index = entry.key;
           final skill = entry.value;
           final color = compactColors[index % compactColors.length];
-          
+
           return Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [
-                  color,
-                  color.withOpacity(0.8),
-                ],
+                colors: [color, color.withOpacity(0.8)],
               ),
               borderRadius: BorderRadius.circular(10),
               boxShadow: [
@@ -725,7 +768,7 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
 
   Widget _buildCompactRolesPreview(List<dynamic> roles) {
     if (roles.isEmpty) return const SizedBox.shrink();
-    
+
     // Define professional colors for preferred roles
     final List<Color> roleColors = [
       const Color(0xFF5F27CD), // Deep Purple
@@ -739,11 +782,11 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
       const Color(0xFF5352ED), // Purple Blue
       const Color(0xFF70A1FF), // Light Blue
     ];
-    
+
     // Show only first 3 roles in compact view
     final displayRoles = roles.take(3).toList();
     final hasMore = roles.length > 3;
-    
+
     return Wrap(
       spacing: 6,
       runSpacing: 4,
@@ -752,19 +795,18 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
           final index = entry.key;
           final role = entry.value.toString();
           final color = roleColors[index % roleColors.length];
-          
+
           return Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [
-                  color,
-                  color.withOpacity(0.8),
-                ],
+                colors: [color, color.withOpacity(0.8)],
               ),
-              borderRadius: BorderRadius.circular(6), // More rectangular for roles
+              borderRadius: BorderRadius.circular(
+                6,
+              ), // More rectangular for roles
               boxShadow: [
                 BoxShadow(
                   color: color.withOpacity(0.3),
@@ -854,262 +896,417 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
       ),
-      builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.9,
-        maxChildSize: 0.95,
-        minChildSize: 0.5,
-        expand: false,
-        builder: (context, scrollController) => Container(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            children: [
-              // Drag Handle
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const SizedBox(height: 24),
-              
-              Expanded(
-                child: SingleChildScrollView(
-                  controller: scrollController,
+      builder:
+          (context) => DraggableScrollableSheet(
+            initialChildSize: 0.9,
+            maxChildSize: 0.95,
+            minChildSize: 0.5,
+            expand: false,
+            builder:
+                (context, scrollController) => Container(
+                  padding: const EdgeInsets.all(24),
                   child: Column(
                     children: [
-                      // Header
-                      Row(
-                        children: [
-                          Container(
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: _getStatusColor(volunteer['approvalStatus']),
-                                width: 3,
-                              ),
-                            ),
-                            child: CircleAvatar(
-                              radius: 40,
-                              backgroundImage: volunteer['photoUrl'] != null
-                                  ? NetworkImage(volunteer['photoUrl'])
-                                  : null,
-                              backgroundColor: primaryColor.withOpacity(0.1),
-                              child: volunteer['photoUrl'] == null
-                                  ? Icon(
-                                      Icons.person_rounded,
-                                      size: 40,
-                                      color: primaryColor,
-                                    )
-                                  : null,
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  volunteer['fullName'] ?? 'N/A',
-                                  style: GoogleFonts.poppins(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 24,
-                                    color: textPrimary,
-                                  ),
-                                ),
-                                Text(
-                                  volunteer['email'] ?? 'N/A',
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 16,
-                                    color: textSecondary,
-                                  ),
-                                ),
-                                if (volunteer['phone'] != null) ...[
-                                  const SizedBox(height: 4),
-                                  Row(
-                                    children: [
-                                      Icon(Icons.phone, size: 16, color: textSecondary),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        volunteer['phone'],
-                                        style: GoogleFonts.poppins(
-                                          fontSize: 16,
-                                          color: textSecondary,
+                      // Drag Handle
+                      Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+
+                      Expanded(
+                        child: SingleChildScrollView(
+                          controller: scrollController,
+                          child: Column(
+                            children: [
+                              // Header
+                              Row(
+                                children: [
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: _getStatusColor(
+                                          volunteer['approvalStatus'],
                                         ),
+                                        width: 3,
                                       ),
-                                    ],
-                                  ),
-                                ],
-                                const SizedBox(height: 8),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                  decoration: BoxDecoration(
-                                    color: _getStatusColor(volunteer['approvalStatus']).withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: Text(
-                                    volunteer['approvalStatus']?.toUpperCase() ?? 'PENDING',
-                                    style: GoogleFonts.poppins(
-                                      color: _getStatusColor(volunteer['approvalStatus']),
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
+                                    ),
+                                    child: CircleAvatar(
+                                      radius: 40,
+                                      backgroundImage:
+                                          volunteer['photoUrl'] != null
+                                              ? NetworkImage(
+                                                volunteer['photoUrl'],
+                                              )
+                                              : null,
+                                      backgroundColor: primaryColor.withOpacity(
+                                        0.1,
+                                      ),
+                                      child:
+                                          volunteer['photoUrl'] == null
+                                              ? Icon(
+                                                Icons.person_rounded,
+                                                size: 40,
+                                                color: primaryColor,
+                                              )
+                                              : null,
                                     ),
                                   ),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          volunteer['fullName'] ?? 'N/A',
+                                          style: GoogleFonts.poppins(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 24,
+                                            color: textPrimary,
+                                          ),
+                                        ),
+                                        Text(
+                                          volunteer['email'] ?? 'N/A',
+                                          style: GoogleFonts.poppins(
+                                            fontSize: 16,
+                                            color: textSecondary,
+                                          ),
+                                        ),
+                                        if (volunteer['phone'] != null) ...[
+                                          const SizedBox(height: 4),
+                                          Row(
+                                            children: [
+                                              Icon(
+                                                Icons.phone,
+                                                size: 16,
+                                                color: textSecondary,
+                                              ),
+                                              const SizedBox(width: 8),
+                                              Text(
+                                                volunteer['phone'],
+                                                style: GoogleFonts.poppins(
+                                                  fontSize: 16,
+                                                  color: textSecondary,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                        const SizedBox(height: 8),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 12,
+                                            vertical: 6,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: _getStatusColor(
+                                              volunteer['approvalStatus'],
+                                            ).withOpacity(0.1),
+                                            borderRadius: BorderRadius.circular(
+                                              20,
+                                            ),
+                                          ),
+                                          child: Text(
+                                            volunteer['approvalStatus']
+                                                    ?.toUpperCase() ??
+                                                'PENDING',
+                                            style: GoogleFonts.poppins(
+                                              color: _getStatusColor(
+                                                volunteer['approvalStatus'],
+                                              ),
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+
+                              const SizedBox(height: 32),
+
+                              // Details
+                              ..._buildDetailsSections(volunteer),
+
+                              if (showActions) ...[
+                                const SizedBox(height: 32),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: _buildActionButton(
+                                        'Approve Volunteer',
+                                        Icons.check_circle_rounded,
+                                        Colors.green,
+                                        () {
+                                          Navigator.pop(context);
+                                          _approveVolunteer(volunteer['_id']);
+                                        },
+                                      ),
+                                    ),
+                                    const SizedBox(width: 16),
+                                    Expanded(
+                                      child: _buildActionButton(
+                                        'Reject Application',
+                                        Icons.cancel_rounded,
+                                        Colors.red,
+                                        () {
+                                          Navigator.pop(context);
+                                          _rejectVolunteer(volunteer['_id']);
+                                        },
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
-                            ),
+                            ],
                           ),
-                        ],
-                      ),
-                      
-                      const SizedBox(height: 32),
-                      
-                      // Details
-                      ..._buildDetailsSections(volunteer),
-                      
-                      if (showActions) ...[
-                        const SizedBox(height: 32),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _buildActionButton(
-                                'Approve Volunteer',
-                                Icons.check_circle_rounded,
-                                Colors.green,
-                                () {
-                                  Navigator.pop(context);
-                                  _approveVolunteer(volunteer['_id']);
-                                },
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: _buildActionButton(
-                                'Reject Application',
-                                Icons.cancel_rounded,
-                                Colors.red,
-                                () {
-                                  Navigator.pop(context);
-                                  _rejectVolunteer(volunteer['_id']);
-                                },
-                              ),
-                            ),
-                          ],
                         ),
-                      ],
+                      ),
                     ],
                   ),
                 ),
-              ),
-            ],
           ),
-        ),
-      ),
     );
   }
 
   List<Widget> _buildDetailsSections(Map<String, dynamic> volunteer) {
     return [
       _buildDetailsSection('Personal Information', [
-        _buildModernInfoRow(Icons.cake_rounded, 'Date of Birth', volunteer['dob']?.substring(0, 10)),
-        _buildModernInfoRow(Icons.person_outline_rounded, 'Gender', volunteer['gender']),
-        _buildModernInfoRow(Icons.bloodtype_rounded, 'Blood Group', volunteer['bloodGroup']),
-        _buildModernInfoRow(Icons.location_on_rounded, 'Address', volunteer['address']),
-        _buildModernInfoRow(Icons.location_city_rounded, 'Current Location', volunteer['currentLocation']),
+        _buildModernInfoRow(
+          Icons.cake_rounded,
+          'Date of Birth',
+          volunteer['dob']?.substring(0, 10),
+        ),
+        _buildModernInfoRow(
+          Icons.person_outline_rounded,
+          'Gender',
+          volunteer['gender'],
+        ),
+        _buildModernInfoRow(
+          Icons.bloodtype_rounded,
+          'Blood Group',
+          volunteer['bloodGroup'],
+        ),
+        _buildModernInfoRow(
+          Icons.location_on_rounded,
+          'Address',
+          volunteer['address'],
+        ),
+        _buildModernInfoRow(
+          Icons.location_city_rounded,
+          'Current Location',
+          volunteer['currentLocation'],
+        ),
         _buildModernInfoRow(Icons.phone_rounded, 'Phone', volunteer['phone']),
-        _buildModernInfoRow(Icons.verified_user_rounded, 'Email Verified', volunteer['verified'] == true ? 'Yes' : 'No'),
+        _buildModernInfoRow(
+          Icons.verified_user_rounded,
+          'Email Verified',
+          volunteer['verified'] == true ? 'Yes' : 'No',
+        ),
       ]),
-      
+
       const SizedBox(height: 24),
-      
+
       _buildDetailsSection('Professional & Educational Details', [
-        _buildModernInfoRow(Icons.work_rounded, 'Current Occupation', volunteer['currentOccupation']),
-        _buildModernInfoRow(Icons.school_rounded, 'Highest Qualification', volunteer['highestQualification']),
-        _buildModernInfoRow(Icons.business_rounded, 'Organization', volunteer['organizationName']?.isNotEmpty == true ? volunteer['organizationName'] : 'Not specified'),
-        _buildModernInfoRow(Icons.corporate_fare_rounded, 'Corporate Experience', volunteer['corporateExperience'] == true ? 'Yes' : 'No'),
+        _buildModernInfoRow(
+          Icons.work_rounded,
+          'Current Occupation',
+          volunteer['currentOccupation'],
+        ),
+        _buildModernInfoRow(
+          Icons.school_rounded,
+          'Highest Qualification',
+          volunteer['highestQualification'],
+        ),
+        _buildModernInfoRow(
+          Icons.business_rounded,
+          'Organization',
+          volunteer['organizationName']?.isNotEmpty == true
+              ? volunteer['organizationName']
+              : 'Not specified',
+        ),
+        _buildModernInfoRow(
+          Icons.corporate_fare_rounded,
+          'Corporate Experience',
+          volunteer['corporateExperience'] == true ? 'Yes' : 'No',
+        ),
         if (volunteer['skills'] != null && volunteer['skills'].isNotEmpty)
           _buildSkillsChips('Skills', volunteer['skills']),
-        if (volunteer['preferredRoles'] != null && volunteer['preferredRoles'].isNotEmpty)
+        if (volunteer['preferredRoles'] != null &&
+            volunteer['preferredRoles'].isNotEmpty)
           _buildSkillsChips('Preferred Roles', volunteer['preferredRoles']),
-        if (volunteer['skillsDesc'] != null && volunteer['skillsDesc'].isNotEmpty)
+        if (volunteer['skillsDesc'] != null &&
+            volunteer['skillsDesc'].isNotEmpty)
           _buildTextSection('Skills Description', volunteer['skillsDesc']),
       ]),
-      
+
       const SizedBox(height: 24),
-      
+
       _buildDetailsSection('Volunteering Details', [
-        _buildModernInfoRow(Icons.schedule_rounded, 'Hours Per Week', volunteer['hoursPerWeek']),
-        _buildModernInfoRow(Icons.apps_rounded, 'Interested Program', volunteer['interestedProgram']),
-        _buildModernInfoRow(Icons.language_rounded, 'Meiteilon', volunteer['meiteilon']),
-        _buildModernInfoRow(Icons.volunteer_activism_rounded, 'Prior Volunteering', volunteer['priorVolunteering'] == true ? 'Yes' : 'No'),
-        if (volunteer['priorVolunteeringDesc'] != null && volunteer['priorVolunteeringDesc'].isNotEmpty)
-          _buildTextSection('Prior Volunteering Description', volunteer['priorVolunteeringDesc']),
-        if (volunteer['specialRequirements'] != null && volunteer['specialRequirements'].isNotEmpty)
-          _buildTextSection('Special Requirements', volunteer['specialRequirements']),
-        if (volunteer['conflictSituation'] != null && volunteer['conflictSituation'].isNotEmpty)
-          _buildTextSection('Conflict Situation Handling', volunteer['conflictSituation']),
+        _buildModernInfoRow(
+          Icons.schedule_rounded,
+          'Hours Per Week',
+          volunteer['hoursPerWeek'],
+        ),
+        _buildModernInfoRow(
+          Icons.apps_rounded,
+          'Interested Program',
+          volunteer['interestedProgram'],
+        ),
+        _buildModernInfoRow(
+          Icons.language_rounded,
+          'Meiteilon',
+          volunteer['meiteilon'],
+        ),
+        _buildModernInfoRow(
+          Icons.volunteer_activism_rounded,
+          'Prior Volunteering',
+          volunteer['priorVolunteering'] == true ? 'Yes' : 'No',
+        ),
+        if (volunteer['priorVolunteeringDesc'] != null &&
+            volunteer['priorVolunteeringDesc'].isNotEmpty)
+          _buildTextSection(
+            'Prior Volunteering Description',
+            volunteer['priorVolunteeringDesc'],
+          ),
+        if (volunteer['specialRequirements'] != null &&
+            volunteer['specialRequirements'].isNotEmpty)
+          _buildTextSection(
+            'Special Requirements',
+            volunteer['specialRequirements'],
+          ),
+        if (volunteer['conflictSituation'] != null &&
+            volunteer['conflictSituation'].isNotEmpty)
+          _buildTextSection(
+            'Conflict Situation Handling',
+            volunteer['conflictSituation'],
+          ),
       ]),
-      
+
       const SizedBox(height: 24),
-      
+
       _buildDetailsSection('Application Status & Admin Info', [
-        _buildModernInfoRow(Icons.approval_rounded, 'Approval Status', volunteer['approvalStatus']),
-        _buildModernInfoRow(Icons.admin_panel_settings_rounded, 'Approved By', volunteer['approvedBy']),
+        _buildModernInfoRow(
+          Icons.approval_rounded,
+          'Approval Status',
+          volunteer['approvalStatus'],
+        ),
+        _buildModernInfoRow(
+          Icons.admin_panel_settings_rounded,
+          'Approved By',
+          volunteer['approvedBy'],
+        ),
         _buildModernInfoRow(Icons.person_rounded, 'Role', volunteer['role']),
-        _buildModernInfoRow(Icons.schedule_rounded, 'Application Date', volunteer['createdAt']?.substring(0, 10)),
-        _buildModernInfoRow(Icons.update_rounded, 'Last Updated', volunteer['updatedAt']?.substring(0, 10)),
+        _buildModernInfoRow(
+          Icons.schedule_rounded,
+          'Application Date',
+          volunteer['createdAt']?.substring(0, 10),
+        ),
+        _buildModernInfoRow(
+          Icons.update_rounded,
+          'Last Updated',
+          volunteer['updatedAt']?.substring(0, 10),
+        ),
       ]),
-      
+
       const SizedBox(height: 24),
-      
+
       _buildDetailsSection('Policy & Compliance', [
-        _buildModernInfoRow(Icons.policy_rounded, 'POSH Policy Accepted', volunteer['poshPolicyAccepted'] == true ? 'Yes' : 'No'),
-        _buildModernInfoRow(Icons.child_care_rounded, 'Child Protection Undertaking', volunteer['childProtectionUndertaking'] == true ? 'Yes' : 'No'),
-        _buildModernInfoRow(Icons.school_rounded, 'Willing for Orientation', volunteer['willingOrientation'] == true ? 'Yes' : 'No'),
+        _buildModernInfoRow(
+          Icons.policy_rounded,
+          'POSH Policy Accepted',
+          volunteer['poshPolicyAccepted'] == true ? 'Yes' : 'No',
+        ),
+        _buildModernInfoRow(
+          Icons.child_care_rounded,
+          'Child Protection Undertaking',
+          volunteer['childProtectionUndertaking'] == true ? 'Yes' : 'No',
+        ),
+        _buildModernInfoRow(
+          Icons.school_rounded,
+          'Willing for Orientation',
+          volunteer['willingOrientation'] == true ? 'Yes' : 'No',
+        ),
       ]),
-      
-      if (volunteer['socialMedia'] != null && volunteer['socialMedia'].isNotEmpty) ...[
+
+      if (volunteer['socialMedia'] != null &&
+          volunteer['socialMedia'].isNotEmpty) ...[
         const SizedBox(height: 24),
         _buildDetailsSection('Contact & Social', [
-          _buildModernInfoRow(Icons.share_rounded, 'Social Media', volunteer['socialMedia']),
+          _buildModernInfoRow(
+            Icons.share_rounded,
+            'Social Media',
+            volunteer['socialMedia'],
+          ),
         ]),
       ],
-      
+
       const SizedBox(height: 24),
-      
+
       _buildDetailsSection('Reference Information', [
-        _buildModernInfoRow(Icons.person_rounded, 'Reference Name', volunteer['referenceName']),
-        _buildModernInfoRow(Icons.phone_rounded, 'Reference Phone', volunteer['referencePhone']),
-        _buildModernInfoRow(Icons.family_restroom_rounded, 'Reference Relation', volunteer['referenceRelation']),
-        _buildModernInfoRow(Icons.business_rounded, 'Reference Affiliation', volunteer['referenceAffiliation']),
+        _buildModernInfoRow(
+          Icons.person_rounded,
+          'Reference Name',
+          volunteer['referenceName'],
+        ),
+        _buildModernInfoRow(
+          Icons.phone_rounded,
+          'Reference Phone',
+          volunteer['referencePhone'],
+        ),
+        _buildModernInfoRow(
+          Icons.family_restroom_rounded,
+          'Reference Relation',
+          volunteer['referenceRelation'],
+        ),
+        _buildModernInfoRow(
+          Icons.business_rounded,
+          'Reference Affiliation',
+          volunteer['referenceAffiliation'],
+        ),
       ]),
-      
-      if (volunteer['whyVolunteer'] != null && volunteer['whyVolunteer'].isNotEmpty) ...[
+
+      if (volunteer['whyVolunteer'] != null &&
+          volunteer['whyVolunteer'].isNotEmpty) ...[
         const SizedBox(height: 24),
         _buildDetailsSection('Motivation', [
           _buildTextSection('Why Volunteer?', volunteer['whyVolunteer']),
         ]),
       ],
-      
-      if (volunteer['trustworthyMeaning'] != null && volunteer['trustworthyMeaning'].isNotEmpty) ...[
+
+      if (volunteer['trustworthyMeaning'] != null &&
+          volunteer['trustworthyMeaning'].isNotEmpty) ...[
         const SizedBox(height: 24),
         _buildDetailsSection('Personal Values', [
-          _buildTextSection('What does being trustworthy mean?', volunteer['trustworthyMeaning']),
+          _buildTextSection(
+            'What does being trustworthy mean?',
+            volunteer['trustworthyMeaning'],
+          ),
         ]),
       ],
-      
+
       const SizedBox(height: 24),
-      
+
       _buildDetailsSection('Documents & Photos', [
-        if (volunteer['photoUrl'] != null) 
+        if (volunteer['photoUrl'] != null)
           _buildImageSection('Profile Photo', volunteer['photoUrl']),
-        if (volunteer['aadhar'] != null) 
+        if (volunteer['aadhar'] != null)
           _buildDocumentSection('Aadhar Document', volunteer['aadhar']),
-        if (volunteer['referencePhotoUrl'] != null) 
+        if (volunteer['referencePhotoUrl'] != null)
           _buildImageSection('Reference Photo', volunteer['referencePhotoUrl']),
-        if (volunteer['referenceAadhar'] != null) 
-          _buildDocumentSection('Reference Aadhar', volunteer['referenceAadhar']),
+        if (volunteer['referenceAadhar'] != null)
+          _buildDocumentSection(
+            'Reference Aadhar',
+            volunteer['referenceAadhar'],
+          ),
       ]),
     ];
   }
@@ -1167,10 +1364,7 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
                 const SizedBox(height: 4),
                 Text(
                   value ?? 'N/A',
-                  style: GoogleFonts.poppins(
-                    fontSize: 14,
-                    color: textPrimary,
-                  ),
+                  style: GoogleFonts.poppins(fontSize: 14, color: textPrimary),
                 ),
               ],
             ),
@@ -1187,21 +1381,27 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
       if (item is String) {
         // If it's a string that looks like an array or contains commas, split it
         String cleanItem = item.trim();
-        
+
         // Remove array brackets if present
         cleanItem = cleanItem.replaceAll(RegExp(r'^\[|\]$'), '');
-        
+
         // If it contains commas, split it
         if (cleanItem.contains(',')) {
-          List<String> splitItems = cleanItem.split(',')
-              .map((s) => s.trim())
-              .map((s) => s.replaceAll('"', '').replaceAll("'", '')) // Remove quotes
-              .where((s) => s.isNotEmpty)
-              .toList();
+          List<String> splitItems =
+              cleanItem
+                  .split(',')
+                  .map((s) => s.trim())
+                  .map(
+                    (s) => s.replaceAll('"', '').replaceAll("'", ''),
+                  ) // Remove quotes
+                  .where((s) => s.isNotEmpty)
+                  .toList();
           parsedItems.addAll(splitItems);
         } else {
           // Single item, just clean it up
-          cleanItem = cleanItem.replaceAll('"', '').replaceAll("'", ''); // Remove quotes
+          cleanItem = cleanItem
+              .replaceAll('"', '')
+              .replaceAll("'", ''); // Remove quotes
           if (cleanItem.isNotEmpty) {
             parsedItems.add(cleanItem);
           }
@@ -1214,19 +1414,19 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
         }
       }
     }
-    
+
     // Remove duplicates and empty items
     return parsedItems.where((item) => item.isNotEmpty).toSet().toList();
   }
 
   Widget _buildSkillsChips(String label, List<dynamic> items) {
     if (items.isEmpty) return const SizedBox.shrink();
-    
+
     // Parse the items properly
     List<String> parsedItems = _parseItemsArray(items);
-    
+
     if (parsedItems.isEmpty) return const SizedBox.shrink();
-    
+
     // Define different vibrant colors for each individual bubble
     final List<Color> bubbleColors = [
       // Vibrant colors for individual bubbles
@@ -1251,9 +1451,9 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
       const Color(0xFF7BED9F), // Light Green
       const Color(0xFFFF6B35), // Coral
     ];
-    
+
     final bool isSkills = label.toLowerCase().contains('skill');
-    
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
@@ -1278,9 +1478,10 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: isSkills 
-                      ? [Colors.blue[400]!, Colors.purple[400]!]
-                      : [Colors.deepPurple[400]!, Colors.indigo[400]!],
+                    colors:
+                        isSkills
+                            ? [Colors.blue[400]!, Colors.purple[400]!]
+                            : [Colors.deepPurple[400]!, Colors.indigo[400]!],
                   ),
                   borderRadius: BorderRadius.circular(10),
                 ),
@@ -1322,68 +1523,69 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
           Wrap(
             spacing: 8,
             runSpacing: 8,
-            children: parsedItems.asMap().entries.map((entry) {
-              final index = entry.key;
-              final item = entry.value;
-              final color = bubbleColors[index % bubbleColors.length];
-              
-              return AnimatedContainer(
-                duration: Duration(milliseconds: 300 + (index * 100)),
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      color,
-                      color.withOpacity(0.8),
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: color.withOpacity(0.4),
-                      blurRadius: 6,
-                      offset: const Offset(0, 3),
+            children:
+                parsedItems.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final item = entry.value;
+                  final color = bubbleColors[index % bubbleColors.length];
+
+                  return AnimatedContainer(
+                    duration: Duration(milliseconds: 300 + (index * 100)),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 8,
                     ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 6,
-                      height: 6,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.9),
-                        shape: BoxShape.circle,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [color, color.withOpacity(0.8)],
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    Flexible(
-                      child: Text(
-                        item,
-                        style: GoogleFonts.poppins(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                          shadows: [
-                            Shadow(
-                              offset: const Offset(0, 1),
-                              blurRadius: 2,
-                              color: Colors.black.withOpacity(0.3),
-                            ),
-                          ],
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: color.withOpacity(0.4),
+                          blurRadius: 6,
+                          offset: const Offset(0, 3),
                         ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                      ],
                     ),
-                  ],
-                ),
-              );
-            }).toList(),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 6,
+                          height: 6,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.9),
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            item,
+                            style: GoogleFonts.poppins(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                              shadows: [
+                                Shadow(
+                                  offset: const Offset(0, 1),
+                                  blurRadius: 2,
+                                  color: Colors.black.withOpacity(0.3),
+                                ),
+                              ],
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
           ),
-          
+
           // Add a summary at the bottom
           if (parsedItems.length > 5) ...[
             const SizedBox(height: 12),
@@ -1498,15 +1700,19 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
               height: 120,
               width: 120,
               fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) => Container(
-                height: 120,
-                width: 120,
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(Icons.image_not_supported, color: Colors.grey[400]),
-              ),
+              errorBuilder:
+                  (context, error, stackTrace) => Container(
+                    height: 120,
+                    width: 120,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      Icons.image_not_supported,
+                      color: Colors.grey[400],
+                    ),
+                  ),
             ),
           ),
         ],
@@ -1531,7 +1737,11 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
               color: primaryColor.withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(Icons.description_rounded, color: primaryColor, size: 20),
+            child: Icon(
+              Icons.description_rounded,
+              color: primaryColor,
+              size: 20,
+            ),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -1549,10 +1759,7 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
                 const SizedBox(height: 4),
                 Text(
                   'Document Available',
-                  style: GoogleFonts.poppins(
-                    fontSize: 14,
-                    color: textPrimary,
-                  ),
+                  style: GoogleFonts.poppins(fontSize: 14, color: textPrimary),
                 ),
               ],
             ),
@@ -1650,35 +1857,14 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
             ),
             actions: [
               IconButton(
-                icon: const Icon(Icons.people, color: Colors.white),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const AdminMenteeManagementPage(),
-                    ),
-                  );
-                },
-                tooltip: 'Mentee Management',
-              ),
-              IconButton(
-                icon: const Icon(Icons.forum_outlined, color: Colors.white),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const AdminQueryManagementPage(),
-                    ),
-                  );
-                },
-                tooltip: 'Query Management',
-              ),
-              IconButton(
-                icon: const Icon(Icons.dashboard_rounded, color: Colors.white),
+                icon: const Icon(
+                  Icons.settings_suggest_rounded,
+                  color: Colors.white,
+                ),
                 onPressed: () {
                   Navigator.pushNamed(context, '/admin/vms/dashboard');
                 },
-                tooltip: 'VMS Dashboard',
+                tooltip: 'VMS & CCP Controls',
               ),
               IconButton(
                 icon: const Icon(Icons.refresh_rounded, color: Colors.white),
@@ -1696,7 +1882,7 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
               const SizedBox(width: 8),
             ],
           ),
-          
+
           // Statistics Cards
           SliverToBoxAdapter(
             child: Container(
@@ -1724,7 +1910,7 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
               ),
             ),
           ),
-          
+
           // Tab Bar
           SliverPersistentHeader(
             pinned: true,
@@ -1736,7 +1922,9 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
                 indicatorColor: primaryColor,
                 indicatorWeight: 3,
                 labelStyle: GoogleFonts.poppins(fontWeight: FontWeight.w600),
-                unselectedLabelStyle: GoogleFonts.poppins(fontWeight: FontWeight.w500),
+                unselectedLabelStyle: GoogleFonts.poppins(
+                  fontWeight: FontWeight.w500,
+                ),
                 tabs: const [
                   Tab(text: 'Pending Approval'),
                   Tab(text: 'All Volunteers'),
@@ -1744,7 +1932,7 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
               ),
             ),
           ),
-          
+
           // Tab Content
           SliverFillRemaining(
             child: TabBarView(
@@ -1773,11 +1961,12 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   double get maxExtent => _tabBar.preferredSize.height;
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return Container(
-      color: const Color(0xFFF8FFFE),
-      child: _tabBar,
-    );
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
+    return Container(color: const Color(0xFFF8FFFE), child: _tabBar);
   }
 
   @override

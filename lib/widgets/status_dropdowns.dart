@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/volunteer_model.dart';
+import '../config/app_colors.dart';
 
 /// Dropdown for Onboarding Status
 class OnboardingStatusDropdown extends StatelessWidget {
@@ -151,7 +152,7 @@ class StageFilterDropdown extends StatelessWidget {
           icon: const Icon(Icons.keyboard_arrow_down_rounded),
           style: GoogleFonts.poppins(
             fontSize: 14,
-            color: const Color(0xFF2C3E50),
+            color: AppColors.textDark,
             fontWeight: FontWeight.w500,
           ),
           hint: Text(

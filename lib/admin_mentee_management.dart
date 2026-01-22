@@ -4,6 +4,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'create_mentee_page.dart';
+import 'config/api_config.dart';
+import 'config/app_colors.dart';
 
 class AdminMenteeManagementPage extends StatefulWidget {
   const AdminMenteeManagementPage({super.key});
@@ -13,7 +15,7 @@ class AdminMenteeManagementPage extends StatefulWidget {
 }
 
 class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
-  final String baseUrl = "https://shrew-concrete-cobra.ngrok-free.app/api";
+  final String baseUrl = ApiConfig.apiUrl;
   final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
   
   List<dynamic> _mentees = [];
@@ -238,11 +240,7 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
         elevation: 0,
         flexibleSpace: Container(
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
+            gradient: AppColors.primaryGradient,
           ),
         ),
         foregroundColor: Colors.white,
@@ -255,7 +253,7 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
         ],
       ),
       body: _loading
-          ? Center(child: CircularProgressIndicator(color: Color(0xFF6366F1)))
+          ? Center(child: CircularProgressIndicator(color: AppColors.primaryBlue))
           : Column(
               children: [
                 _buildFilterTabs(),
@@ -298,7 +296,7 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
         },
         icon: Icon(Icons.person_add),
         label: Text("Add Mentee"),
-        backgroundColor: Color(0xFF6366F1),
+        backgroundColor: AppColors.primaryBlue,
       ),
     );
   }
@@ -360,7 +358,7 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
               icon: Icon(Icons.refresh),
               label: Text('Retry Connection'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFF6366F1),
+                backgroundColor: AppColors.primaryBlue,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               ),
@@ -403,7 +401,7 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
           gradient: isSelected
-              ? LinearGradient(colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)])
+              ? AppColors.primaryGradient
               : null,
           borderRadius: BorderRadius.circular(12),
         ),
@@ -422,7 +420,7 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
               style: GoogleFonts.poppins(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: isSelected ? Colors.white : Color(0xFF6366F1),
+                color: isSelected ? Colors.white : AppColors.primaryBlue,
               ),
             ),
           ],
@@ -440,10 +438,10 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [Color(0xFF6366F1).withOpacity(0.1), Color(0xFF8B5CF6).withOpacity(0.05)],
+          colors: [AppColors.primaryBlue.withOpacity(0.1), AppColors.purpleGradientEnd.withOpacity(0.05)],
         ),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Color(0xFF6366F1).withOpacity(0.3)),
+        border: Border.all(color: AppColors.primaryBlue.withOpacity(0.3)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -459,14 +457,14 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
   Widget _buildStatItem(IconData icon, String label, String value) {
     return Column(
       children: [
-        Icon(icon, color: Color(0xFF6366F1)),
+        Icon(icon, color: AppColors.primaryBlue),
         const SizedBox(height: 4),
         Text(
           value,
           style: GoogleFonts.poppins(
             fontSize: 24,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF6366F1),
+            color: AppColors.primaryBlue,
           ),
         ),
         Text(
@@ -523,7 +521,7 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
               children: [
                 CircleAvatar(
                   radius: 30,
-                  backgroundColor: Color(0xFF6366F1).withOpacity(0.1),
+                  backgroundColor: AppColors.primaryBlue.withOpacity(0.1),
                   child: mentee['photoUrl'] != null && mentee['photoUrl'].toString().isNotEmpty
                       ? ClipOval(
                           child: Image.network(
@@ -531,10 +529,10 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
                             width: 60,
                             height: 60,
                             fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) => Icon(Icons.person, color: Color(0xFF6366F1), size: 30),
+                            errorBuilder: (context, error, stackTrace) => Icon(Icons.person, color: AppColors.primaryBlue, size: 30),
                           ),
                         )
-                      : Icon(Icons.person, color: Color(0xFF6366F1), size: 30),
+                      : Icon(Icons.person, color: AppColors.primaryBlue, size: 30),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -584,7 +582,7 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Color(0xFF6366F1).withOpacity(0.1),
+                    color: AppColors.primaryBlue.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
@@ -592,7 +590,7 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
                     style: GoogleFonts.poppins(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF6366F1),
+                      color: AppColors.primaryBlue,
                     ),
                   ),
                 ),
@@ -649,7 +647,7 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
                     icon: Icon(Icons.person_add, size: 16),
                     label: Text('Assign'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFF6366F1),
+                      backgroundColor: AppColors.primaryBlue,
                       foregroundColor: Colors.white,
                     ),
                   ),
@@ -661,7 +659,7 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
                   icon: Icon(Icons.visibility, size: 16),
                   label: Text('View'),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: Color(0xFF6366F1),
+                    foregroundColor: AppColors.primaryBlue,
                   ),
                 ),
               ],

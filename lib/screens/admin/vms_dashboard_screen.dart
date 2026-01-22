@@ -6,6 +6,9 @@ import '../../services/vms_service.dart';
 import '../../widgets/dashboard_stat_card.dart';
 import '../../widgets/status_dropdowns.dart';
 import '../../widgets/vms_volunteer_card.dart';
+import '../../config/app_colors.dart';
+import 'ccp_controls_screen.dart';
+import 'enhanced_vms_dashboard_screen.dart';
 
 /// VMS Dashboard Screen showing statistics and volunteer overview
 class VMSDashboardScreen extends StatefulWidget {
@@ -17,7 +20,7 @@ class VMSDashboardScreen extends StatefulWidget {
 
 class _VMSDashboardScreenState extends State<VMSDashboardScreen> {
   final VMSService _vmsService = VMSService();
-  
+
   bool _isLoading = true;
   VMSDashboardStats? _stats;
   List<Volunteer> _volunteers = [];
@@ -25,11 +28,11 @@ class _VMSDashboardScreenState extends State<VMSDashboardScreen> {
   String _searchQuery = '';
   String? _error;
 
-  // Theme colors
-  static const primaryColor = Color(0xFF1E88E5);
-  static const backgroundColor = Color(0xFFF8FFFE);
-  static const textPrimary = Color(0xFF2C3E50);
-  static const textSecondary = Color(0xFF7F8C8D);
+  // Theme colors (using AppColors)
+  static final primaryColor = AppColors.primaryBlue;
+  static final backgroundColor = AppColors.backgroundLight1;
+  static final textPrimary = AppColors.textDark;
+  static final textSecondary = AppColors.gray1;
 
   @override
   void initState() {
@@ -73,9 +76,10 @@ class _VMSDashboardScreenState extends State<VMSDashboardScreen> {
     setState(() => _isLoading = true);
 
     try {
-      final response = stage != null
-          ? await _vmsService.getVolunteersByStage(stage.value)
-          : await _vmsService.getAllVolunteers();
+      final response =
+          stage != null
+              ? await _vmsService.getVolunteersByStage(stage.value)
+              : await _vmsService.getAllVolunteers();
 
       setState(() {
         if (response.isSuccess) {
@@ -93,17 +97,19 @@ class _VMSDashboardScreenState extends State<VMSDashboardScreen> {
 
     // Filter by stage
     if (_selectedStage != null) {
-      filtered = filtered.where((v) => v.currentStage == _selectedStage).toList();
+      filtered =
+          filtered.where((v) => v.currentStage == _selectedStage).toList();
     }
 
     // Filter by search query
     if (_searchQuery.isNotEmpty) {
       final query = _searchQuery.toLowerCase();
-      filtered = filtered.where((v) {
-        return v.displayName.toLowerCase().contains(query) ||
-            (v.volunteerCode?.toLowerCase().contains(query) ?? false) ||
-            (v.email?.toLowerCase().contains(query) ?? false);
-      }).toList();
+      filtered =
+          filtered.where((v) {
+            return v.displayName.toLowerCase().contains(query) ||
+                (v.volunteerCode?.toLowerCase().contains(query) ?? false) ||
+                (v.email?.toLowerCase().contains(query) ?? false);
+          }).toList();
     }
 
     return filtered;
@@ -139,24 +145,43 @@ class _VMSDashboardScreenState extends State<VMSDashboardScreen> {
     Navigator.pushNamed(context, '/admin/vms/certificates');
   }
 
-  Future<void> _exportCSV() async {
-    final response = await _vmsService.exportCSV(
-      stage: _selectedStage?.value,
+  void _navigateToCCPControls() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const CCPControlsScreen()),
     );
+  }
+
+  void _navigateToEnhancedDashboard() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const EnhancedVMSDashboardScreen(),
+      ),
+    );
+  }
+
+  Future<void> _exportCSV() async {
+    final response = await _vmsService.exportCSV(stage: _selectedStage?.value);
 
     if (response.isSuccess) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Row(
             children: [
-              const Icon(Icons.check_circle_outline_rounded, color: Colors.white),
+              const Icon(
+                Icons.check_circle_outline_rounded,
+                color: Colors.white,
+              ),
               const SizedBox(width: 12),
               const Text('CSV export started'),
             ],
           ),
           backgroundColor: Colors.green[600],
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           margin: const EdgeInsets.all(16),
         ),
       );
@@ -180,8 +205,40 @@ class _VMSDashboardScreenState extends State<VMSDashboardScreen> {
           ),
         ),
         actions: [
+          // Enhanced Metrics Dashboard
+          Container(
+            margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.analytics_rounded, color: Colors.white),
+              onPressed: _navigateToEnhancedDashboard,
+              tooltip: 'Enhanced Metrics Dashboard',
+            ),
+          ),
+          // CCP Controls - Combined Mentee & Query Management
+          Container(
+            margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: IconButton(
+              icon: const Icon(
+                Icons.settings_suggest_rounded,
+                color: Colors.white,
+              ),
+              onPressed: _navigateToCCPControls,
+              tooltip: 'CCP Controls (Mentee & Query Management)',
+            ),
+          ),
           IconButton(
-            icon: const Icon(Icons.workspace_premium_rounded, color: Colors.white),
+            icon: const Icon(
+              Icons.workspace_premium_rounded,
+              color: Colors.white,
+            ),
             onPressed: _navigateToCertificates,
             tooltip: 'Certificate Management',
           ),
@@ -195,47 +252,49 @@ class _VMSDashboardScreenState extends State<VMSDashboardScreen> {
             onPressed: _loadData,
             tooltip: 'Refresh',
           ),
+          const SizedBox(width: 8),
         ],
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _error != null
+      body:
+          _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : _error != null
               ? _buildErrorState()
               : RefreshIndicator(
-                  onRefresh: _loadData,
-                  child: CustomScrollView(
-                    slivers: [
-                      // Stats Grid
-                      SliverToBoxAdapter(
-                        child: _buildStatsSection(),
-                      ),
+                onRefresh: _loadData,
+                child: CustomScrollView(
+                  slivers: [
+                    // Stats Grid
+                    SliverToBoxAdapter(child: _buildStatsSection()),
 
-                      // Search and Filter
-                      SliverToBoxAdapter(
-                        child: _buildSearchAndFilter(),
-                      ),
+                    // Search and Filter
+                    SliverToBoxAdapter(child: _buildSearchAndFilter()),
 
-                      // Volunteers List
-                      SliverPadding(
-                        padding: const EdgeInsets.all(16),
-                        sliver: _filteredVolunteers.isEmpty
-                            ? SliverToBoxAdapter(child: _buildEmptyState())
-                            : SliverList(
-                                delegate: SliverChildBuilderDelegate(
-                                  (context, index) {
-                                    final volunteer = _filteredVolunteers[index];
-                                    return VMSVolunteerCard(
-                                      volunteer: volunteer,
-                                      onTap: () => _navigateToVolunteerDetail(volunteer),
-                                    );
-                                  },
-                                  childCount: _filteredVolunteers.length,
-                                ),
+                    // Volunteers List
+                    SliverPadding(
+                      padding: const EdgeInsets.all(16),
+                      sliver:
+                          _filteredVolunteers.isEmpty
+                              ? SliverToBoxAdapter(child: _buildEmptyState())
+                              : SliverList(
+                                delegate: SliverChildBuilderDelegate((
+                                  context,
+                                  index,
+                                ) {
+                                  final volunteer = _filteredVolunteers[index];
+                                  return VMSVolunteerCard(
+                                    volunteer: volunteer,
+                                    onTap:
+                                        () => _navigateToVolunteerDetail(
+                                          volunteer,
+                                        ),
+                                  );
+                                }, childCount: _filteredVolunteers.length),
                               ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
+              ),
     );
   }
 
@@ -257,10 +316,7 @@ class _VMSDashboardScreenState extends State<VMSDashboardScreen> {
           const SizedBox(height: 8),
           Text(
             _error ?? 'Unknown error occurred',
-            style: GoogleFonts.poppins(
-              fontSize: 14,
-              color: textSecondary,
-            ),
+            style: GoogleFonts.poppins(fontSize: 14, color: textSecondary),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 24),
@@ -290,38 +346,103 @@ class _VMSDashboardScreenState extends State<VMSDashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Overview',
-            style: GoogleFonts.poppins(
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-              color: textPrimary,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Dashboard Overview',
+                style: GoogleFonts.poppins(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: textPrimary,
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: primaryColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.people_rounded, color: primaryColor, size: 16),
+                    const SizedBox(width: 6),
+                    Text(
+                      '${_stats!.totalVolunteers} Total',
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: primaryColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // Key Metrics - Highlighted
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [primaryColor, primaryColor.withOpacity(0.8)],
+              ),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: primaryColor.withOpacity(0.3),
+                  blurRadius: 15,
+                  offset: const Offset(0, 5),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: _buildHighlightStat(
+                    'Active Mentoring',
+                    _stats!.activeMentoring,
+                    Icons.groups_rounded,
+                    () {
+                      setState(() => _selectedStage = VolunteerStage.mentoring);
+                      _loadVolunteersByStage(VolunteerStage.mentoring);
+                    },
+                  ),
+                ),
+                Container(
+                  width: 1,
+                  height: 50,
+                  color: Colors.white.withOpacity(0.3),
+                ),
+                Expanded(
+                  child: _buildHighlightStat(
+                    'Pending Approval',
+                    _stats!.pendingApproval,
+                    Icons.pending_actions_rounded,
+                    null,
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 16),
+
+          // Stage Breakdown Grid
           GridView.count(
             crossAxisCount: 2,
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             mainAxisSpacing: 12,
             crossAxisSpacing: 12,
-            childAspectRatio: 1.3,
+            childAspectRatio: 1.4,
             children: [
-              DashboardStatCard(
-                title: 'Total Volunteers',
-                value: _stats!.totalVolunteers,
-                icon: Icons.people_rounded,
-                color: primaryColor,
-                onTap: () {
-                  setState(() => _selectedStage = null);
-                },
-              ),
-              DashboardStatCard(
-                title: 'Pending Approval',
-                value: _stats!.pendingApproval,
-                icon: Icons.pending_actions_rounded,
-                color: Colors.orange,
-              ),
               DashboardStatCard(
                 title: 'In Onboarding',
                 value: _stats!.inOnboarding,
@@ -343,16 +464,6 @@ class _VMSDashboardScreenState extends State<VMSDashboardScreen> {
                 },
               ),
               DashboardStatCard(
-                title: 'Active Mentoring',
-                value: _stats!.activeMentoring,
-                icon: Icons.groups_rounded,
-                color: Colors.teal,
-                onTap: () {
-                  setState(() => _selectedStage = VolunteerStage.mentoring);
-                  _loadVolunteersByStage(VolunteerStage.mentoring);
-                },
-              ),
-              DashboardStatCard(
                 title: 'Exit Pending',
                 value: _stats!.exitPending,
                 icon: Icons.logout_rounded,
@@ -363,22 +474,55 @@ class _VMSDashboardScreenState extends State<VMSDashboardScreen> {
                 },
               ),
               DashboardStatCard(
-                title: 'Certificate Eligible',
+                title: 'Certificate Ready',
                 value: _stats!.certificateEligible,
                 icon: Icons.workspace_premium_rounded,
                 color: Colors.amber[700]!,
                 onTap: _navigateToCertificates,
               ),
-              DashboardStatCard(
-                title: 'Certificates Issued',
-                value: _stats!.certificateIssued,
-                icon: Icons.card_membership_rounded,
-                color: Colors.green,
-                onTap: _navigateToCertificates,
-              ),
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildHighlightStat(
+    String title,
+    int value,
+    IconData icon,
+    VoidCallback? onTap,
+  ) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: Colors.white, size: 32),
+            const SizedBox(height: 8),
+            Text(
+              value.toString(),
+              style: GoogleFonts.poppins(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              title,
+              style: GoogleFonts.poppins(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: Colors.white.withOpacity(0.9),
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -410,13 +554,17 @@ class _VMSDashboardScreenState extends State<VMSDashboardScreen> {
                   fontSize: 14,
                   color: textSecondary,
                 ),
-                prefixIcon: const Icon(Icons.search_rounded, color: primaryColor),
-                suffixIcon: _searchQuery.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear_rounded),
-                        onPressed: () => setState(() => _searchQuery = ''),
-                      )
-                    : null,
+                prefixIcon: Icon(
+                  Icons.search_rounded,
+                  color: primaryColor,
+                ),
+                suffixIcon:
+                    _searchQuery.isNotEmpty
+                        ? IconButton(
+                          icon: const Icon(Icons.clear_rounded),
+                          onPressed: () => setState(() => _searchQuery = ''),
+                        )
+                        : null,
                 border: InputBorder.none,
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 16,
@@ -426,7 +574,7 @@ class _VMSDashboardScreenState extends State<VMSDashboardScreen> {
             ),
           ),
           const SizedBox(height: 12),
-          
+
           // Stage filter
           StageFilterDropdown(
             value: _selectedStage,
@@ -436,14 +584,11 @@ class _VMSDashboardScreenState extends State<VMSDashboardScreen> {
             },
           ),
           const SizedBox(height: 8),
-          
+
           // Results count
           Text(
             '${_filteredVolunteers.length} volunteer${_filteredVolunteers.length == 1 ? '' : 's'} found',
-            style: GoogleFonts.poppins(
-              fontSize: 12,
-              color: textSecondary,
-            ),
+            style: GoogleFonts.poppins(fontSize: 12, color: textSecondary),
           ),
         ],
       ),
@@ -481,10 +626,7 @@ class _VMSDashboardScreenState extends State<VMSDashboardScreen> {
             _searchQuery.isNotEmpty
                 ? 'Try a different search term'
                 : 'No volunteers in this category',
-            style: GoogleFonts.poppins(
-              fontSize: 14,
-              color: textSecondary,
-            ),
+            style: GoogleFonts.poppins(fontSize: 14, color: textSecondary),
           ),
         ],
       ),

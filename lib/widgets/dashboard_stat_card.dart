@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/vms_dashboard_model.dart';
+import '../config/app_colors.dart';
 
 /// A stat card for displaying dashboard statistics
 class DashboardStatCard extends StatelessWidget {
@@ -58,25 +59,25 @@ class DashboardStatCard extends StatelessWidget {
   static Color _getColor(DashboardStatColor statColor) {
     switch (statColor) {
       case DashboardStatColor.blue:
-        return const Color(0xFF1E88E5);
+        return AppColors.primaryBlue;
       case DashboardStatColor.orange:
-        return const Color(0xFFFF9800);
+        return AppColors.accentOrange;
       case DashboardStatColor.purple:
-        return const Color(0xFF9C27B0);
+        return AppColors.purpleGradientEnd;
       case DashboardStatColor.teal:
-        return const Color(0xFF26A69A);
+        return AppColors.secondaryBlue;
       case DashboardStatColor.green:
-        return const Color(0xFF4CAF50);
+        return AppColors.accentGreen;
       case DashboardStatColor.red:
-        return const Color(0xFFE53935);
+        return AppColors.accentOrange;
       case DashboardStatColor.amber:
-        return const Color(0xFFFFC107);
+        return AppColors.accentYellow;
       case DashboardStatColor.indigo:
-        return const Color(0xFF3F51B5);
+        return AppColors.primaryBlue;
       case DashboardStatColor.pink:
-        return const Color(0xFFE91E63);
+        return AppColors.pinkAccent;
       case DashboardStatColor.cyan:
-        return const Color(0xFF00BCD4);
+        return AppColors.tertiaryBlue;
     }
   }
 
@@ -128,7 +129,7 @@ class DashboardStatCard extends StatelessWidget {
                     style: GoogleFonts.poppins(
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
-                      color: const Color(0xFF2C3E50),
+                      color: AppColors.textDark,
                     ),
                   ),
                 ],
@@ -139,7 +140,7 @@ class DashboardStatCard extends StatelessWidget {
                 style: GoogleFonts.poppins(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: const Color(0xFF7F8C8D),
+                  color: AppColors.gray1,
                 ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
@@ -223,7 +224,7 @@ class CompactStatCard extends StatelessWidget {
                       title,
                       style: GoogleFonts.poppins(
                         fontSize: 11,
-                        color: const Color(0xFF7F8C8D),
+                        color: AppColors.gray1,
                         fontWeight: FontWeight.w500,
                       ),
                       maxLines: 1,

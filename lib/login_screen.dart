@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 
 import 'home_screen.dart';
 import 'register_screen.dart';
+import 'config/api_config.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -24,7 +25,7 @@ class _LoginPageState extends State<LoginPage> {
   bool _otpSent = false;
   bool _isLoading = false;
 
-  final String baseUrl = "https://shrew-concrete-cobra.ngrok-free.app/api"; // Replace with your actual URL
+  final String baseUrl = ApiConfig.apiUrl;
 
   Future<void> _sendOtp() async {
     final email = _emailController.text.trim();

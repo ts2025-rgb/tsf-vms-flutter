@@ -4,6 +4,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'companionconnect.dart';
+import 'config/api_config.dart';
+import 'config/app_colors.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -14,7 +16,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
-  final String baseUrl = "https://shrew-concrete-cobra.ngrok-free.app/api";
+  final String baseUrl = ApiConfig.apiUrl;
 
   Map<String, dynamic> userData = {};
   List<Map<String, dynamic>> _availablePrograms = [];
@@ -86,28 +88,52 @@ class _HomePageState extends State<HomePage> {
     if (approvalStatus != "approved") {
       return Container(
         margin: const EdgeInsets.all(16),
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: Colors.orange[50],
-          border: Border.all(color: Colors.orange[300]!),
-          borderRadius: BorderRadius.circular(12),
+          gradient: LinearGradient(
+            colors: [
+              AppColors.accentYellow.withOpacity(0.15),
+              AppColors.accentOrange.withOpacity(0.1),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.accentOrange.withOpacity(0.3), width: 2),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.accentOrange.withOpacity(0.1),
+              blurRadius: 12,
+              offset: Offset(0, 4),
+            ),
+          ],
         ),
         child: Column(
           children: [
+            Container(
+              padding: EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.accentOrange.withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.hourglass_empty, color: AppColors.accentOrange, size: 32),
+            ),
+            SizedBox(height: 16),
             Text(
               "Hello $name!",
               style: GoogleFonts.poppins(
                 fontSize: 24,
-                fontWeight: FontWeight.w600,
-                color: Colors.orange[800],
+                fontWeight: FontWeight.w700,
+                color: AppColors.accentOrange,
               ),
             ),
             const SizedBox(height: 12),
             Text(
-              "Thanks for applying to be a volunteer. Your application has not been approved yet. We will let you know by mail once our team reviews your application.",
+              "Thanks for applying to be a volunteer. Your application is under review. We'll notify you by email once our team completes the approval process.",
               style: GoogleFonts.poppins(
-                fontSize: 16,
-                color: Colors.orange[700],
+                fontSize: 15,
+                color: Colors.grey.shade700,
+                height: 1.5,
               ),
               textAlign: TextAlign.center,
             ),
@@ -125,14 +151,14 @@ class _HomePageState extends State<HomePage> {
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
+              colors: AppColors.getPrimaryGradientColors(),
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: Color(0xFF6366F1).withOpacity(0.3),
+                color: AppColors.primaryBlue.withOpacity(0.3),
                 blurRadius: 12,
                 offset: Offset(0, 4),
               ),
@@ -230,7 +256,7 @@ class _HomePageState extends State<HomePage> {
         child: Center(
           child: Column(
             children: [
-              CircularProgressIndicator(color: Color(0xFF6366F1)),
+              CircularProgressIndicator(color: AppColors.primaryBlue),
               const SizedBox(height: 12),
               Text(
                 "Loading programs...",
@@ -256,21 +282,67 @@ class _HomePageState extends State<HomePage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Icon(Icons.campaign, color: Color(0xFF6366F1), size: 20),
-              const SizedBox(width: 8),
-              Text(
-                "Your Programs",
-                style: GoogleFonts.poppins(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.grey[800],
-                ),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  AppColors.primaryBlue.withOpacity(0.1),
+                  AppColors.secondaryBlue.withOpacity(0.05),
+                ],
               ),
-            ],
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppColors.primaryBlue.withOpacity(0.2)),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [AppColors.primaryBlue, AppColors.secondaryBlue],
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primaryBlue.withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Icon(Icons.dashboard_customize, color: Colors.white, size: 22),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  "Your Programs",
+                  style: GoogleFonts.poppins(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.primaryBlue,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+                Spacer(),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppColors.accentGreen.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    "${userPrograms.length}",
+                    style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.accentGreen,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -302,34 +374,53 @@ class _HomePageState extends State<HomePage> {
                 child: Tooltip(
                   message: programDescription.isNotEmpty ? programDescription : programName,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
-                          _getProgramColor(index).withOpacity(0.1),
-                          _getProgramColor(index).withOpacity(0.05),
+                          _getProgramColor(index).withOpacity(0.15),
+                          _getProgramColor(index).withOpacity(0.08),
                         ],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(14),
                       border: Border.all(
-                        color: _getProgramColor(index).withOpacity(0.3),
-                        width: 1.5,
+                        color: _getProgramColor(index).withOpacity(0.4),
+                        width: 2,
                       ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: _getProgramColor(index).withOpacity(0.2),
+                          blurRadius: 8,
+                          offset: Offset(0, 3),
+                        ),
+                      ],
                     ),
                     child: Row(
                       children: [
                         Container(
-                          padding: const EdgeInsets.all(8),
+                          padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: _getProgramColor(index).withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(8),
+                            gradient: LinearGradient(
+                              colors: [
+                                _getProgramColor(index).withOpacity(0.3),
+                                _getProgramColor(index).withOpacity(0.2),
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(10),
+                            boxShadow: [
+                              BoxShadow(
+                                color: _getProgramColor(index).withOpacity(0.3),
+                                blurRadius: 4,
+                                spreadRadius: 1,
+                              ),
+                            ],
                           ),
                           child: Icon(
                             _getProgramIcon(programName),
                             color: _getProgramColor(index),
-                            size: 20,
+                            size: 22,
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -338,8 +429,9 @@ class _HomePageState extends State<HomePage> {
                             programName,
                             style: GoogleFonts.poppins(
                               fontSize: 13,
-                              fontWeight: FontWeight.w600,
+                              fontWeight: FontWeight.w700,
                               color: _getProgramColor(index),
+                              height: 1.3,
                             ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
@@ -360,12 +452,12 @@ class _HomePageState extends State<HomePage> {
 
   Color _getProgramColor(int index) {
     final colors = [
-      Color(0xFF6366F1), // Indigo
-      Color(0xFF8B5CF6), // Purple
-      Color(0xFFEC4899), // Pink
-      Color(0xFF10B981), // Green
-      Color(0xFFF59E0B), // Amber
-      Color(0xFF3B82F6), // Blue
+      AppColors.primaryBlue, // Primary Blue
+      AppColors.secondaryBlue, // Secondary Blue
+      AppColors.accentOrange, // Accent Orange
+      AppColors.accentGreen, // Accent Green
+      AppColors.accentYellow, // Accent Yellow
+      AppColors.tertiaryBlue, // Tertiary Blue
     ];
     return colors[index % colors.length];
   }
@@ -391,10 +483,41 @@ class _HomePageState extends State<HomePage> {
     final bool isMobile = MediaQuery.of(context).size.width < 600;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFEFFAF6),
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        backgroundColor: Colors.teal[700],
-        title: Text("TSF Volunteer Portal", style: GoogleFonts.poppins()),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [AppColors.primaryBlue, AppColors.secondaryBlue, AppColors.tertiaryBlue],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+        elevation: 0,
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ColorFiltered(
+              colorFilter: ColorFilter.mode(Colors.white, BlendMode.srcIn),
+              child: Image.asset(
+                'assets/images/logo.png',
+                height: 28,
+                width: 28,
+              ),
+            ),
+            SizedBox(width: 12),
+            Text(
+              "TSF VMS",
+              style: GoogleFonts.poppins(
+                fontWeight: FontWeight.w900,
+                fontSize: 22,
+                letterSpacing: 1.2,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
         actions: [
           // Profile section in top right
           GestureDetector(

@@ -5,6 +5,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:file_picker/file_picker.dart';
+import 'config/api_config.dart';
+import 'config/app_colors.dart';
 
 class CreateMenteePage extends StatefulWidget {
   final String companionConnectProgramId;
@@ -16,7 +18,7 @@ class CreateMenteePage extends StatefulWidget {
 }
 
 class _CreateMenteePageState extends State<CreateMenteePage> {
-  final String baseUrl = "https://shrew-concrete-cobra.ngrok-free.app/api";
+  final String baseUrl = ApiConfig.apiUrl;
   final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
   final _formKey = GlobalKey<FormState>();
   
@@ -75,7 +77,7 @@ class _CreateMenteePageState extends State<CreateMenteePage> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: ColorScheme.light(
-              primary: Color(0xFF6366F1),
+              primary: AppColors.primaryBlue,
               onPrimary: Colors.white,
             ),
           ),
@@ -169,11 +171,7 @@ class _CreateMenteePageState extends State<CreateMenteePage> {
         elevation: 0,
         flexibleSpace: Container(
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
+            gradient: AppColors.primaryGradient,
           ),
         ),
         foregroundColor: Colors.white,
@@ -192,9 +190,9 @@ class _CreateMenteePageState extends State<CreateMenteePage> {
                   width: 120,
                   height: 120,
                   decoration: BoxDecoration(
-                    color: Color(0xFF6366F1).withOpacity(0.1),
+                    color: AppColors.primaryBlue.withOpacity(0.1),
                     shape: BoxShape.circle,
-                    border: Border.all(color: Color(0xFF6366F1), width: 2),
+                    border: Border.all(color: AppColors.primaryBlue, width: 2),
                   ),
                   child: _photoBytes != null
                       ? ClipOval(
@@ -208,11 +206,11 @@ class _CreateMenteePageState extends State<CreateMenteePage> {
                       : Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.camera_alt, size: 40, color: Color(0xFF6366F1)),
+                            Icon(Icons.camera_alt, size: 40, color: AppColors.primaryBlue),
                             const SizedBox(height: 8),
                             Text(
                               'Add Photo',
-                              style: GoogleFonts.poppins(fontSize: 12, color: Color(0xFF6366F1)),
+                              style: GoogleFonts.poppins(fontSize: 12, color: AppColors.primaryBlue),
                             ),
                           ],
                         ),
@@ -227,11 +225,11 @@ class _CreateMenteePageState extends State<CreateMenteePage> {
               style: GoogleFonts.poppins(),
               decoration: InputDecoration(
                 labelText: 'Full Name *',
-                prefixIcon: Icon(Icons.person, color: Color(0xFF6366F1)),
+                prefixIcon: Icon(Icons.person, color: AppColors.primaryBlue),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Color(0xFF6366F1), width: 2),
+                  borderSide: BorderSide(color: AppColors.primaryBlue, width: 2),
                 ),
               ),
               validator: (value) {
@@ -254,7 +252,7 @@ class _CreateMenteePageState extends State<CreateMenteePage> {
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.calendar_today, color: Color(0xFF6366F1)),
+                    Icon(Icons.calendar_today, color: AppColors.primaryBlue),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
@@ -277,11 +275,11 @@ class _CreateMenteePageState extends State<CreateMenteePage> {
               value: _gender,
               decoration: InputDecoration(
                 labelText: 'Gender *',
-                prefixIcon: Icon(Icons.wc, color: Color(0xFF6366F1)),
+                prefixIcon: Icon(Icons.wc, color: AppColors.primaryBlue),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Color(0xFF6366F1), width: 2),
+                  borderSide: BorderSide(color: AppColors.primaryBlue, width: 2),
                 ),
               ),
               items: _genderOptions.map((gender) {
@@ -306,11 +304,11 @@ class _CreateMenteePageState extends State<CreateMenteePage> {
               keyboardType: TextInputType.phone,
               decoration: InputDecoration(
                 labelText: 'Phone Number *',
-                prefixIcon: Icon(Icons.phone, color: Color(0xFF6366F1)),
+                prefixIcon: Icon(Icons.phone, color: AppColors.primaryBlue),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Color(0xFF6366F1), width: 2),
+                  borderSide: BorderSide(color: AppColors.primaryBlue, width: 2),
                 ),
               ),
               validator: (value) {
@@ -328,11 +326,11 @@ class _CreateMenteePageState extends State<CreateMenteePage> {
               style: GoogleFonts.poppins(),
               decoration: InputDecoration(
                 labelText: 'Location *',
-                prefixIcon: Icon(Icons.location_on, color: Color(0xFF6366F1)),
+                prefixIcon: Icon(Icons.location_on, color: AppColors.primaryBlue),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Color(0xFF6366F1), width: 2),
+                  borderSide: BorderSide(color: AppColors.primaryBlue, width: 2),
                 ),
               ),
               validator: (value) {
@@ -351,11 +349,11 @@ class _CreateMenteePageState extends State<CreateMenteePage> {
               maxLines: 4,
               decoration: InputDecoration(
                 labelText: 'Notes (Optional)',
-                prefixIcon: Icon(Icons.notes, color: Color(0xFF6366F1)),
+                prefixIcon: Icon(Icons.notes, color: AppColors.primaryBlue),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Color(0xFF6366F1), width: 2),
+                  borderSide: BorderSide(color: AppColors.primaryBlue, width: 2),
                 ),
                 hintText: 'Any additional information about the mentee...',
               ),
@@ -366,13 +364,11 @@ class _CreateMenteePageState extends State<CreateMenteePage> {
             Container(
               height: 56,
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
-                ),
+                gradient: AppColors.primaryGradient,
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: Color(0xFF6366F1).withOpacity(0.3),
+                    color: AppColors.primaryBlue.withOpacity(0.3),
                     blurRadius: 8,
                     offset: Offset(0, 4),
                   ),

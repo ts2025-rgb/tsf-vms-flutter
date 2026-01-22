@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
+import 'config/api_config.dart';
 
 class AdminLoginScreen extends StatefulWidget {
   const AdminLoginScreen({super.key});
@@ -19,7 +20,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
   
   bool _isLoading = false;
   bool _obscurePassword = true;
-  final String baseUrl = "https://shrew-concrete-cobra.ngrok-free.app/api";
+  final String baseUrl = ApiConfig.apiUrl;
 
   Future<void> _adminLogin() async {
     if (!_formKey.currentState!.validate()) return;

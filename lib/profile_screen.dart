@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
+import 'config/api_config.dart';
+import 'config/app_colors.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -82,7 +84,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _saveProfile() async {
-    final url = Uri.parse("https://shrew-concrete-cobra.ngrok-free.app/api/auth/update-profile");
+    final url = Uri.parse("${ApiConfig.apiUrl}/auth/update-profile");
     final response = await http.patch(
       url,
       headers: {
@@ -142,38 +144,73 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _sectionHeader(String title) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      child: Text(
-        title,
-        style: const TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-          color: Color(0xFFD12027),
+    return Container(
+      margin: const EdgeInsets.only(top: 16, bottom: 12),
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            AppColors.primaryBlue.withOpacity(0.1),
+            AppColors.secondaryBlue.withOpacity(0.05),
+          ],
         ),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: AppColors.primaryBlue.withOpacity(0.2)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [AppColors.primaryBlue, AppColors.secondaryBlue],
+              ),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Icon(Icons.star, color: Colors.white, size: 16),
+          ),
+          SizedBox(width: 10),
+          Text(
+            title,
+            style: GoogleFonts.poppins(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: AppColors.primaryBlue,
+            ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildTextField(TextEditingController controller, String label) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.only(bottom: 12),
       child: TextFormField(
         controller: controller,
         decoration: InputDecoration(
           labelText: label,
+          labelStyle: GoogleFonts.poppins(
+            color: AppColors.primaryBlue,
+            fontSize: 14,
+          ),
           filled: true,
-          fillColor: Colors.grey.shade100,
+          fillColor: Colors.white,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12.0),
-            borderSide: BorderSide.none,
+            borderSide: BorderSide(color: Colors.grey.shade300),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12.0),
+            borderSide: BorderSide(color: Colors.grey.shade300, width: 1.5),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12.0),
-            borderSide: const BorderSide(color: Color(0xFFD12027), width: 2),
+            borderSide: BorderSide(color: AppColors.primaryBlue, width: 2.5),
           ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 14),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         ),
+        style: GoogleFonts.poppins(fontSize: 14),
       ),
     );
   }
@@ -183,33 +220,132 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final bool isMobile = MediaQuery.of(context).size.width < 600;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        backgroundColor: const Color(0xFFD12027),
-        title: Text("Profile", style: GoogleFonts.poppins()),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [AppColors.primaryBlue, AppColors.secondaryBlue, AppColors.tertiaryBlue],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+        elevation: 0,
+        title: Row(
+          children: [
+            Container(
+              padding: EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(Icons.person, color: Colors.white, size: 24),
+            ),
+            SizedBox(width: 12),
+            Text(
+              "My Profile",
+              style: GoogleFonts.poppins(
+                fontWeight: FontWeight.w700,
+                fontSize: 20,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ],
+        ),
       ),
       body: SingleChildScrollView(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Card(
-              elevation: 4,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Column(
+          children: [
+            // Header Section with Avatar
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: AppColors.getPrimaryGradientColors(),
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primaryBlue.withOpacity(0.2),
+                    blurRadius: 12,
+                    offset: Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 4),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          blurRadius: 10,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: CircleAvatar(
+                      radius: 55,
+                      backgroundImage: userData["photoUrl"] != null
+                          ? NetworkImage(userData["photoUrl"])
+                          : null,
+                      backgroundColor: Colors.white,
+                      child: userData["photoUrl"] == null
+                          ? Icon(Icons.person, color: AppColors.primaryBlue, size: 50)
+                          : null,
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    userData["fullName"] ?? "Volunteer",
+                    style: GoogleFonts.poppins(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  ),
+                  if (userData["volunteerCode"] != null) ...[
+                    SizedBox(height: 8),
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.25),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.badge, color: Colors.white, size: 16),
+                          SizedBox(width: 6),
+                          Text(
+                            "ID: ${userData["volunteerCode"]}",
+                            style: GoogleFonts.poppins(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            SizedBox(height: 16),
+            // Form Content
+            Padding(
+              padding: const EdgeInsets.all(16.0),
               child: Container(
-                padding: const EdgeInsets.all(24),
-                width: isMobile ? double.infinity : 500,
+                constraints: BoxConstraints(maxWidth: 600),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (userData["photoUrl"] != null)
-                      Center(
-                        child: CircleAvatar(
-                          radius: 50,
-                          backgroundImage: NetworkImage(userData["photoUrl"]),
-                          backgroundColor: Colors.grey[200],
-                        ),
-                      ),
-                    const SizedBox(height: 16),
                     _sectionHeader("Personal Information"),
                     _buildTextField(fullNameController, "Full Name"),
                     _buildTextField(addressController, "Address"),
@@ -238,43 +374,94 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     _sectionHeader("Other Information"),
                     _buildTextField(trustworthyMeaningController, "Trustworthy Meaning"),
                     _buildTextField(conflictSituationController, "Conflict Situation"),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 24),
+                    // Action Buttons
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        ElevatedButton.icon(
-                          onPressed: _saveProfile,
-                          icon: const Icon(Icons.save, color: Colors.white),
-                          label: const Text("Save"),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFD12027),
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+                        Expanded(
+                          child: Container(
+                            height: 50,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [AppColors.accentGreen, Colors.green.shade600],
+                              ),
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.accentGreen.withOpacity(0.3),
+                                  blurRadius: 8,
+                                  offset: Offset(0, 3),
+                                ),
+                              ],
                             ),
-                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                            child: ElevatedButton.icon(
+                              onPressed: _saveProfile,
+                              icon: const Icon(Icons.save, color: Colors.white, size: 20),
+                              label: Text(
+                                "Save Changes",
+                                style: GoogleFonts.poppins(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 15,
+                                ),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.transparent,
+                                shadowColor: Colors.transparent,
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                            ),
                           ),
                         ),
-                        ElevatedButton.icon(
-                          onPressed: _logout,
-                          icon: const Icon(Icons.logout, color: Colors.white),
-                          label: const Text("Logout"),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFD12027),
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+                        SizedBox(width: 12),
+                        Expanded(
+                          child: Container(
+                            height: 50,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [AppColors.accentOrange, Colors.deepOrange],
+                              ),
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.accentOrange.withOpacity(0.3),
+                                  blurRadius: 8,
+                                  offset: Offset(0, 3),
+                                ),
+                              ],
                             ),
-                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                            child: ElevatedButton.icon(
+                              onPressed: _logout,
+                              icon: const Icon(Icons.logout, color: Colors.white, size: 20),
+                              label: Text(
+                                "Logout",
+                                style: GoogleFonts.poppins(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 15,
+                                ),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.transparent,
+                                shadowColor: Colors.transparent,
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                            ),
                           ),
                         ),
                       ],
                     ),
+                    SizedBox(height: 20),
                   ],
                 ),
               ),
             ),
-          ),
+          ],
         ),
       ),
     );

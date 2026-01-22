@@ -3,15 +3,15 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import '../models/volunteer_model.dart';
 import '../models/vms_dashboard_model.dart';
+import '../models/enhanced_metrics_model.dart';
+import '../config/api_config.dart';
 
 /// Service class for VMS (Volunteer Management System) API calls
 class VMSService {
   final String baseUrl;
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
-  
-  VMSService({
-    this.baseUrl = "https://shrew-concrete-cobra.ngrok-free.app/api",
-  });
+
+  VMSService({String? baseUrl}) : baseUrl = baseUrl ?? ApiConfig.apiUrl;
 
   /// Get admin token from secure storage
   Future<String?> _getAdminToken() async {
@@ -51,7 +51,9 @@ class VMSService {
   }
 
   /// GET /admin/vms/stage/:stage - Get volunteers by lifecycle stage
-  Future<VMSServiceResponse<List<Volunteer>>> getVolunteersByStage(String stage) async {
+  Future<VMSServiceResponse<List<Volunteer>>> getVolunteersByStage(
+    String stage,
+  ) async {
     try {
       final headers = await _getHeaders();
       final response = await http.get(
@@ -62,9 +64,10 @@ class VMSService {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         final volunteersJson = data['volunteers'] as List? ?? [];
-        final volunteers = volunteersJson
-            .map((v) => Volunteer.fromJson(v as Map<String, dynamic>))
-            .toList();
+        final volunteers =
+            volunteersJson
+                .map((v) => Volunteer.fromJson(v as Map<String, dynamic>))
+                .toList();
         return VMSServiceResponse.success(volunteers);
       } else {
         final error = _parseError(response);
@@ -76,7 +79,9 @@ class VMSService {
   }
 
   /// GET /admin/vms/volunteer/:identifier - Get volunteer details by ID or code
-  Future<VMSServiceResponse<Volunteer>> getVolunteerDetails(String identifier) async {
+  Future<VMSServiceResponse<Volunteer>> getVolunteerDetails(
+    String identifier,
+  ) async {
     try {
       final headers = await _getHeaders();
       final response = await http.get(
@@ -99,7 +104,7 @@ class VMSService {
 
   /// PATCH /admin/vms/:id/onboarding - Update onboarding status
   Future<VMSServiceResponse<Volunteer>> updateOnboardingStatus(
-    String id, 
+    String id,
     OnboardingStatus status,
   ) async {
     try {
@@ -125,7 +130,7 @@ class VMSService {
 
   /// PATCH /admin/vms/:id/training - Update training status
   Future<VMSServiceResponse<Volunteer>> updateTrainingStatus(
-    String id, 
+    String id,
     TrainingStatus status, {
     DateTime? scheduledDate,
   }) async {
@@ -135,7 +140,7 @@ class VMSService {
       if (scheduledDate != null) {
         body['scheduledDate'] = scheduledDate.toIso8601String();
       }
-      
+
       final response = await http.patch(
         Uri.parse('$baseUrl/admin/vms/$id/training'),
         headers: headers,
@@ -157,7 +162,7 @@ class VMSService {
 
   /// PATCH /admin/vms/:id/mentoring - Update mentoring status
   Future<VMSServiceResponse<Volunteer>> updateMentoringStatus(
-    String id, 
+    String id,
     MentoringStatus status,
   ) async {
     try {
@@ -190,7 +195,7 @@ class VMSService {
       final headers = await _getHeaders();
       final body = <String, dynamic>{};
       if (reason != null) body['reason'] = reason;
-      
+
       final response = await http.post(
         Uri.parse('$baseUrl/admin/vms/$id/request-exit'),
         headers: headers,
@@ -219,12 +224,10 @@ class VMSService {
   }) async {
     try {
       final headers = await _getHeaders();
-      final body = <String, dynamic>{
-        'childName': childName,
-      };
+      final body = <String, dynamic>{'childName': childName};
       if (childStatus != null) body['childCurrentStatus'] = childStatus;
       if (notes != null) body['handoverNotes'] = notes;
-      
+
       final response = await http.post(
         Uri.parse('$baseUrl/admin/vms/$id/handover'),
         headers: headers,
@@ -298,10 +301,11 @@ class VMSService {
       final queryParams = <String, String>{};
       if (status != null) queryParams['status'] = status;
       if (stage != null) queryParams['stage'] = stage;
-      
-      final uri = Uri.parse('$baseUrl/admin/vms/export/csv')
-          .replace(queryParameters: queryParams.isEmpty ? null : queryParams);
-      
+
+      final uri = Uri.parse(
+        '$baseUrl/admin/vms/export/csv',
+      ).replace(queryParameters: queryParams.isEmpty ? null : queryParams);
+
       final response = await http.get(uri, headers: headers);
 
       if (response.statusCode == 200) {
@@ -311,7 +315,9 @@ class VMSService {
           return VMSServiceResponse.success(response.body);
         }
         final data = json.decode(response.body);
-        return VMSServiceResponse.success(data['downloadUrl'] ?? data['url'] ?? response.body);
+        return VMSServiceResponse.success(
+          data['downloadUrl'] ?? data['url'] ?? response.body,
+        );
       } else {
         final error = _parseError(response);
         return VMSServiceResponse.error(error);
@@ -322,7 +328,9 @@ class VMSService {
   }
 
   /// Search volunteers by code or name
-  Future<VMSServiceResponse<List<Volunteer>>> searchVolunteers(String query) async {
+  Future<VMSServiceResponse<List<Volunteer>>> searchVolunteers(
+    String query,
+  ) async {
     try {
       final headers = await _getHeaders();
       final response = await http.get(
@@ -333,9 +341,10 @@ class VMSService {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         final volunteersJson = data['volunteers'] as List? ?? [];
-        final volunteers = volunteersJson
-            .map((v) => Volunteer.fromJson(v as Map<String, dynamic>))
-            .toList();
+        final volunteers =
+            volunteersJson
+                .map((v) => Volunteer.fromJson(v as Map<String, dynamic>))
+                .toList();
         return VMSServiceResponse.success(volunteers);
       } else {
         final error = _parseError(response);
@@ -356,18 +365,20 @@ class VMSService {
       final queryParams = <String, String>{};
       if (stage != null) queryParams['stage'] = stage;
       if (status != null) queryParams['status'] = status;
-      
-      final uri = Uri.parse('$baseUrl/admin/volunteers')
-          .replace(queryParameters: queryParams.isEmpty ? null : queryParams);
-      
+
+      final uri = Uri.parse(
+        '$baseUrl/admin/volunteers',
+      ).replace(queryParameters: queryParams.isEmpty ? null : queryParams);
+
       final response = await http.get(uri, headers: headers);
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         final volunteersJson = data['volunteers'] as List? ?? [];
-        final volunteers = volunteersJson
-            .map((v) => Volunteer.fromJson(v as Map<String, dynamic>))
-            .toList();
+        final volunteers =
+            volunteersJson
+                .map((v) => Volunteer.fromJson(v as Map<String, dynamic>))
+                .toList();
         return VMSServiceResponse.success(volunteers);
       } else {
         final error = _parseError(response);
@@ -382,9 +393,255 @@ class VMSService {
   String _parseError(http.Response response) {
     try {
       final data = json.decode(response.body);
-      return data['message'] ?? data['error'] ?? 'Request failed with status ${response.statusCode}';
+      return data['message'] ??
+          data['error'] ??
+          'Request failed with status ${response.statusCode}';
     } catch (e) {
       return 'Request failed with status ${response.statusCode}';
+    }
+  }
+
+  // ========== ENHANCED METRICS API CALLS ==========
+
+  /// GET /admin/vms/dashboard/enhanced - Get enhanced dashboard with all metrics
+  Future<VMSServiceResponse<EnhancedDashboardStats>> getEnhancedDashboard({
+    String filter = 'all',
+  }) async {
+    try {
+      final headers = await _getHeaders();
+      final response = await http.get(
+        Uri.parse('$baseUrl/admin/vms/dashboard/enhanced?filter=$filter'),
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final stats = EnhancedDashboardStats.fromJson(data['data'] ?? {});
+        return VMSServiceResponse.success(stats);
+      } else {
+        final error = _parseError(response);
+        return VMSServiceResponse.error(error);
+      }
+    } catch (e) {
+      return VMSServiceResponse.error('Network error: $e');
+    }
+  }
+
+  /// GET /admin/vms/call-metrics - Get call tracking metrics
+  Future<VMSServiceResponse<CallMetrics>> getCallMetrics({
+    String filter = 'all',
+    String? volunteerId,
+  }) async {
+    try {
+      final headers = await _getHeaders();
+      var url = '$baseUrl/admin/vms/call-metrics?filter=$filter';
+      if (volunteerId != null) {
+        url += '&volunteerId=$volunteerId';
+      }
+
+      final response = await http.get(Uri.parse(url), headers: headers);
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final metrics = CallMetrics.fromJson(data['data'] ?? {});
+        return VMSServiceResponse.success(metrics);
+      } else {
+        final error = _parseError(response);
+        return VMSServiceResponse.error(error);
+      }
+    } catch (e) {
+      return VMSServiceResponse.error('Network error: $e');
+    }
+  }
+
+  /// GET /admin/vms/mood-metrics - Get mood tracking metrics
+  Future<VMSServiceResponse<MoodMetrics>> getMoodMetrics({
+    String filter = 'all',
+    String? volunteerId,
+  }) async {
+    try {
+      final headers = await _getHeaders();
+      var url = '$baseUrl/admin/vms/mood-metrics?filter=$filter';
+      if (volunteerId != null) {
+        url += '&volunteerId=$volunteerId';
+      }
+
+      final response = await http.get(Uri.parse(url), headers: headers);
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final metrics = MoodMetrics.fromJson(data['data'] ?? {});
+        return VMSServiceResponse.success(metrics);
+      } else {
+        final error = _parseError(response);
+        return VMSServiceResponse.error(error);
+      }
+    } catch (e) {
+      return VMSServiceResponse.error('Network error: $e');
+    }
+  }
+
+  /// GET /admin/vms/self-esteem-metrics - Get self-esteem tracking metrics
+  Future<VMSServiceResponse<SelfEsteemMetrics>> getSelfEsteemMetrics({
+    String filter = 'all',
+    String? volunteerId,
+  }) async {
+    try {
+      final headers = await _getHeaders();
+      var url = '$baseUrl/admin/vms/self-esteem-metrics?filter=$filter';
+      if (volunteerId != null) {
+        url += '&volunteerId=$volunteerId';
+      }
+
+      final response = await http.get(Uri.parse(url), headers: headers);
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final metrics = SelfEsteemMetrics.fromJson(data['data'] ?? {});
+        return VMSServiceResponse.success(metrics);
+      } else {
+        final error = _parseError(response);
+        return VMSServiceResponse.error(error);
+      }
+    } catch (e) {
+      return VMSServiceResponse.error('Network error: $e');
+    }
+  }
+
+  /// GET /admin/vms/call-quality-metrics - Get call quality ratings
+  Future<VMSServiceResponse<CallQualityMetrics>> getCallQualityMetrics({
+    String filter = 'all',
+    String? volunteerId,
+  }) async {
+    try {
+      final headers = await _getHeaders();
+      var url = '$baseUrl/admin/vms/call-quality-metrics?filter=$filter';
+      if (volunteerId != null) {
+        url += '&volunteerId=$volunteerId';
+      }
+
+      final response = await http.get(Uri.parse(url), headers: headers);
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final metrics = CallQualityMetrics.fromJson(data['data'] ?? {});
+        return VMSServiceResponse.success(metrics);
+      } else {
+        final error = _parseError(response);
+        return VMSServiceResponse.error(error);
+      }
+    } catch (e) {
+      return VMSServiceResponse.error('Network error: $e');
+    }
+  }
+
+  /// GET /admin/vms/mentor-ratings - Get mentor ratings and learning outcomes
+  Future<VMSServiceResponse<MentorRatingsMetrics>> getMentorRatings({
+    String filter = 'all',
+    int limit = 10,
+  }) async {
+    try {
+      final headers = await _getHeaders();
+      final response = await http.get(
+        Uri.parse(
+          '$baseUrl/admin/vms/mentor-ratings?filter=$filter&limit=$limit',
+        ),
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final metrics = MentorRatingsMetrics.fromJson(data['data'] ?? {});
+        return VMSServiceResponse.success(metrics);
+      } else {
+        final error = _parseError(response);
+        return VMSServiceResponse.error(error);
+      }
+    } catch (e) {
+      return VMSServiceResponse.error('Network error: $e');
+    }
+  }
+
+  /// GET /admin/vms/volunteers/:id/progress - Get volunteer gamification progress
+  Future<VMSServiceResponse<VolunteerProgress>> getVolunteerProgress(
+    String volunteerId,
+  ) async {
+    try {
+      final headers = await _getHeaders();
+      final response = await http.get(
+        Uri.parse('$baseUrl/admin/vms/volunteers/$volunteerId/progress'),
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final progress = VolunteerProgress.fromJson(data['data'] ?? {});
+        return VMSServiceResponse.success(progress);
+      } else {
+        final error = _parseError(response);
+        return VMSServiceResponse.error(error);
+      }
+    } catch (e) {
+      return VMSServiceResponse.error('Network error: $e');
+    }
+  }
+
+  /// PATCH /admin/vms/calls/:callId/rate - Rate a call's quality
+  Future<VMSServiceResponse<Map<String, dynamic>>> rateCall(
+    String callId, {
+    required int rating,
+    String? notes,
+  }) async {
+    try {
+      final headers = await _getHeaders();
+      final response = await http.patch(
+        Uri.parse('$baseUrl/admin/vms/calls/$callId/rate'),
+        headers: headers,
+        body: json.encode({
+          'rating': rating,
+          if (notes != null) 'notes': notes,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return VMSServiceResponse.success(data['data'] ?? {});
+      } else {
+        final error = _parseError(response);
+        return VMSServiceResponse.error(error);
+      }
+    } catch (e) {
+      return VMSServiceResponse.error('Network error: $e');
+    }
+  }
+
+  /// GET /admin/vms/export - Export VMS data
+  Future<VMSServiceResponse<String>> exportData({
+    String format = 'json',
+    String filter = 'all',
+    List<String>? metrics,
+    bool includeVolunteers = true,
+  }) async {
+    try {
+      final headers = await _getHeaders();
+      var url =
+          '$baseUrl/admin/vms/export?format=$format&filter=$filter&includeVolunteers=$includeVolunteers';
+
+      if (metrics != null && metrics.isNotEmpty) {
+        url += '&metrics=${metrics.join(',')}';
+      }
+
+      final response = await http.get(Uri.parse(url), headers: headers);
+
+      if (response.statusCode == 200) {
+        // Return the response body as string (CSV or JSON)
+        return VMSServiceResponse.success(response.body);
+      } else {
+        final error = _parseError(response);
+        return VMSServiceResponse.error(error);
+      }
+    } catch (e) {
+      return VMSServiceResponse.error('Network error: $e');
     }
   }
 }
@@ -395,11 +652,7 @@ class VMSServiceResponse<T> {
   final String? error;
   final bool isSuccess;
 
-  VMSServiceResponse._({
-    this.data,
-    this.error,
-    required this.isSuccess,
-  });
+  VMSServiceResponse._({this.data, this.error, required this.isSuccess});
 
   factory VMSServiceResponse.success(T data) {
     return VMSServiceResponse._(data: data, isSuccess: true);

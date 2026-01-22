@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../models/volunteer_model.dart';
 import '../../services/vms_service.dart';
+import '../../config/app_colors.dart';
 
 /// Handover Form Screen for completing handover during exit process
 class HandoverFormScreen extends StatefulWidget {
@@ -29,11 +30,11 @@ class _HandoverFormScreenState extends State<HandoverFormScreen> {
   bool _isLoading = false;
   Volunteer? _volunteer;
 
-  // Theme colors
-  static const primaryColor = Color(0xFF1E88E5);
-  static const backgroundColor = Color(0xFFF8FFFE);
-  static const textPrimary = Color(0xFF2C3E50);
-  static const textSecondary = Color(0xFF7F8C8D);
+  // Theme colors (using AppColors)
+  static final primaryColor = AppColors.primaryBlue;
+  static final backgroundColor = AppColors.backgroundLight1;
+  static final textPrimary = AppColors.textDark;
+  static final textSecondary = AppColors.gray1;
 
   @override
   void initState() {
@@ -271,13 +272,13 @@ class _HandoverFormScreenState extends State<HandoverFormScreen> {
                       child: ElevatedButton(
                         onPressed: _isLoading ? null : _submitHandover,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF26A69A),
+                          backgroundColor: AppColors.accentGreen,
                           foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
                           ),
                           elevation: 4,
-                          shadowColor: const Color(0xFF26A69A).withOpacity(0.4),
+                          shadowColor: AppColors.accentGreen.withOpacity(0.4),
                         ),
                         child: _isLoading
                             ? const SizedBox(

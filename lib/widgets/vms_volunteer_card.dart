@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/volunteer_model.dart';
 import 'status_dropdowns.dart';
+import '../config/app_colors.dart';
 
 /// Modern volunteer card with VMS fields
 class VMSVolunteerCard extends StatelessWidget {
@@ -73,7 +74,7 @@ class VMSVolunteerCard extends StatelessWidget {
                             style: GoogleFonts.poppins(
                               fontWeight: FontWeight.w600,
                               fontSize: 18,
-                              color: const Color(0xFF2C3E50),
+                              color: AppColors.textDark,
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -82,7 +83,7 @@ class VMSVolunteerCard extends StatelessWidget {
                               volunteer.email!,
                               style: GoogleFonts.poppins(
                                 fontSize: 14,
-                                color: const Color(0xFF7F8C8D),
+                                color: AppColors.gray1,
                               ),
                             ),
                           if (volunteer.phone != null) ...[
@@ -91,7 +92,7 @@ class VMSVolunteerCard extends StatelessWidget {
                               volunteer.phone!,
                               style: GoogleFonts.poppins(
                                 fontSize: 13,
-                                color: const Color(0xFF7F8C8D),
+                                color: AppColors.gray1,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -107,13 +108,13 @@ class VMSVolunteerCard extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF1E88E5).withOpacity(0.1),
+                          color: AppColors.primaryBlue.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.arrow_forward_ios_rounded,
                           size: 16,
-                          color: Color(0xFF1E88E5),
+                          color: AppColors.primaryBlue,
                         ),
                       ),
                   ],
@@ -170,14 +171,14 @@ class VMSVolunteerCard extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            const Color(0xFF1E88E5),
-            const Color(0xFF1565C0),
+            AppColors.primaryBlue,
+            AppColors.secondaryBlue,
           ],
         ),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF1E88E5).withOpacity(0.3),
+            color: AppColors.primaryBlue.withOpacity(0.3),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),
@@ -207,21 +208,21 @@ class VMSVolunteerCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: const Color(0xFF26A69A).withOpacity(0.1),
+        color: AppColors.secondaryBlue.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFF26A69A).withOpacity(0.3)),
+        border: Border.all(color: AppColors.secondaryBlue.withOpacity(0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.schedule_rounded, size: 14, color: Color(0xFF26A69A)),
+          Icon(Icons.schedule_rounded, size: 14, color: AppColors.secondaryBlue),
           const SizedBox(width: 6),
           Text(
             duration,
             style: GoogleFonts.poppins(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: const Color(0xFF26A69A),
+              color: AppColors.secondaryBlue,
             ),
           ),
         ],
@@ -244,12 +245,12 @@ class VMSVolunteerCard extends StatelessWidget {
             backgroundImage: volunteer.photoUrl != null
                 ? NetworkImage(volunteer.photoUrl!)
                 : null,
-            backgroundColor: const Color(0xFF1E88E5).withOpacity(0.1),
+            backgroundColor: AppColors.primaryBlue.withOpacity(0.1),
             child: volunteer.photoUrl == null
-                ? const Icon(
+                ? Icon(
                     Icons.person_rounded,
                     size: 32,
-                    color: Color(0xFF1E88E5),
+                    color: AppColors.primaryBlue,
                   )
                 : null,
           ),
@@ -299,14 +300,14 @@ class VMSVolunteerCard extends StatelessWidget {
     return Row(
       children: [
         if (volunteer.currentLocation != null) ...[
-          Icon(Icons.location_on_rounded, size: 14, color: const Color(0xFF7F8C8D)),
+          Icon(Icons.location_on_rounded, size: 14, color: AppColors.gray1),
           const SizedBox(width: 4),
           Expanded(
             child: Text(
               volunteer.currentLocation!,
               style: GoogleFonts.poppins(
                 fontSize: 12,
-                color: const Color(0xFF7F8C8D),
+                color: AppColors.gray1,
               ),
               overflow: TextOverflow.ellipsis,
             ),

@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'config/api_config.dart';
+import 'config/app_colors.dart';
 
 class CompanionConnectPage extends StatefulWidget {
   final String programId;
@@ -14,7 +17,7 @@ class CompanionConnectPage extends StatefulWidget {
 }
 
 class _CompanionConnectPageState extends State<CompanionConnectPage> {
-  final String baseUrl = "https://shrew-concrete-cobra.ngrok-free.app/api";
+  final String baseUrl = ApiConfig.apiUrl;
   final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
   
   int _selectedTab = 0;
@@ -217,6 +220,44 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
     }
   }
 
+  Future<void> _makePhoneCall() async {
+    if (_menteeData == null || _menteeData!['phone'] == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Phone number not available"),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    final phoneNumber = _menteeData!['phone'].toString().replaceAll(RegExp(r'[^0-9+]'), '');
+    final Uri launchUri = Uri(
+      scheme: 'tel',
+      path: phoneNumber,
+    );
+
+    try {
+      if (await canLaunchUrl(launchUri)) {
+        await launchUrl(launchUri);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Could not launch phone dialer"),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Error: $e"),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
   Future<void> _advanceProgress() async {
     if (_menteeData == null) return;
     
@@ -273,11 +314,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
         elevation: 0,
         flexibleSpace: Container(
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
+            gradient: AppColors.primaryGradient,
           ),
         ),
         foregroundColor: Colors.white,
@@ -337,11 +374,102 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
             // Call History
             // Call History moved to bottom sheet
             
-            const SizedBox(height: 20),
+            const SizedBox(height: 80), // Extra space for bottom action bar
           ],
         ),
       ),
-      bottomNavigationBar: _buildBottomNavigation(),
+      bottomNavigationBar: _menteeData != null ? _buildBottomActionBar() : null,
+    );
+  }
+
+  Widget _buildBottomActionBar() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: Offset(0, -2),
+          ),
+        ],
+      ),
+      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      child: SafeArea(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            // Query/Support Button
+            Expanded(
+              child: _buildActionButton(
+                icon: Icons.help_outline,
+                label: "Support",
+                color: AppColors.primaryBlue,
+                onTap: () => _showBottomSheet(2),
+              ),
+            ),
+            SizedBox(width: 12),
+            // Call Button
+            Expanded(
+              child: _buildActionButton(
+                icon: Icons.phone,
+                label: "Call",
+                color: AppColors.accentGreen,
+                onTap: _makePhoneCall,
+              ),
+            ),
+            SizedBox(width: 12),
+            // Resources Button
+            Expanded(
+              child: _buildActionButton(
+                icon: Icons.folder_open,
+                label: "Resources",
+                color: AppColors.accentOrange,
+                onTap: () => _showBottomSheet(0),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionButton({
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: color.withOpacity(0.3)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, color: color, size: 24),
+              SizedBox(height: 4),
+              Text(
+                label,
+                style: GoogleFonts.poppins(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: color,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -350,7 +478,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
       return Container(
         margin: const EdgeInsets.all(16),
         padding: const EdgeInsets.all(40),
-        child: Center(child: CircularProgressIndicator(color: Color(0xFF6366F1))),
+        child: Center(child: CircularProgressIndicator(color: AppColors.primaryBlue)),
       );
     }
 
@@ -408,7 +536,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
             children: [
               CircleAvatar(
                 radius: 30,
-                backgroundColor: Color(0xFF6366F1).withOpacity(0.1),
+                backgroundColor: AppColors.primaryBlue.withOpacity(0.1),
                 child: photoUrl.isNotEmpty
                     ? ClipOval(
                         child: Image.network(
@@ -417,11 +545,11 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                           height: 60,
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) {
-                             return Icon(Icons.person, color: Color(0xFF6366F1), size: 30);
+                             return Icon(Icons.person, color: AppColors.primaryBlue, size: 30);
                           },
                         ),
                       )
-                    : Icon(Icons.person, color: Color(0xFF6366F1), size: 30),
+                    : Icon(Icons.person, color: AppColors.primaryBlue, size: 30),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -530,87 +658,697 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
     if (_menteeData == null) return const SizedBox.shrink();
 
     final int currentCell = _menteeData!['currentCell'] ?? 1;
+    final int totalCalls = currentCell + 5; // Show current + 5 upcoming calls
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [Color(0xFF6366F1).withOpacity(0.1), Color(0xFF8B5CF6).withOpacity(0.05)],
+          colors: [
+            AppColors.primaryBlue.withOpacity(0.08),
+            AppColors.accentGreen.withOpacity(0.06),
+            AppColors.accentYellow.withOpacity(0.04),
+          ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Color(0xFF6366F1).withOpacity(0.3)),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.primaryBlue.withOpacity(0.2), width: 2),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primaryBlue.withOpacity(0.1),
+            blurRadius: 10,
+            offset: Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  Container(
-                    padding: EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Color(0xFF6366F1).withOpacity(0.1),
-                      shape: BoxShape.circle,
+              // Quest Icon
+              Container(
+                padding: EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [AppColors.primaryBlue, AppColors.secondaryBlue],
+                  ),
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primaryBlue.withOpacity(0.3),
+                      blurRadius: 8,
+                      spreadRadius: 1,
                     ),
-                    child: Icon(Icons.timeline, color: Color(0xFF6366F1), size: 20),
-                  ),
-                  const SizedBox(width: 12),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Call Journey",
-                        style: GoogleFonts.poppins(
-                          fontSize: 14,
-                          color: Colors.grey.shade600,
-                        ),
-                      ),
-                      Text(
-                        "Current: Call #$currentCell",
-                        style: GoogleFonts.poppins(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF6366F1),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                  ],
+                ),
+                child: Icon(Icons.explore, color: Colors.white, size: 22),
               ),
-              ElevatedButton.icon(
-                onPressed: _advanceProgress,
-                icon: Icon(Icons.check_circle_outline, size: 16, color: Colors.white),
-                label: Text("Complete", style: GoogleFonts.poppins(color: Colors.white)),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFF6366F1),
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              const SizedBox(width: 12),
+              // Quest Info
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          "🗺️ Epic Journey",
+                          style: GoogleFonts.poppins(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.primaryBlue,
+                          ),
+                        ),
+                        SizedBox(width: 6),
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [AppColors.accentGreen, AppColors.accentGreen.withOpacity(0.7)],
+                            ),
+                            borderRadius: BorderRadius.circular(10),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.accentGreen.withOpacity(0.3),
+                                blurRadius: 4,
+                                spreadRadius: 1,
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.shield, color: Colors.white, size: 12),
+                              SizedBox(width: 4),
+                              Text(
+                                "LVL $currentCell",
+                                style: GoogleFonts.poppins(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w800,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Icon(Icons.bolt, color: AppColors.accentYellow, size: 14),
+                        SizedBox(width: 4),
+                        Text(
+                          "${(currentCell - 1) * 100} XP",
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.accentOrange,
+                          ),
+                        ),
+                        SizedBox(width: 12),
+                        Icon(Icons.whatshot, color: Colors.orange, size: 14),
+                        SizedBox(width: 4),
+                        Text(
+                          "${currentCell - 1} Streak",
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.deepOrange,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: LinearProgressIndicator(
-              value: null, // Indeterminate to show ongoing journey
-              backgroundColor: Colors.grey.shade200,
-              valueColor: AlwaysStoppedAnimation(Color(0xFF6366F1)),
-              minHeight: 6,
+          SizedBox(height: 12),
+          // XP Progress Bar
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Progress to Next Level",
+                    style: GoogleFonts.poppins(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                  Text(
+                    "${((currentCell - 1) / totalCalls * 100).toStringAsFixed(0)}%",
+                    style: GoogleFonts.poppins(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.primaryBlue,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 6),
+              Stack(
+                children: [
+                  Container(
+                    height: 12,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade200,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  FractionallySizedBox(
+                    widthFactor: (currentCell - 1) / totalCalls,
+                    child: Container(
+                      height: 12,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            AppColors.accentGreen,
+                            AppColors.primaryBlue,
+                            AppColors.accentYellow,
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primaryBlue.withOpacity(0.4),
+                            blurRadius: 6,
+                            spreadRadius: 1,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          SizedBox(height: 16),
+          // Complete Quest Button
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [AppColors.accentGreen, Colors.green.shade600],
+              ),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.accentGreen.withOpacity(0.4),
+                  blurRadius: 12,
+                  offset: Offset(0, 4),
+                  spreadRadius: 2,
+                ),
+              ],
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: _advanceProgress,
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  padding: EdgeInsets.symmetric(vertical: 14),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.emoji_events, color: Colors.white, size: 24),
+                      SizedBox(width: 10),
+                      Text(
+                        "COMPLETE QUEST & EARN 100 XP",
+                        style: GoogleFonts.poppins(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                      SizedBox(width: 10),
+                      Icon(Icons.arrow_forward, color: Colors.white, size: 20),
+                    ],
+                  ),
+                ),
+              ),
             ),
           ),
-          SizedBox(height: 8),
-          Text(
-            "Mark 'Complete' after finishing call #$currentCell to move to #$currentCell + 1.",
-            style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey.shade500, fontStyle: FontStyle.italic),
+          const SizedBox(height: 24),
+          
+          // Scrollable Adventure Map Trail
+          Container(
+            height: 200,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Colors.blue.shade50.withOpacity(0.5),
+                  Colors.green.shade50.withOpacity(0.5),
+                  Colors.amber.shade50.withOpacity(0.3),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppColors.primaryBlue.withOpacity(0.2)),
+            ),
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: totalCalls,
+              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 25),
+              itemBuilder: (context, index) {
+                final callNumber = index + 1;
+                final isCompleted = callNumber < currentCell;
+                final isCurrent = callNumber == currentCell;
+                final isUpcoming = callNumber > currentCell;
+                final isMilestone = callNumber % 5 == 0;
+                
+                return _buildStoryNode(
+                  callNumber: callNumber,
+                  isCompleted: isCompleted,
+                  isCurrent: isCurrent,
+                  isUpcoming: isUpcoming,
+                  isMilestone: isMilestone,
+                  isLast: index == totalCalls - 1,
+                );
+              },
+            ),
+          ),
+          
+          const SizedBox(height: 16),
+          // Achievements Row
+          if (currentCell > 3)
+            Container(
+              padding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+              margin: EdgeInsets.only(bottom: 12),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [AppColors.accentYellow.withOpacity(0.2), AppColors.accentOrange.withOpacity(0.15)],
+                ),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.accentOrange.withOpacity(0.3)),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.workspace_premium, color: AppColors.accentOrange, size: 20),
+                  SizedBox(width: 8),
+                  Text(
+                    "🏆 Achievement Unlocked: ",
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.orange.shade900,
+                    ),
+                  ),
+                  Text(
+                    currentCell > 10 ? "Legendary Mentor!" : currentCell > 5 ? "Master Caller!" : "Rising Star!",
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.accentOrange,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildStoryLegend(AppColors.accentGreen, "✓", "Conquered"),
+              SizedBox(width: 20),
+              _buildStoryLegend(AppColors.primaryBlue, "⚡", "Active"),
+              SizedBox(width: 20),
+              _buildStoryLegend(Colors.grey.shade400, "🔒", "Locked"),
+            ],
+          ),
+          SizedBox(height: 12),
+          Center(
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [AppColors.primaryBlue.withOpacity(0.15), AppColors.secondaryBlue.withOpacity(0.1)],
+                ),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: AppColors.primaryBlue.withOpacity(0.3), width: 2),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.swipe, color: AppColors.primaryBlue, size: 16),
+                  SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      "Swipe to explore your epic adventure path!",
+                      style: GoogleFonts.poppins(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primaryBlue,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildStoryNode({
+    required int callNumber,
+    required bool isCompleted,
+    required bool isCurrent,
+    required bool isUpcoming,
+    required bool isMilestone,
+    required bool isLast,
+  }) {
+    String emoji;
+    String rewardText;
+    Color nodeColor;
+    Color glowColor;
+    
+    if (isCompleted) {
+      emoji = "✅";
+      rewardText = "+100 XP";
+      nodeColor = AppColors.accentGreen;
+      glowColor = AppColors.accentGreen;
+    } else if (isCurrent) {
+      emoji = "⚡";
+      rewardText = "NOW!";
+      nodeColor = AppColors.primaryBlue;
+      glowColor = AppColors.primaryBlue;
+    } else {
+      emoji = "🔒";
+      rewardText = "Locked";
+      nodeColor = Colors.grey.shade400;
+      glowColor = Colors.grey.shade400;
+    }
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Container(
+          width: isMilestone ? 110 : 100,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Milestone Badge
+              if (isMilestone)
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  margin: EdgeInsets.only(bottom: 6),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [AppColors.accentYellow, AppColors.accentOrange],
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.accentOrange.withOpacity(0.4),
+                        blurRadius: 8,
+                        spreadRadius: 2,
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.stars, color: Colors.white, size: 14),
+                      SizedBox(width: 4),
+                      Text(
+                        "EPIC",
+                        style: GoogleFonts.poppins(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w900,
+                          color: Colors.white,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              // Story Node with pulse animation
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  // Outer glow ring for current quest
+                  if (isCurrent)
+                    Container(
+                      width: isMilestone ? 100 : 90,
+                      height: isMilestone ? 100 : 90,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: RadialGradient(
+                          colors: [
+                            glowColor.withOpacity(0.4),
+                            glowColor.withOpacity(0.2),
+                            glowColor.withOpacity(0.0),
+                          ],
+                        ),
+                      ),
+                    ),
+                  // Main quest node
+                  Container(
+                    width: isMilestone ? 85 : 75,
+                    height: isMilestone ? 85 : 75,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: isUpcoming
+                            ? [nodeColor, nodeColor]
+                            : [nodeColor, nodeColor.withOpacity(0.75)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: glowColor.withOpacity(isCurrent ? 0.6 : 0.25),
+                          blurRadius: isCurrent ? 20 : 10,
+                          spreadRadius: isCurrent ? 4 : 2,
+                          offset: Offset(0, isCurrent ? 6 : 3),
+                        ),
+                      ],
+                      border: Border.all(
+                        color: isCurrent ? Colors.white : Colors.white.withOpacity(0.4),
+                        width: isCurrent ? 5 : 3,
+                      ),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          emoji,
+                          style: TextStyle(fontSize: isMilestone ? 32 : 26),
+                        ),
+                        SizedBox(height: 3),
+                        Text(
+                          "#$callNumber",
+                          style: GoogleFonts.poppins(
+                            fontSize: isMilestone ? 16 : 14,
+                            fontWeight: FontWeight.w900,
+                            color: isUpcoming ? Colors.white.withOpacity(0.6) : Colors.white,
+                            shadows: [
+                              Shadow(
+                                color: Colors.black.withOpacity(0.3),
+                                offset: Offset(1, 1),
+                                blurRadius: 2,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Reward badge
+                  if (isCompleted || isCurrent)
+                    Positioned(
+                      bottom: isMilestone ? -5 : -8,
+                      child: Container(
+                        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: isCompleted
+                                ? [AppColors.accentGreen, Colors.green.shade600]
+                                : [AppColors.accentYellow, AppColors.accentOrange],
+                          ),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: Colors.white, width: 2),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2),
+                              blurRadius: 4,
+                              offset: Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Text(
+                          rewardText,
+                          style: GoogleFonts.poppins(
+                            fontSize: 9,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.white,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              SizedBox(height: 10),
+              // Status Label with icon
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (isCompleted)
+                    Icon(Icons.check_circle, color: AppColors.accentGreen, size: 12),
+                  if (isCurrent)
+                    Icon(Icons.play_circle_filled, color: AppColors.primaryBlue, size: 12),
+                  if (isUpcoming)
+                    Icon(Icons.lock, color: Colors.grey.shade500, size: 12),
+                  SizedBox(width: 4),
+                  Text(
+                    isCompleted ? "Victory!" : isCurrent ? "In Battle" : "Upcoming",
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.poppins(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      color: isCompleted
+                          ? AppColors.accentGreen
+                          : isCurrent
+                              ? AppColors.primaryBlue
+                              : Colors.grey.shade500,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        // Animated connecting trail (scrolls with nodes!)
+        if (!isLast)
+          Container(
+            width: 45,
+            height: 80,
+            child: Stack(
+              children: [
+                // Main trail path
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  top: 35,
+                  child: Container(
+                    height: 6,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: isCompleted
+                            ? [AppColors.accentGreen, AppColors.accentGreen.withOpacity(0.6)]
+                            : [Colors.grey.shade300, Colors.grey.shade200],
+                      ),
+                      borderRadius: BorderRadius.circular(3),
+                      boxShadow: isCompleted ? [
+                        BoxShadow(
+                          color: AppColors.accentGreen.withOpacity(0.3),
+                          blurRadius: 4,
+                          spreadRadius: 1,
+                        ),
+                      ] : null,
+                    ),
+                  ),
+                ),
+                // Decorative dots on trail
+                Positioned(
+                  left: 10,
+                  top: 32,
+                  child: Container(
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: isCompleted ? Colors.white : Colors.grey.shade400,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 2,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Positioned(
+                  right: 10,
+                  top: 32,
+                  child: Container(
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: isCompleted ? Colors.white : Colors.grey.shade400,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 2,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                // Arrow indicator for completed trails
+                if (isCompleted)
+                  Positioned(
+                    right: 5,
+                    top: 30,
+                    child: Icon(
+                      Icons.arrow_forward_ios,
+                      color: AppColors.accentGreen,
+                      size: 12,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildStoryLegend(Color color, String emoji, String label) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(emoji, style: TextStyle(fontSize: 14)),
+        SizedBox(width: 4),
+        Container(
+          width: 14,
+          height: 14,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [color, color.withOpacity(0.7)],
+            ),
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: color.withOpacity(0.3),
+                blurRadius: 4,
+                spreadRadius: 1,
+              ),
+            ],
+          ),
+        ),
+        SizedBox(width: 6),
+        Text(
+          label,
+          style: GoogleFonts.poppins(
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+            color: Colors.grey.shade700,
+          ),
+        ),
+      ],
     );
   }
 
@@ -623,15 +1361,13 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             gradient: isActive
-                ? LinearGradient(
-                    colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
-                  )
+                ? AppColors.primaryGradient
                 : null,
             color: isActive ? null : Colors.grey.shade300,
             boxShadow: isActive
                 ? [
                     BoxShadow(
-                      color: Color(0xFF6366F1).withOpacity(0.3),
+                      color: AppColors.primaryBlue.withOpacity(0.3),
                       blurRadius: 8,
                       offset: Offset(0, 2),
                     ),
@@ -655,7 +1391,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
           style: GoogleFonts.poppins(
             fontSize: 12,
             fontWeight: FontWeight.w500,
-            color: isActive ? Color(0xFF6366F1) : Colors.grey.shade600,
+            color: isActive ? AppColors.primaryBlue : Colors.grey.shade600,
           ),
         ),
       ],
@@ -690,7 +1426,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
         children: [
           Row(
             children: [
-              Icon(Icons.edit_note, color: Color(0xFF6366F1)),
+              Icon(Icons.edit_note, color: AppColors.primaryBlue),
               const SizedBox(width: 8),
               Text(
                 "Log Report for Call #${_menteeData?['currentCell'] ?? 1}",
@@ -716,7 +1452,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                   max: 5,
                   divisions: 4,
                   label: "$_moodScore",
-                  activeColor: Color(0xFF6366F1),
+                  activeColor: AppColors.primaryBlue,
                   onChanged: (v) => setState(() => _moodScore = v),
                 ),
               ),
@@ -734,7 +1470,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
              return CheckboxListTile(
                 title: Text(item['label'], style: GoogleFonts.poppins(fontSize: 13)),
                 value: item['isAchieved'],
-                activeColor: Color(0xFF6366F1),
+                activeColor: AppColors.primaryBlue,
                 dense: true,
                 contentPadding: EdgeInsets.zero,
                 controlAffinity: ListTileControlAffinity.leading,
@@ -754,11 +1490,11 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
               return FilterChip(
                 label: Text(topic),
                 selected: isSelected,
-                selectedColor: Color(0xFF6366F1).withOpacity(0.2),
-                checkmarkColor: Color(0xFF6366F1),
+                selectedColor: AppColors.primaryBlue.withOpacity(0.2),
+                checkmarkColor: AppColors.primaryBlue,
                 labelStyle: GoogleFonts.poppins(
                   fontSize: 12,
-                  color: isSelected ? Color(0xFF6366F1) : Colors.black87,
+                  color: isSelected ? AppColors.primaryBlue : Colors.black87,
                 ),
                 onSelected: (v) {
                   setState(() {
@@ -823,7 +1559,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                    title: Text(opt, style: GoogleFonts.poppins(fontSize: 13)),
                    value: opt,
                    groupValue: _mentorHelpfulness,
-                   activeColor: Color(0xFF6366F1),
+                   activeColor: AppColors.primaryBlue,
                    contentPadding: EdgeInsets.zero,
                    onChanged: (v) => setState(() => _mentorHelpfulness = v!),
                  ),
@@ -866,9 +1602,9 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
             width: double.infinity,
             child: Container(
               decoration: BoxDecoration(
-                gradient: LinearGradient(colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)]),
+                gradient: AppColors.primaryGradient,
                 borderRadius: BorderRadius.circular(12),
-                boxShadow: [BoxShadow(color: Color(0xFF6366F1).withOpacity(0.3), blurRadius: 8, offset: Offset(0, 2))],
+                boxShadow: [BoxShadow(color: AppColors.primaryBlue.withOpacity(0.3), blurRadius: 8, offset: Offset(0, 2))],
               ),
               child: ElevatedButton.icon(
                 onPressed: _savingNote || _menteeData == null ? null : _saveCallNote,
@@ -904,7 +1640,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
     if (_loadingNotes) {
       return Padding(
         padding: EdgeInsets.all(20),
-        child: Center(child: CircularProgressIndicator(color: Color(0xFF6366F1))),
+        child: Center(child: CircularProgressIndicator(color: AppColors.primaryBlue)),
       );
     }
     
@@ -922,7 +1658,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
               style: GoogleFonts.poppins(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF1E293B),
+                color: AppColors.dark2,
               ),
             ),
           ),
@@ -967,7 +1703,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                       Container(
                         padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
-                          color: Color(0xFF6366F1).withOpacity(0.1),
+                          color: AppColors.primaryBlue.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
@@ -975,7 +1711,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                           style: GoogleFonts.poppins(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
-                            color: Color(0xFF6366F1),
+                            color: AppColors.primaryBlue,
                           ),
                         ),
                       ),
@@ -1018,8 +1754,8 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Text("View Details", style: GoogleFonts.poppins(fontSize: 12, color: Color(0xFF6366F1), fontWeight: FontWeight.w500)),
-                  Icon(Icons.arrow_forward_ios, size: 10, color: Color(0xFF6366F1)),
+                  Text("View Details", style: GoogleFonts.poppins(fontSize: 12, color: AppColors.primaryBlue, fontWeight: FontWeight.w500)),
+                  Icon(Icons.arrow_forward_ios, size: 10, color: AppColors.primaryBlue),
                 ],
               ),
             ],
@@ -1078,7 +1814,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                       spacing: 8,
                       children: (note['topics'] as List).map((t) => Chip(
                         label: Text(t.toString(), style: GoogleFonts.poppins(fontSize: 12)),
-                        backgroundColor: Color(0xFF6366F1).withOpacity(0.1),
+                        backgroundColor: AppColors.primaryBlue.withOpacity(0.1),
                       )).toList(),
                     ),
                     if (note['otherTopicDetail'] != null && note['otherTopicDetail'].toString().isNotEmpty)
@@ -1157,79 +1893,6 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
     );
   }
 
-  Widget _buildBottomNavigation() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: Offset(0, -2),
-          ),
-        ],
-      ),
-      child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildNavItem(0, Icons.video_library, "Resources"),
-              _buildNavItem(1, Icons.call, "Call"),
-              _buildNavItem(3, Icons.history, "History"),
-              _buildNavItem(2, Icons.help_outline, "Query"),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNavItem(int index, IconData icon, String label) {
-    final isSelected = _selectedTab == index;
-    
-    return InkWell(
-      onTap: () {
-        setState(() {
-          _selectedTab = index;
-        });
-        _showBottomSheet(index);
-      },
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-        decoration: BoxDecoration(
-          gradient: isSelected
-              ? LinearGradient(
-                  colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
-                )
-              : null,
-          color: isSelected ? null : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              color: isSelected ? Colors.white : Colors.grey.shade600,
-              size: 24,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: GoogleFonts.poppins(
-                fontSize: 12,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                color: isSelected ? Colors.white : Colors.grey.shade600,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   void _showBottomSheet(int type) {
     if (type == 2) {
@@ -1287,7 +1950,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
 
   Widget _buildHistorySheetContent() {
     if (_loadingNotes) {
-      return Center(child: CircularProgressIndicator(color: Color(0xFF6366F1)));
+      return Center(child: CircularProgressIndicator(color: AppColors.primaryBlue));
     }
     
     if (_callNotes.isEmpty) {
@@ -1357,7 +2020,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                  },
                  child: CircleAvatar(
                    radius: 50,
-                   backgroundColor: Color(0xFF6366F1).withOpacity(0.1),
+                   backgroundColor: AppColors.primaryBlue.withOpacity(0.1),
                    child: _menteeData!['photoUrl'] != null && _menteeData!['photoUrl'].toString().isNotEmpty 
                       ? ClipOval(
                           child: Image.network(
@@ -1366,11 +2029,11 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                             height: 100,
                             fit: BoxFit.cover,
                             errorBuilder: (context, error, stackTrace) {
-                               return Icon(Icons.person, size: 50, color: Color(0xFF6366F1));
+                               return Icon(Icons.person, size: 50, color: AppColors.primaryBlue);
                             },
                           ),
                         ) 
-                      : Icon(Icons.person, size: 50, color: Color(0xFF6366F1)),
+                      : Icon(Icons.person, size: 50, color: AppColors.primaryBlue),
                  ),
                ),
                SizedBox(height: 16),
@@ -1418,8 +2081,8 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
         children: [
            Container(
              padding: EdgeInsets.all(10),
-             decoration: BoxDecoration(color: Color(0xFF6366F1).withOpacity(0.05), borderRadius: BorderRadius.circular(10)),
-             child: Icon(icon, color: Color(0xFF6366F1), size: 20)
+             decoration: BoxDecoration(color: AppColors.primaryBlue.withOpacity(0.05), borderRadius: BorderRadius.circular(10)),
+             child: Icon(icon, color: AppColors.primaryBlue, size: 20)
            ),
            SizedBox(width: 16),
            Expanded(
@@ -1518,16 +2181,16 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFF6366F1).withOpacity(0.1), Color(0xFF8B5CF6).withOpacity(0.05)],
+                colors: [AppColors.primaryBlue.withOpacity(0.1), AppColors.purpleGradientEnd.withOpacity(0.05)],
               ),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Color(0xFF6366F1).withOpacity(0.3)),
+              border: Border.all(color: AppColors.primaryBlue.withOpacity(0.3)),
             ),
             child: Column(
               children: [
                 Row(
                   children: [
-                    Icon(Icons.phone, color: Color(0xFF6366F1)),
+                    Icon(Icons.phone, color: AppColors.primaryBlue),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
@@ -1582,11 +2245,11 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                     Expanded(
                       child: OutlinedButton.icon(
                         onPressed: () {},
-                        icon: Icon(Icons.videocam, color: Color(0xFF6366F1)),
-                        label: Text("Video Call", style: GoogleFonts.poppins(color: Color(0xFF6366F1))),
+                        icon: Icon(Icons.videocam, color: AppColors.primaryBlue),
+                        label: Text("Video Call", style: GoogleFonts.poppins(color: AppColors.primaryBlue)),
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 12),
-                          side: BorderSide(color: Color(0xFF6366F1)),
+                          side: BorderSide(color: AppColors.primaryBlue),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                         ),
                       ),
@@ -1620,7 +2283,7 @@ class VolunteerQuerySheet extends StatefulWidget {
 class _VolunteerQuerySheetState extends State<VolunteerQuerySheet> {
   final TextEditingController _queryController = TextEditingController();
   final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
-  final String baseUrl = "https://shrew-concrete-cobra.ngrok-free.app/api";
+  final String baseUrl = ApiConfig.apiUrl;
   
   bool _isSubmitting = false;
   bool _isLoadingHistory = true;
@@ -1731,7 +2394,7 @@ class _VolunteerQuerySheetState extends State<VolunteerQuerySheet> {
           
           Expanded(
             child: _isLoadingHistory
-                ? Center(child: CircularProgressIndicator(color: Color(0xFF6366F1)))
+                ? Center(child: CircularProgressIndicator(color: AppColors.primaryBlue))
                 : _history.isEmpty
                     ? Center(
                         child: Column(
@@ -1796,7 +2459,7 @@ class _VolunteerQuerySheetState extends State<VolunteerQuerySheet> {
                                   Row(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Icon(Icons.reply, size: 14, color: Color(0xFF6366F1)),
+                                      Icon(Icons.reply, size: 14, color: AppColors.primaryBlue),
                                       SizedBox(width: 8),
                                       Expanded(
                                         child: Text(
@@ -1841,7 +2504,7 @@ class _VolunteerQuerySheetState extends State<VolunteerQuerySheet> {
             child: ElevatedButton(
               onPressed: _isSubmitting ? null : _submitQuery,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFF6366F1),
+                backgroundColor: AppColors.primaryBlue,
                 padding: EdgeInsets.symmetric(vertical: 12),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
@@ -1869,5 +2532,99 @@ class _VolunteerQuerySheetState extends State<VolunteerQuerySheet> {
   void dispose() {
     _queryController.dispose();
     super.dispose();
+  }
+}
+
+// Custom Painter for Journey Path Background
+class _JourneyPathPainter extends CustomPainter {
+  final int totalNodes;
+  final int currentNode;
+  final Color primaryColor;
+  final Color completedColor;
+
+  _JourneyPathPainter({
+    required this.totalNodes,
+    required this.currentNode,
+    required this.primaryColor,
+    required this.completedColor,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 4
+      ..strokeCap = StrokeCap.round;
+
+    final path = Path();
+    final nodeSpacing = 115.0; // Spacing between nodes
+    final startX = 60.0;
+    final centerY = size.height / 2;
+    final waveAmplitude = 15.0;
+
+    // Draw wavy path connecting nodes
+    for (int i = 0; i < totalNodes; i++) {
+      final x = startX + (i * nodeSpacing);
+      final y = centerY + (i % 2 == 0 ? -waveAmplitude : waveAmplitude);
+      
+      if (i == 0) {
+        path.moveTo(x, y);
+      } else {
+        final prevX = startX + ((i - 1) * nodeSpacing);
+        final prevY = centerY + ((i - 1) % 2 == 0 ? -waveAmplitude : waveAmplitude);
+        final controlX = (prevX + x) / 2;
+        
+        path.quadraticBezierTo(controlX, centerY, x, y);
+      }
+    }
+
+    // Draw completed path (green)
+    if (currentNode > 1) {
+      paint.color = completedColor.withOpacity(0.3);
+      paint.strokeWidth = 6;
+      
+      final completedPath = Path();
+      for (int i = 0; i < currentNode; i++) {
+        final x = startX + (i * nodeSpacing);
+        final y = centerY + (i % 2 == 0 ? -waveAmplitude : waveAmplitude);
+        
+        if (i == 0) {
+          completedPath.moveTo(x, y);
+        } else {
+          final prevX = startX + ((i - 1) * nodeSpacing);
+          final prevY = centerY + ((i - 1) % 2 == 0 ? -waveAmplitude : waveAmplitude);
+          final controlX = (prevX + x) / 2;
+          
+          completedPath.quadraticBezierTo(controlX, centerY, x, y);
+        }
+      }
+      canvas.drawPath(completedPath, paint);
+    }
+
+    // Draw upcoming path (lighter)
+    paint.color = Colors.grey.withOpacity(0.15);
+    paint.strokeWidth = 4;
+    canvas.drawPath(path, paint);
+
+    // Draw decorative dots along the path
+    final dotPaint = Paint()
+      ..style = PaintingStyle.fill;
+      
+    for (int i = 0; i < totalNodes - 1; i++) {
+      final x = startX + (i * nodeSpacing) + (nodeSpacing / 2);
+      final y = centerY;
+      
+      dotPaint.color = i < currentNode - 1
+          ? completedColor.withOpacity(0.4)
+          : Colors.grey.withOpacity(0.2);
+      
+      canvas.drawCircle(Offset(x, y), 3, dotPaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(_JourneyPathPainter oldDelegate) {
+    return oldDelegate.currentNode != currentNode ||
+        oldDelegate.totalNodes != totalNodes;
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../models/volunteer_model.dart';
 import '../../services/vms_service.dart';
+import '../../config/app_colors.dart';
 
 /// Certificate Management Screen for viewing and issuing certificates
 class CertificateManagementScreen extends StatefulWidget {
@@ -20,11 +21,11 @@ class _CertificateManagementScreenState extends State<CertificateManagementScree
   List<Volunteer> _eligibleVolunteers = [];
   List<Volunteer> _issuedVolunteers = [];
 
-  // Theme colors
-  static const primaryColor = Color(0xFF1E88E5);
-  static const backgroundColor = Color(0xFFF8FFFE);
-  static const textPrimary = Color(0xFF2C3E50);
-  static const textSecondary = Color(0xFF7F8C8D);
+  // Theme colors (using AppColors)
+  static final primaryColor = AppColors.primaryBlue;
+  static final backgroundColor = AppColors.backgroundLight1;
+  static final textPrimary = AppColors.textDark;
+  static final textSecondary = AppColors.gray1;
 
   @override
   void initState() {
@@ -123,7 +124,7 @@ class _CertificateManagementScreenState extends State<CertificateManagementScree
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const CircularProgressIndicator(color: primaryColor),
+                CircularProgressIndicator(color: primaryColor),
                 const SizedBox(height: 16),
                 Text(
                   'Processing...',

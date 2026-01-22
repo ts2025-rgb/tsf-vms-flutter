@@ -9,6 +9,7 @@ import 'screens/admin/volunteer_detail_screen.dart';
 import 'screens/admin/handover_form_screen.dart';
 import 'screens/admin/certificate_management_screen.dart';
 import 'models/volunteer_model.dart';
+import 'config/app_colors.dart';
 
 void main() {
   runApp(const TSFVMSApp());
@@ -22,8 +23,8 @@ class TSFVMSApp extends StatelessWidget {
     return MaterialApp(
       title: 'TSF Visit Management System',
       theme: ThemeData(
-        primaryColor: const Color(0xFF0A3A81),
-        scaffoldBackgroundColor: const Color(0xFFFFF8F0),
+        primaryColor: AppColors.primaryBlue,
+        scaffoldBackgroundColor: AppColors.backgroundLight1,
         textTheme: Theme.of(context).textTheme.apply(
               fontFamily: 'Poppins',
             ),

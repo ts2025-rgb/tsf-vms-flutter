@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
+import 'config/api_config.dart';
+import 'config/app_colors.dart';
 
 class AdminQueryManagementPage extends StatefulWidget {
   const AdminQueryManagementPage({super.key});
@@ -13,7 +15,7 @@ class AdminQueryManagementPage extends StatefulWidget {
 
 class _AdminQueryManagementPageState extends State<AdminQueryManagementPage> with SingleTickerProviderStateMixin {
   final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
-  final String baseUrl = "https://shrew-concrete-cobra.ngrok-free.app/api"; // Same base URL
+  final String baseUrl = ApiConfig.apiUrl;
   
   List<dynamic> _queries = [];
   bool _loading = true;
@@ -100,9 +102,9 @@ class _AdminQueryManagementPageState extends State<AdminQueryManagementPage> wit
         iconTheme: IconThemeData(color: Colors.black87),
         bottom: TabBar(
           controller: _tabController,
-          labelColor: Color(0xFF6366F1),
+          labelColor: AppColors.primaryBlue,
           unselectedLabelColor: Colors.grey,
-          indicatorColor: Color(0xFF6366F1),
+          indicatorColor: AppColors.primaryBlue,
           tabs: [
             Tab(text: "Pending (${pendingQueries.length})"),
             Tab(text: "Replied (${answeredQueries.length})"),
@@ -110,7 +112,7 @@ class _AdminQueryManagementPageState extends State<AdminQueryManagementPage> wit
         ),
       ),
       body: _loading
-          ? Center(child: CircularProgressIndicator(color: Color(0xFF6366F1)))
+          ? Center(child: CircularProgressIndicator(color: AppColors.primaryBlue))
           : TabBarView(
               controller: _tabController,
               children: [
@@ -162,11 +164,11 @@ class _AdminQueryManagementPageState extends State<AdminQueryManagementPage> wit
               children: [
                 CircleAvatar(
                   radius: 16,
-                  backgroundColor: Color(0xFF6366F1).withOpacity(0.1),
+                  backgroundColor: AppColors.primaryBlue.withOpacity(0.1),
                   child: Text(
                     (query['volunteerName'] ?? 'V')[0].toUpperCase(),
                     style: GoogleFonts.poppins(
-                      color: Color(0xFF6366F1),
+                      color: AppColors.primaryBlue,
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
                     ),
@@ -258,7 +260,7 @@ class _AdminQueryManagementPageState extends State<AdminQueryManagementPage> wit
                   icon: Icon(Icons.reply, size: 16),
                   label: Text("Reply"),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFF6366F1),
+                    backgroundColor: AppColors.primaryBlue,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -317,7 +319,7 @@ class _AdminQueryManagementPageState extends State<AdminQueryManagementPage> wit
                 _submitReply(query['id'] ?? query['_id'], replyController.text.trim());
               }
             },
-            style: ElevatedButton.styleFrom(backgroundColor: Color(0xFF6366F1), foregroundColor: Colors.white),
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryBlue, foregroundColor: Colors.white),
             child: Text("Send Reply"),
           ),
         ],

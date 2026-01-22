@@ -4,6 +4,7 @@ import '../../models/volunteer_model.dart';
 import '../../services/vms_service.dart';
 import '../../widgets/lifecycle_progress_indicator.dart';
 import '../../widgets/status_dropdowns.dart';
+import '../../config/app_colors.dart';
 
 /// Volunteer Detail Screen with expanded view and lifecycle management
 class VolunteerDetailScreen extends StatefulWidget {
@@ -28,11 +29,11 @@ class _VolunteerDetailScreenState extends State<VolunteerDetailScreen> {
   Volunteer? _volunteer;
   String? _error;
 
-  // Theme colors
-  static const primaryColor = Color(0xFF1E88E5);
-  static const backgroundColor = Color(0xFFF8FFFE);
-  static const textPrimary = Color(0xFF2C3E50);
-  static const textSecondary = Color(0xFF7F8C8D);
+  // Theme colors (using AppColors)
+  static final primaryColor = AppColors.primaryBlue;
+  static final backgroundColor = AppColors.backgroundLight1;
+  static final textPrimary = AppColors.textDark;
+  static final textSecondary = AppColors.gray1;
 
   @override
   void initState() {

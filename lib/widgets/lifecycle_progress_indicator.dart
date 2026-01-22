@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/volunteer_model.dart';
+import '../config/app_colors.dart';
 
 /// Widget that displays the lifecycle progress as a stepper/checklist
 class LifecycleProgressIndicator extends StatelessWidget {
@@ -42,7 +43,7 @@ class LifecycleProgressIndicator extends StatelessWidget {
             style: GoogleFonts.poppins(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: const Color(0xFF2C3E50),
+              color: AppColors.textDark,
             ),
           ),
           const SizedBox(height: 20),
@@ -166,7 +167,7 @@ class LifecycleProgressIndicator extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                         color: stage.isActive 
                             ? stage.color 
-                            : const Color(0xFF2C3E50),
+                            : AppColors.textDark,
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -204,7 +205,7 @@ class LifecycleProgressIndicator extends StatelessWidget {
                     stage.subtitle!,
                     style: GoogleFonts.poppins(
                       fontSize: 12,
-                      color: const Color(0xFF7F8C8D),
+                      color: AppColors.gray1,
                     ),
                   ),
                 ],

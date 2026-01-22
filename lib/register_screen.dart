@@ -6,6 +6,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:file_picker/file_picker.dart';
+import 'config/api_config.dart';
+import 'config/app_colors.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({Key? key}) : super(key: key);
@@ -82,7 +84,7 @@ class _RegisterPageState extends State<RegisterPage> {
   bool _isSubmitting = false;
 
   final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
-  final String baseUrl = "https://shrew-concrete-cobra.ngrok-free.app/api";
+  final String baseUrl = ApiConfig.apiUrl;
 
   // Multi-select options
   final List<String> _skillsOptions = [
@@ -1956,11 +1958,7 @@ class _RegisterPageState extends State<RegisterPage> {
         elevation: 0,
         flexibleSpace: Container(
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
+            gradient: AppColors.primaryGradient,
           ),
         ),
         foregroundColor: Colors.white,
@@ -2005,7 +2003,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             style: GoogleFonts.poppins(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
-                              color: Color(0xFF6366F1),
+                              color: AppColors.primaryBlue,
                             ),
                           ),
                           Text(
@@ -2025,7 +2023,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           minHeight: 8,
                           backgroundColor: Colors.grey.shade200,
                           valueColor: AlwaysStoppedAnimation<Color>(
-                            Color(0xFF6366F1),
+                            AppColors.primaryBlue,
                           ),
                         ),
                       ),
@@ -2088,13 +2086,11 @@ class _RegisterPageState extends State<RegisterPage> {
                               flex: 2,
                               child: Container(
                                 decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
-                                  ),
+                                  gradient: AppColors.primaryGradient,
                                   borderRadius: BorderRadius.circular(12),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Color(0xFF6366F1).withOpacity(0.3),
+                                      color: AppColors.primaryBlue.withOpacity(0.3),
                                       blurRadius: 12,
                                       offset: Offset(0, 4),
                                     ),
@@ -2167,7 +2163,7 @@ class _RegisterPageState extends State<RegisterPage> {
                               height: 50,
                               child: CircularProgressIndicator(
                                 strokeWidth: 3,
-                                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF6366F1)),
+                                valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryBlue),
                               ),
                             ),
                             const SizedBox(height: 20),
@@ -2176,7 +2172,7 @@ class _RegisterPageState extends State<RegisterPage> {
                               style: GoogleFonts.poppins(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w600,
-                                color: Color(0xFF6366F1),
+                                color: AppColors.primaryBlue,
                               ),
                             ),
                             const SizedBox(height: 8),
