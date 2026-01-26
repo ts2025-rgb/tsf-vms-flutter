@@ -522,6 +522,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
 
     final String menteeName = _menteeData!['fullName'] ?? 'Unknown';
     final int menteeAge = _menteeData!['age'] ?? 0;
+    final String gender = _menteeData!['gender'] ?? 'N/A';
     final String phone = _menteeData!['phone'] ?? 'N/A';
     final String region = _menteeData!['region'] ?? 'N/A';
     final String grade = _menteeData!['grade'] ?? 'N/A';
@@ -593,6 +594,8 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
             ],
           ),
           const SizedBox(height: 20),
+          _buildInfoRow(Icons.wc, "Gender", gender),
+          const SizedBox(height: 12),
           _buildInfoRow(Icons.school_outlined, "Grade", grade),
           const SizedBox(height: 12),
           _buildInfoRow(Icons.location_on_outlined, "Region", region),
