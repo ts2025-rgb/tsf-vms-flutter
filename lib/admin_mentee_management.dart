@@ -654,7 +654,7 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
                 const SizedBox(width: 8),
                 OutlinedButton.icon(
                   onPressed: () {
-                    // TODO: Show mentee details
+                    _showMenteeDetailsDialog(mentee);
                   },
                   icon: Icon(Icons.visibility, size: 16),
                   label: Text('View'),
@@ -736,6 +736,279 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
         ],
       ),
     );
+  }
+
+  void _showMenteeDetailsDialog(Map<String, dynamic> mentee) {
+    final TextEditingController phoneController = TextEditingController(text: mentee['phone'] ?? '');
+    final TextEditingController regionController = TextEditingController(text: mentee['region'] ?? '');
+    final TextEditingController gradeController = TextEditingController(text: mentee['grade'] ?? '');
+    final TextEditingController pointOfContactController = TextEditingController(text: mentee['pointOfContact'] ?? '');
+    final TextEditingController notesController = TextEditingController(text: mentee['notes'] ?? '');
+    String selectedStatus = mentee['status'] ?? 'active';
+    
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: Row(
+            children: [
+              CircleAvatar(
+                radius: 20,
+                backgroundColor: AppColors.primaryBlue.withOpacity(0.1),
+                child: mentee['photoUrl'] != null && mentee['photoUrl'].toString().isNotEmpty
+                    ? ClipOval(
+                        child: Image.network(
+                          mentee['photoUrl'],
+                          width: 40,
+                          height: 40,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) => Icon(Icons.person, color: AppColors.primaryBlue),
+                        ),
+                      )
+                    : Icon(Icons.person, color: AppColors.primaryBlue),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      mentee['fullName'] ?? 'Unknown',
+                      style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w600),
+                    ),
+                    Text(
+                      'Age: ${mentee['age']} • ${mentee['gender'] ?? 'N/A'}',
+                      style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: SizedBox(
+              width: 500,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Status Dropdown
+                  Text('Status', style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.grey.shade700)),
+                  const SizedBox(height: 8),
+                  DropdownButtonFormField<String>(
+                    value: selectedStatus,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    ),
+                    items: ['active', 'paused', 'completed'].map((status) {
+                      return DropdownMenuItem(value: status, child: Text(status.toUpperCase()));
+                    }).toList(),
+                    onChanged: (value) {
+                      setDialogState(() {
+                        selectedStatus = value!;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  // Phone
+                  Text('Phone', style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.grey.shade700)),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: phoneController,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                      prefixIcon: Icon(Icons.phone, size: 20),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  // Region
+                  Text('Region', style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.grey.shade700)),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: regionController,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                      prefixIcon: Icon(Icons.location_on, size: 20),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  // Grade
+                  Text('Grade', style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.grey.shade700)),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: gradeController,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                      prefixIcon: Icon(Icons.school, size: 20),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  // Point of Contact
+                  Text('Point of Contact', style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.grey.shade700)),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: pointOfContactController,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                      prefixIcon: Icon(Icons.person_outline, size: 20),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  // Notes
+                  Text('Notes', style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.grey.shade700)),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: notesController,
+                    maxLines: 3,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                      hintText: 'Additional notes...',
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  // Read-only info
+                  Container(
+                    padding: EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade50,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.grey.shade200),
+                    ),
+                    child: Column(
+                      children: [
+                        _buildInfoRowDialog(Icons.calendar_today, 'Date of Birth', mentee['dob']?.substring(0, 10) ?? 'N/A'),
+                        _buildInfoRowDialog(Icons.school, 'Program', mentee['program']?['name'] ?? 'N/A'),
+                        if (mentee['assignedTo'] != null)
+                          _buildInfoRowDialog(Icons.person, 'Assigned To', mentee['assignedTo']['fullName'] ?? 'N/A'),
+                        _buildInfoRowDialog(Icons.flag, 'Cell', 'Cell ${mentee['currentCell'] ?? 1}'),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                await _updateMenteeDetails(
+                  mentee['id'],
+                  phoneController.text,
+                  regionController.text,
+                  gradeController.text,
+                  pointOfContactController.text,
+                  notesController.text,
+                  selectedStatus,
+                );
+                Navigator.pop(context);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryBlue,
+                foregroundColor: Colors.white,
+              ),
+              child: Text('Save Changes'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  
+  Widget _buildInfoRowDialog(IconData icon, String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        children: [
+          Icon(icon, size: 16, color: Colors.grey.shade600),
+          const SizedBox(width: 8),
+          Text('$label: ', style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey.shade600)),
+          Expanded(
+            child: Text(value, style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w500)),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  Future<void> _updateMenteeDetails(
+    String menteeId,
+    String phone,
+    String region,
+    String grade,
+    String pointOfContact,
+    String notes,
+    String status,
+  ) async {
+    try {
+      final token = await secureStorage.read(key: "adminToken");
+      
+      if (token == null || token.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Authentication token not found. Please login again.'), backgroundColor: Colors.red),
+        );
+        return;
+      }
+      
+      print('🔑 Updating mentee with token: ${token.substring(0, 20)}...');
+      print('📝 Update payload: phone=$phone, region=$region, grade=$grade, status=$status');
+      
+      final response = await http.patch(
+        Uri.parse('$baseUrl/companion-connect/admin/mentees/$menteeId'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          'phone': phone,
+          'region': region,
+          'grade': grade,
+          'pointOfContact': pointOfContact,
+          'notes': notes,
+          'status': status,
+        }),
+      );
+      
+      print('📥 Update Response Status: ${response.statusCode}');
+      print('📥 Update Response Body: ${response.body}');
+      
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['success'] == true) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Mentee updated successfully!'), backgroundColor: Colors.green),
+          );
+          _fetchData(); // Refresh the list
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(data['message'] ?? 'Failed to update mentee'), backgroundColor: Colors.red),
+          );
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error updating mentee'), backgroundColor: Colors.red),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+      );
+    }
   }
 
   void _showUnassignDialog(Map<String, dynamic> mentee) {

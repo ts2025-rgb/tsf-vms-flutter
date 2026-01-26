@@ -8,6 +8,7 @@ import 'package:http/http.dart' as http;
 import 'home_screen.dart';
 import 'register_screen.dart';
 import 'config/api_config.dart';
+import 'config/app_colors.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -50,7 +51,7 @@ class _LoginPageState extends State<LoginPage> {
         setState(() => _otpSent = true);
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text("OTP sent to your email", style: GoogleFonts.poppins()),
-          backgroundColor: Colors.teal,
+          backgroundColor: AppColors.accentGreen,
         ));
       } else {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -143,7 +144,7 @@ class _LoginPageState extends State<LoginPage> {
                     style: GoogleFonts.poppins(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: Colors.green[800],
+                      color: AppColors.primaryBlue,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -152,7 +153,7 @@ class _LoginPageState extends State<LoginPage> {
                     textAlign: TextAlign.center,
                     style: GoogleFonts.poppins(
                       fontSize: 16,
-                      color: Colors.teal[700],
+                      color: AppColors.secondaryBlue,
                     ),
                   ),
                   const SizedBox(height: 28),
@@ -163,8 +164,12 @@ class _LoginPageState extends State<LoginPage> {
                     style: GoogleFonts.poppins(),
                     decoration: InputDecoration(
                       labelText: "Email",
-                      prefixIcon: const Icon(Icons.email_outlined, color: Colors.teal),
+                      prefixIcon: Icon(Icons.email_outlined, color: AppColors.primaryBlue),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: AppColors.primaryBlue, width: 2),
+                      ),
                     ),
                     validator: (value) => (value == null || value.trim().isEmpty) ? 'Enter your email' : null,
                   ),
@@ -176,8 +181,12 @@ class _LoginPageState extends State<LoginPage> {
                       style: GoogleFonts.poppins(),
                       decoration: InputDecoration(
                         labelText: "OTP",
-                        prefixIcon: const Icon(Icons.lock_clock, color: Colors.teal),
+                        prefixIcon: Icon(Icons.lock_clock, color: AppColors.primaryBlue),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: AppColors.primaryBlue, width: 2),
+                        ),
                       ),
                     ),
 
@@ -186,48 +195,80 @@ class _LoginPageState extends State<LoginPage> {
                   if (!_otpSent)
                     SizedBox(
                       width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: _isLoading ? null : _sendOtp,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.teal[700],
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [AppColors.primaryBlue, AppColors.secondaryBlue],
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.primaryBlue.withOpacity(0.3),
+                              blurRadius: 8,
+                              offset: Offset(0, 4),
+                            ),
+                          ],
                         ),
-                        child: _isLoading
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : Text("Send OTP", style: GoogleFonts.poppins(fontSize: 16)),
+                        child: ElevatedButton(
+                          onPressed: _isLoading ? null : _sendOtp,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            shadowColor: Colors.transparent,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                          child: _isLoading
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : Text("Send OTP", style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w700)),
+                        ),
                       ),
                     ),
 
                   if (_otpSent)
                     SizedBox(
                       width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: _isLoading ? null : _verifyOtp,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green[800],
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [AppColors.accentGreen, Colors.green.shade600],
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.accentGreen.withOpacity(0.3),
+                              blurRadius: 8,
+                              offset: Offset(0, 4),
+                            ),
+                          ],
                         ),
-                        child: _isLoading
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : Text("Login", style: GoogleFonts.poppins(fontSize: 16)),
+                        child: ElevatedButton(
+                          onPressed: _isLoading ? null : _verifyOtp,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            shadowColor: Colors.transparent,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                          child: _isLoading
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : Text("Login", style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w700)),
+                        ),
                       ),
                     ),
 
@@ -247,7 +288,7 @@ class _LoginPageState extends State<LoginPage> {
                           "Register",
                           style: GoogleFonts.poppins(
                             fontSize: 14,
-                            color: Colors.teal[700],
+                            color: AppColors.primaryBlue,
                             fontWeight: FontWeight.bold,
                             decoration: TextDecoration.underline,
                           ),

@@ -32,11 +32,13 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
   final TextEditingController _callDurationController = TextEditingController();
   
   // Detailed Call Log Fields
-  final TextEditingController _assistanceController = TextEditingController();
+  final TextEditingController _assistanceRequestOtherDetailController = TextEditingController();
   final TextEditingController _otherTopicController = TextEditingController();
   final TextEditingController _redFlagsController = TextEditingController();
+  final TextEditingController _volunteerNoteController = TextEditingController();
   
   double _moodScore = 3.0;
+  double _volunteerComfort = 3.0;
   String _mentorHelpfulness = "Yes"; 
   
   final List<Map<String, dynamic>> _checklistItems = [
@@ -48,6 +50,9 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
   
   final List<String> _availableTopics = ['Studies', 'Health', 'Family', 'Hobbies', 'Skills', 'Others'];
   final List<String> _selectedTopics = [];
+  
+  final List<String> _availableAssistanceOptions = ['Emotional Support', 'Safety Concern', 'Academic Support', 'Other Concern', 'Not required'];
+  final List<String> _selectedAssistanceRequests = [];
 
   @override
   void initState() {
@@ -149,19 +154,25 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
       final menteeId = _menteeData!['_id'];
       final currentCell = _menteeData!['currentCell'] ?? 1;
       
+      final hasAssistanceRequest = _selectedAssistanceRequests.isNotEmpty && 
+          !(_selectedAssistanceRequests.length == 1 && _selectedAssistanceRequests.contains('Not required'));
+      
       final bodyPayload = {
           'menteeId': menteeId,
           'note': _postCallNoteController.text.trim(),
           'cellNumber': currentCell,
           'callDuration': int.tryParse(_callDurationController.text) ?? 0,
-          'followUpRequired': _assistanceController.text.trim().isNotEmpty,
-          'assistanceRequest': _assistanceController.text.trim(),
+          'followUpRequired': hasAssistanceRequest,
+          'assistanceRequest': _selectedAssistanceRequests,
+          'assistanceRequestOtherDetail': _selectedAssistanceRequests.contains('Other Concern') ? _assistanceRequestOtherDetailController.text.trim() : '',
           'moodScore': _moodScore,
           'checklist': _checklistItems,
           'topics': _selectedTopics,
           'otherTopicDetail': _selectedTopics.contains('Others') ? _otherTopicController.text.trim() : '',
           'mentorHelpfulness': _mentorHelpfulness,
           'redFlags': _redFlagsController.text.trim(),
+          'volunteerComfort': _volunteerComfort,
+          'volunteerNote': _volunteerNoteController.text.trim(),
       };
 
       print("📤 SENDING NOTE PAYLOAD: ${json.encode(bodyPayload)}");
@@ -188,13 +199,16 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
           );
           _postCallNoteController.clear();
           _callDurationController.clear();
-          _assistanceController.clear();
+          _assistanceRequestOtherDetailController.clear();
           _otherTopicController.clear();
           _redFlagsController.clear();
+          _volunteerNoteController.clear();
           setState(() {
              _moodScore = 3.0;
+             _volunteerComfort = 3.0;
              _mentorHelpfulness = "Yes";
              _selectedTopics.clear();
+             _selectedAssistanceRequests.clear();
              for (var item in _checklistItems) item['isAchieved'] = false;
           });
           // Refresh notes
@@ -509,7 +523,9 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
     final String menteeName = _menteeData!['fullName'] ?? 'Unknown';
     final int menteeAge = _menteeData!['age'] ?? 0;
     final String phone = _menteeData!['phone'] ?? 'N/A';
-    final String location = _menteeData!['location'] ?? 'N/A';
+    final String region = _menteeData!['region'] ?? 'N/A';
+    final String grade = _menteeData!['grade'] ?? 'N/A';
+    final String pointOfContact = _menteeData!['pointOfContact'] ?? 'N/A';
     final String assignedDate = _menteeData!['assignedAt'] != null
         ? DateTime.parse(_menteeData!['assignedAt']).toString().substring(0, 10)
         : 'N/A';
@@ -577,11 +593,13 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
             ],
           ),
           const SizedBox(height: 20),
-          _buildInfoRow(Icons.phone, "Phone", phone),
+          _buildInfoRow(Icons.school_outlined, "Grade", grade),
+          const SizedBox(height: 12),
+          _buildInfoRow(Icons.location_on_outlined, "Region", region),
+          const SizedBox(height: 12),
+          _buildInfoRow(Icons.person_outline, "Point of Contact", pointOfContact),
           const SizedBox(height: 12),
           _buildInfoRow(Icons.calendar_today, "Assigned", assignedDate),
-          const SizedBox(height: 12),
-          _buildInfoRow(Icons.location_on_outlined, "Location", location),
           if (_menteeData!['notes'] != null && _menteeData!['notes'].toString().trim().isNotEmpty) ...[
             const SizedBox(height: 12),
             _buildNotesRow(Icons.notes, "Notes", _menteeData!['notes']),
@@ -1446,14 +1464,31 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
           Row(
             children: [
               Expanded(
-                child: Slider(
-                  value: _moodScore,
-                  min: 1,
-                  max: 5,
-                  divisions: 4,
-                  label: "$_moodScore",
-                  activeColor: AppColors.primaryBlue,
-                  onChanged: (v) => setState(() => _moodScore = v),
+                child: Column(
+                  children: [
+                    Slider(
+                      value: _moodScore,
+                      min: 1,
+                      max: 5,
+                      divisions: 4,
+                      label: "$_moodScore",
+                      activeColor: AppColors.primaryBlue,
+                      onChanged: (v) => setState(() => _moodScore = v),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text("Bad", style: GoogleFonts.poppins(fontSize: 10, color: Colors.grey.shade600)),
+                          Text("Low", style: GoogleFonts.poppins(fontSize: 10, color: Colors.grey.shade600)),
+                          Text("Neutral", style: GoogleFonts.poppins(fontSize: 10, color: Colors.grey.shade600)),
+                          Text("Good", style: GoogleFonts.poppins(fontSize: 10, color: Colors.grey.shade600)),
+                          Text("Excited", style: GoogleFonts.poppins(fontSize: 10, color: Colors.grey.shade600)),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
               Text(
@@ -1465,7 +1500,56 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
           const SizedBox(height: 16),
 
           // 2. Checklist
-          Text("Discussion Goals (Achieved?)", style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 14)),
+          Row(
+            children: [
+              Text("Discussion Focus for this call?", style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 14)),
+              const SizedBox(width: 6),
+              GestureDetector(
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: Row(
+                        children: [
+                          Icon(Icons.info_outline, color: AppColors.primaryBlue),
+                          const SizedBox(width: 8),
+                          Text("Discussion Focus Areas", style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600)),
+                        ],
+                      ),
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "What are the focus areas for this call session?",
+                            style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w500),
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            "Check the topics you discussed or covered during this call. These help track progress and identify what areas need more attention in future sessions.",
+                            style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade700),
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            "💡 Tip: You don't need to check all boxes every call. Focus on what's most relevant for this session.",
+                            style: GoogleFonts.poppins(fontSize: 12, color: AppColors.primaryBlue, fontStyle: FontStyle.italic),
+                          ),
+                        ],
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: Text("Got it!", style: GoogleFonts.poppins(color: AppColors.primaryBlue, fontWeight: FontWeight.w600)),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+                child: Icon(Icons.info_outline, size: 18, color: AppColors.primaryBlue),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
           ..._checklistItems.map((item) {
              return CheckboxListTile(
                 title: Text(item['label'], style: GoogleFonts.poppins(fontSize: 13)),
@@ -1528,26 +1612,55 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
             maxLines: 4,
             style: GoogleFonts.poppins(fontSize: 13),
             decoration: InputDecoration(
-              hintText: "Write your observations, discussions, and details...",
+              hintText: "Brief notes on themes discussed or noteworthy moments. Avoid judgment or diagnosis.",
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               contentPadding: const EdgeInsets.all(12),
             ),
           ),
           const SizedBox(height: 16),
 
-          // 5. Assistance
+          // 5. Assistance Request
           Text("Assistance Needed / Follow-up", style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 14)),
           const SizedBox(height: 8),
-          TextField(
-            controller: _assistanceController,
-            maxLines: 2,
-            style: GoogleFonts.poppins(fontSize: 13),
-            decoration: InputDecoration(
-              hintText: "Any support needed from admin?",
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-              contentPadding: const EdgeInsets.all(12),
-            ),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: _availableAssistanceOptions.map((option) {
+              final isSelected = _selectedAssistanceRequests.contains(option);
+              return FilterChip(
+                label: Text(option),
+                selected: isSelected,
+                selectedColor: AppColors.primaryBlue.withOpacity(0.2),
+                checkmarkColor: AppColors.primaryBlue,
+                labelStyle: GoogleFonts.poppins(
+                  fontSize: 12,
+                  color: isSelected ? AppColors.primaryBlue : Colors.black87,
+                ),
+                onSelected: (v) {
+                  setState(() {
+                    if (v) {
+                      _selectedAssistanceRequests.add(option);
+                    } else {
+                      _selectedAssistanceRequests.remove(option);
+                    }
+                  });
+                },
+              );
+            }).toList(),
           ),
+          if (_selectedAssistanceRequests.contains('Other Concern')) ...[
+             const SizedBox(height: 8),
+             TextField(
+               controller: _assistanceRequestOtherDetailController,
+               decoration: InputDecoration(
+                 hintText: "Please specify other concern details...",
+                 hintStyle: GoogleFonts.poppins(fontSize: 12),
+                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                 contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+               ),
+               style: GoogleFonts.poppins(fontSize: 13),
+             ),
+          ],
           const SizedBox(height: 16),
           
           // 6. Mentor Helpfulness
@@ -1573,9 +1686,10 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
           const SizedBox(height: 8),
           TextField(
             controller: _redFlagsController,
+            maxLines: 4,
             style: GoogleFonts.poppins(fontSize: 13),
             decoration: InputDecoration(
-              hintText: "Report any concerning behavior...",
+              hintText: "Use only if something felt concerning or unsafe.Briefly write what raised concern.",
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.red.shade200)),
               enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.red.shade200)),
               contentPadding: const EdgeInsets.all(12),
@@ -1592,6 +1706,83 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
               labelText: "Call Duration (minutes)",
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               prefixIcon: Icon(Icons.timer, color: Colors.grey),
+            ),
+          ),
+          
+          const SizedBox(height: 24),
+          
+          // 9. Volunteer Comfort Check-in
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColors.primaryBlue.withOpacity(0.05),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppColors.primaryBlue.withOpacity(0.2)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.favorite_outline, color: AppColors.primaryBlue, size: 20),
+                    const SizedBox(width: 8),
+                    Text(
+                      "Your Comfort Check-in (Optional)",
+                      style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 14, color: AppColors.primaryBlue),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  "How comfortable did you feel during this call?",
+                  style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey.shade700),
+                ),
+                const SizedBox(height: 12),
+                Column(
+                  children: [
+                    Slider(
+                      value: _volunteerComfort,
+                      min: 1,
+                      max: 5,
+                      divisions: 4,
+                      label: "${_volunteerComfort.toInt()}",
+                      activeColor: AppColors.primaryBlue,
+                      onChanged: (v) => setState(() => _volunteerComfort = v),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text("Uncomfortable", style: GoogleFonts.poppins(fontSize: 10, color: Colors.grey.shade600)),
+                          Text("Neutral", style: GoogleFonts.poppins(fontSize: 10, color: Colors.grey.shade600)),
+                          Text("Very Comfortable", style: GoogleFonts.poppins(fontSize: 10, color: Colors.grey.shade600)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  "Personal Notes (For your reference only)",
+                  style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w500, color: Colors.grey.shade700),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: _volunteerNoteController,
+                  maxLines: 3,
+                  maxLength: 1000,
+                  style: GoogleFonts.poppins(fontSize: 13),
+                  decoration: InputDecoration(
+                    hintText: "Any personal reflections, challenges, or learnings from this call...",
+                    hintStyle: GoogleFonts.poppins(fontSize: 12, color: Colors.grey.shade400),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                    contentPadding: const EdgeInsets.all(12),
+                    filled: true,
+                    fillColor: Colors.white,
+                  ),
+                ),
+              ],
             ),
           ),
           
@@ -2046,11 +2237,11 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                ),
                SizedBox(height: 24),
                _buildProfileDetailRow(Icons.cake, "Age / Gender", "${_menteeData!['age']} years • ${_menteeData!['gender'] ?? 'N/A'}"),
-               _buildProfileDetailRow(Icons.location_on, "Location", "${_menteeData!['location'] ?? 'N/A'}"),
+               _buildProfileDetailRow(Icons.school_outlined, "Grade", "${_menteeData!['grade'] ?? 'N/A'}"),
+               _buildProfileDetailRow(Icons.location_on, "Region", "${_menteeData!['region'] ?? 'N/A'}"),
+               _buildProfileDetailRow(Icons.person_outline, "Point of Contact", "${_menteeData!['pointOfContact'] ?? 'N/A'}"),
                _buildProfileDetailRow(Icons.school, "Program", "${_menteeData!['program']?['name'] ?? 'N/A'}"),
                _buildProfileDetailRow(Icons.calendar_today, "Assigned On", "${_menteeData!['assignedAt']?.substring(0,10) ?? 'N/A'}"),
-               if (_menteeData!['phone'] != null)
-                 _buildProfileDetailRow(Icons.phone, "Phone", "${_menteeData!['phone']}"),
                  
                SizedBox(height: 24),
                SizedBox(

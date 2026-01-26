@@ -27,7 +27,9 @@ class _CreateMenteePageState extends State<CreateMenteePage> {
   // Form fields
   final TextEditingController _fullNameController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
-  final TextEditingController _locationController = TextEditingController();
+  final TextEditingController _regionController = TextEditingController();
+  final TextEditingController _gradeController = TextEditingController();
+  final TextEditingController _pointOfContactController = TextEditingController();
   final TextEditingController _notesController = TextEditingController();
   
   DateTime? _selectedDate;
@@ -41,7 +43,9 @@ class _CreateMenteePageState extends State<CreateMenteePage> {
   void dispose() {
     _fullNameController.dispose();
     _phoneController.dispose();
-    _locationController.dispose();
+    _regionController.dispose();
+    _gradeController.dispose();
+    _pointOfContactController.dispose();
     _notesController.dispose();
     super.dispose();
   }
@@ -129,7 +133,9 @@ class _CreateMenteePageState extends State<CreateMenteePage> {
           'dob': _selectedDate!.toIso8601String(),
           'gender': _gender,
           'phone': _phoneController.text.trim(),
-          'location': _locationController.text.trim(),
+          'region': _regionController.text.trim(),
+          'grade': _gradeController.text.trim(),
+          'pointOfContact': _pointOfContactController.text.trim(),
           'programId': widget.companionConnectProgramId,
           'notes': _notesController.text.trim(),
         }),
@@ -320,12 +326,12 @@ class _CreateMenteePageState extends State<CreateMenteePage> {
             ),
             const SizedBox(height: 16),
 
-            // Location
+            // Region
             TextFormField(
-              controller: _locationController,
+              controller: _regionController,
               style: GoogleFonts.poppins(),
               decoration: InputDecoration(
-                labelText: 'Location *',
+                labelText: 'Region *',
                 prefixIcon: Icon(Icons.location_on, color: AppColors.primaryBlue),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 focusedBorder: OutlineInputBorder(
@@ -335,7 +341,53 @@ class _CreateMenteePageState extends State<CreateMenteePage> {
               ),
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
-                  return 'Location is required';
+                  return 'Region is required';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 16),
+
+            // Grade
+            TextFormField(
+              controller: _gradeController,
+              style: GoogleFonts.poppins(),
+              decoration: InputDecoration(
+                labelText: 'Grade *',
+                prefixIcon: Icon(Icons.school, color: AppColors.primaryBlue),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: AppColors.primaryBlue, width: 2),
+                ),
+                hintText: 'e.g., Class 10, Grade 8',
+              ),
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return 'Grade is required';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 16),
+
+            // Point of Contact
+            TextFormField(
+              controller: _pointOfContactController,
+              style: GoogleFonts.poppins(),
+              decoration: InputDecoration(
+                labelText: 'Point of Contact *',
+                prefixIcon: Icon(Icons.person_outline, color: AppColors.primaryBlue),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: AppColors.primaryBlue, width: 2),
+                ),
+                hintText: 'Primary contact person name',
+              ),
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return 'Point of contact is required';
                 }
                 return null;
               },
