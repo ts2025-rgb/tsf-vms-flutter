@@ -7,12 +7,12 @@
 
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:tsf_vms/main.dart';
+import 'package:py4p_vms/main.dart';
 
 void main() {
   testWidgets('App launches successfully', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const TSFVMSApp());
+    await tester.pumpWidget(const PY4PVMSApp());
 
     // Verify the app launches without errors
     expect(find.text('Pathways for Purpose'), findsOneWidget);

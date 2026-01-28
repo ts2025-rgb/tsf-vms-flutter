@@ -549,7 +549,7 @@ class _VMSDashboardScreenState extends State<VMSDashboardScreen> {
             child: TextField(
               onChanged: (value) => setState(() => _searchQuery = value),
               decoration: InputDecoration(
-                hintText: 'Search by name, code (TSF-2025-XXXX), or email...',
+                hintText: 'Search by name, code (PY4P-2025-XXXX), or email...',
                 hintStyle: GoogleFonts.poppins(
                   fontSize: 14,
                   color: textSecondary,

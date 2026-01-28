@@ -182,11 +182,33 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
           SnackBar(content: Text('Mentee assigned successfully!'), backgroundColor: Colors.green),
         );
         _fetchMentees();
+        _fetchVolunteers(); // Refresh volunteer list to update indicators
       } else {
         final data = json.decode(response.body);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(data['message'] ?? 'Failed to assign mentee'), backgroundColor: Colors.red),
-        );
+        final errorMessage = data['message'] ?? 'Failed to assign mentee';
+        
+        // Show specific error for already assigned volunteer
+        if (errorMessage.contains('already exists') || errorMessage.contains('already has')) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Assignment Failed', style: TextStyle(fontWeight: FontWeight.bold)),
+                  SizedBox(height: 4),
+                  Text('This volunteer already has an active mentee assigned.'),
+                ],
+              ),
+              backgroundColor: Colors.orange.shade700,
+              duration: Duration(seconds: 4),
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(errorMessage), backgroundColor: Colors.red),
+          );
+        }
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -215,6 +237,7 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
           SnackBar(content: Text('Mentee unassigned successfully!'), backgroundColor: Colors.green),
         );
         _fetchMentees();
+        _fetchVolunteers(); // Refresh volunteer list to update indicators
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -297,6 +320,7 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
         icon: Icon(Icons.person_add),
         label: Text("Add Mentee"),
         backgroundColor: AppColors.primaryBlue,
+        foregroundColor: Colors.white,
       ),
     );
   }
@@ -662,6 +686,16 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
                     foregroundColor: AppColors.primaryBlue,
                   ),
                 ),
+                const SizedBox(width: 8),
+                IconButton(
+                  onPressed: () => _showDeleteMenteeDialog(mentee),
+                  icon: Icon(Icons.delete_outline, size: 20),
+                  color: Colors.red,
+                  tooltip: 'Delete Mentee',
+                  style: IconButton.styleFrom(
+                    backgroundColor: Colors.red.shade50,
+                  ),
+                ),
               ],
             ),
           ],
@@ -673,26 +707,111 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
   void _showAssignDialog(Map<String, dynamic> mentee) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Assign Mentee', style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
-        content: SizedBox(
-          width: double.maxFinite,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        child: Container(
+          constraints: BoxConstraints(maxWidth: 500),
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Icon
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  gradient: AppColors.primaryGradient,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.person_add_rounded,
+                  size: 48,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 24),
+              
+              // Title
               Text(
-                'Assign ${mentee['fullName']} to:',
-                style: GoogleFonts.poppins(),
+                'Assign Volunteer',
+                style: GoogleFonts.poppins(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey.shade900,
+                ),
+              ),
+              const SizedBox(height: 12),
+              
+              // Mentee Name
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryBlue.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.person, size: 16, color: AppColors.primaryBlue),
+                    const SizedBox(width: 8),
+                    Text(
+                      mentee['fullName'],
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primaryBlue,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              
+              // Description
+              Text(
+                'Select a volunteer to assign:',
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  color: Colors.grey.shade600,
+                ),
               ),
               const SizedBox(height: 16),
-              SizedBox(
-                height: 300,
+              
+              // Volunteers List
+              Container(
+                constraints: BoxConstraints(maxHeight: 300),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey.shade200),
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 child: _volunteers.isEmpty
-                    ? Center(
-                        child: Text(
-                          'No approved volunteers found',
-                          style: GoogleFonts.poppins(color: Colors.grey),
+                    ? Padding(
+                        padding: const EdgeInsets.all(32),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.people_outline, size: 48, color: Colors.grey.shade300),
+                            const SizedBox(height: 12),
+                            Text(
+                              'No approved volunteers found',
+                              style: GoogleFonts.poppins(
+                                color: Colors.grey.shade500,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
                         ),
                       )
                     : ListView.builder(
@@ -700,40 +819,159 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
                         itemCount: _volunteers.length,
                         itemBuilder: (context, index) {
                           final volunteer = _volunteers[index];
-                          return ListTile(
-                            leading: CircleAvatar(
-                              backgroundImage: volunteer['photoUrl'] != null
-                                  ? NetworkImage(volunteer['photoUrl'])
-                                  : null,
-                              child: volunteer['photoUrl'] == null
-                                  ? Icon(Icons.person)
-                                  : null,
+                          final hasAssignedMentee = _mentees.any((m) => 
+                            m['assignedTo'] != null && 
+                            m['assignedTo']['id'] == volunteer['id']
+                          );
+                          
+                          return Container(
+                            margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: hasAssignedMentee 
+                                ? Colors.grey.shade50
+                                : Colors.white,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: hasAssignedMentee 
+                                  ? Colors.grey.shade200 
+                                  : Colors.transparent,
+                              ),
                             ),
-                            title: Text(
-                              volunteer['fullName'] ?? 'Unknown',
-                              style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
+                            child: ListTile(
+                              enabled: !hasAssignedMentee,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              leading: Stack(
+                                children: [
+                                  CircleAvatar(
+                                    radius: 24,
+                                    backgroundColor: AppColors.primaryBlue.withOpacity(0.1),
+                                    backgroundImage: volunteer['photoUrl'] != null
+                                        ? NetworkImage(volunteer['photoUrl'])
+                                        : null,
+                                    child: volunteer['photoUrl'] == null
+                                        ? Icon(Icons.person, color: AppColors.primaryBlue)
+                                        : null,
+                                  ),
+                                  if (hasAssignedMentee)
+                                    Positioned(
+                                      right: 0,
+                                      bottom: 0,
+                                      child: Container(
+                                        padding: EdgeInsets.all(2),
+                                        decoration: BoxDecoration(
+                                          color: Colors.orange.shade600,
+                                          shape: BoxShape.circle,
+                                          border: Border.all(color: Colors.white, width: 2),
+                                        ),
+                                        child: Icon(
+                                          Icons.check_circle,
+                                          size: 12,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                              title: Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      volunteer['fullName'] ?? 'Unknown',
+                                      style: GoogleFonts.poppins(
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 14,
+                                        color: hasAssignedMentee ? Colors.grey.shade500 : Colors.grey.shade800,
+                                      ),
+                                    ),
+                                  ),
+                                  if (hasAssignedMentee)
+                                    Container(
+                                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: Colors.orange.shade100,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(Icons.check_circle, size: 10, color: Colors.orange.shade700),
+                                          SizedBox(width: 4),
+                                          Text(
+                                            'ASSIGNED',
+                                            style: GoogleFonts.poppins(
+                                              fontSize: 9,
+                                              fontWeight: FontWeight.w600,
+                                              color: Colors.orange.shade700,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                ],
+                              ),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    volunteer['email'] ?? '',
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 12,
+                                      color: hasAssignedMentee ? Colors.grey.shade400 : Colors.grey.shade600,
+                                    ),
+                                  ),
+                                  if (hasAssignedMentee)
+                                    Padding(
+                                      padding: EdgeInsets.only(top: 4),
+                                      child: Text(
+                                        'Already has an active mentee',
+                                        style: GoogleFonts.poppins(
+                                          fontSize: 11,
+                                          fontStyle: FontStyle.italic,
+                                          color: Colors.orange.shade600,
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                              onTap: hasAssignedMentee ? null : () {
+                                Navigator.pop(context);
+                                _assignMentee(mentee['id'], volunteer['id']);
+                              },
                             ),
-                            subtitle: Text(
-                              volunteer['email'] ?? '',
-                              style: GoogleFonts.poppins(fontSize: 12),
-                            ),
-                            onTap: () {
-                              Navigator.pop(context);
-                              _assignMentee(mentee['id'], volunteer['id']); // Changed from _id to id
-                            },
                           );
                         },
                       ),
               ),
+              const SizedBox(height: 24),
+              
+              // Cancel Button
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    side: BorderSide(color: Colors.grey.shade300),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(
+                    'Cancel',
+                    style: GoogleFonts.poppins(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey.shade700,
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Cancel'),
-          ),
-        ],
       ),
     );
   }
@@ -1036,5 +1274,330 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
         ],
       ),
     );
+  }
+
+  void _showDeleteMenteeDialog(Map<String, dynamic> mentee) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Icon
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.delete_outline_rounded,
+                  size: 48,
+                  color: Colors.red.shade400,
+                ),
+              ),
+              const SizedBox(height: 24),
+              
+              // Title
+              Text(
+                'Delete Mentee?',
+                style: GoogleFonts.poppins(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey.shade900,
+                ),
+              ),
+              const SizedBox(height: 12),
+              
+              // Mentee Name
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  mentee['fullName'],
+                  style: GoogleFonts.poppins(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey.shade800,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              
+              // Description
+              Text(
+                'This action cannot be undone. All associated data will be permanently removed.',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  color: Colors.grey.shade600,
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 20),
+              
+              // Warning Box
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.red.shade100),
+                ),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.info_outline_rounded, size: 20, color: Colors.red.shade700),
+                        const SizedBox(width: 8),
+                        Text(
+                          'What will be deleted:',
+                          style: GoogleFonts.poppins(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.red.shade700,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    _buildDeleteItem('All call notes and progress'),
+                    const SizedBox(height: 8),
+                    _buildDeleteItem('Personal information'),
+                    const SizedBox(height: 8),
+                    _buildDeleteItem('Assignment history'),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+              
+              // Buttons
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        side: BorderSide(color: Colors.grey.shade300),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: Text(
+                        'Cancel',
+                        style: GoogleFonts.poppins(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey.shade700,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _deleteMentee(mentee['id']);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        backgroundColor: Colors.red.shade500,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: Text(
+                        'Delete',
+                        style: GoogleFonts.poppins(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDeleteItem(String text) {
+    return Row(
+      children: [
+        Icon(
+          Icons.check_circle_rounded,
+          size: 16,
+          color: Colors.red.shade400,
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            text,
+            style: GoogleFonts.poppins(
+              fontSize: 12,
+              color: Colors.red.shade700,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _deleteMentee(String menteeId) async {
+    try {
+      final token = await secureStorage.read(key: "adminToken");
+      
+      // Show loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+          child: Container(
+            padding: const EdgeInsets.all(32),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    SizedBox(
+                      width: 60,
+                      height: 60,
+                      child: CircularProgressIndicator(
+                        color: Colors.red.shade400,
+                        strokeWidth: 3,
+                      ),
+                    ),
+                    Icon(
+                      Icons.delete_outline_rounded,
+                      size: 28,
+                      color: Colors.red.shade400,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  'Deleting Mentee...',
+                  style: GoogleFonts.poppins(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey.shade800,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Please wait',
+                  style: GoogleFonts.poppins(
+                    fontSize: 13,
+                    color: Colors.grey.shade500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      final response = await http.delete(
+        Uri.parse('$baseUrl/companion-connect/admin/mentees/$menteeId'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      Navigator.pop(context); // Hide loading
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['success'] == true) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  Icon(Icons.check_circle, color: Colors.white),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      data['message'] ?? 'Mentee deleted successfully',
+                      style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
+                    ),
+                  ),
+                ],
+              ),
+              backgroundColor: Colors.green,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+          );
+          await _fetchMentees(); // Refresh the list
+        } else {
+          throw Exception(data['message'] ?? 'Failed to delete mentee');
+        }
+      } else {
+        final errorData = json.decode(response.body);
+        throw Exception(errorData['message'] ?? 'Failed to delete mentee');
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              Icon(Icons.error_outline, color: Colors.white),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Error: $e',
+                  style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      );
+    }
   }
 }

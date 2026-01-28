@@ -379,7 +379,7 @@ class _RegisterPageState extends State<RegisterPage> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  "I hereby declare that I understand and respect the principles of Prevention of Sexual Harassment (POSH) as outlined by the Tengbang Sintha Foundation.",
+                  "I hereby declare that I understand and respect the principles of Prevention of Sexual Harassment (POSH) as outlined by Pathways for Purpose.",
                   style: GoogleFonts.poppins(fontSize: 14, height: 1.5, fontWeight: FontWeight.w500),
                 ),
                 const SizedBox(height: 12),
@@ -2211,7 +2211,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           style: GoogleFonts.poppins(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
-                            color: Colors.green[800],
+                            color: AppColors.primaryBlue,
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -2220,7 +2220,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           textAlign: TextAlign.center,
                           style: GoogleFonts.poppins(
                             fontSize: 16,
-                            color: Colors.teal[700],
+                            color: AppColors.secondaryBlue,
                           ),
                         ),
                         const SizedBox(height: 28),
@@ -2231,8 +2231,12 @@ class _RegisterPageState extends State<RegisterPage> {
                           style: GoogleFonts.poppins(),
                           decoration: InputDecoration(
                             labelText: "Email",
-                            prefixIcon: const Icon(Icons.email_outlined, color: Colors.teal),
+                            prefixIcon: Icon(Icons.email_outlined, color: AppColors.primaryBlue),
                             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: AppColors.primaryBlue, width: 2),
+                            ),
                           ),
                           enabled: !_otpSent,
                           validator: (v) => v == null || v.isEmpty ? "Required" : null,
@@ -2245,8 +2249,12 @@ class _RegisterPageState extends State<RegisterPage> {
                             style: GoogleFonts.poppins(),
                             decoration: InputDecoration(
                               labelText: "Enter OTP",
-                              prefixIcon: const Icon(Icons.lock_clock, color: Colors.teal),
+                              prefixIcon: Icon(Icons.lock_clock, color: AppColors.primaryBlue),
                               border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(color: AppColors.primaryBlue, width: 2),
+                              ),
                             ),
                           ),
 
@@ -2255,48 +2263,80 @@ class _RegisterPageState extends State<RegisterPage> {
                         if (!_otpSent)
                           SizedBox(
                             width: double.infinity,
-                            child: ElevatedButton(
-                              onPressed: _sendingOtp ? null : _sendOtp,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.teal[700],
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(vertical: 14),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [AppColors.primaryBlue, AppColors.secondaryBlue],
+                                ),
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: AppColors.primaryBlue.withOpacity(0.3),
+                                    blurRadius: 8,
+                                    offset: Offset(0, 4),
+                                  ),
+                                ],
                               ),
-                              child: _sendingOtp
-                                  ? const SizedBox(
-                                      height: 20,
-                                      width: 20,
-                                      child: CircularProgressIndicator(
-                                        color: Colors.white,
-                                        strokeWidth: 2,
-                                      ),
-                                    )
-                                  : Text("Send OTP", style: GoogleFonts.poppins(fontSize: 16)),
+                              child: ElevatedButton(
+                                onPressed: _sendingOtp ? null : _sendOtp,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.transparent,
+                                  shadowColor: Colors.transparent,
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(vertical: 14),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                ),
+                                child: _sendingOtp
+                                    ? const SizedBox(
+                                        height: 20,
+                                        width: 20,
+                                        child: CircularProgressIndicator(
+                                          color: Colors.white,
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                    : Text("Send OTP", style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w700)),
+                              ),
                             ),
                           ),
 
                         if (_otpSent && !_emailVerified)
                           SizedBox(
                             width: double.infinity,
-                            child: ElevatedButton(
-                              onPressed: _verifyingOtp ? null : _verifyOtp,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.green[800],
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(vertical: 14),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [AppColors.accentGreen, Colors.green.shade600],
+                                ),
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: AppColors.accentGreen.withOpacity(0.3),
+                                    blurRadius: 8,
+                                    offset: Offset(0, 4),
+                                  ),
+                                ],
                               ),
-                              child: _verifyingOtp
-                                  ? const SizedBox(
-                                      height: 20,
-                                      width: 20,
-                                      child: CircularProgressIndicator(
-                                        color: Colors.white,
-                                        strokeWidth: 2,
-                                      ),
-                                    )
-                                  : Text("Verify OTP", style: GoogleFonts.poppins(fontSize: 16)),
+                              child: ElevatedButton(
+                                onPressed: _verifyingOtp ? null : _verifyOtp,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.transparent,
+                                  shadowColor: Colors.transparent,
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(vertical: 14),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                ),
+                                child: _verifyingOtp
+                                    ? const SizedBox(
+                                        height: 20,
+                                        width: 20,
+                                        child: CircularProgressIndicator(
+                                          color: Colors.white,
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                    : Text("Verify OTP", style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w700)),
+                              ),
                             ),
                           ),
 
@@ -2316,7 +2356,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 "Login",
                                 style: GoogleFonts.poppins(
                                   fontSize: 14,
-                                  color: Colors.teal[700],
+                                  color: AppColors.primaryBlue,
                                   fontWeight: FontWeight.bold,
                                   decoration: TextDecoration.underline,
                                 ),

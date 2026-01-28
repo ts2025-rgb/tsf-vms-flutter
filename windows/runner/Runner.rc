@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "tsf_vms" "\0"
+            VALUE "FileDescription", "py4p_vms" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "tsf_vms" "\0"
+            VALUE "InternalName", "py4p_vms" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2025 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "tsf_vms.exe" "\0"
-            VALUE "ProductName", "tsf_vms" "\0"
+            VALUE "OriginalFilename", "py4p_vms.exe" "\0"
+            VALUE "ProductName", "py4p_vms" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

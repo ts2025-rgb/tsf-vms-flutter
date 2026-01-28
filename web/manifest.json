@@ -1,6 +1,6 @@
 {
-    "name": "tsf_vms",
-    "short_name": "tsf_vms",
+    "name": "py4p_vms",
+    "short_name": "py4p_vms",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

@@ -3,6 +3,7 @@ import 'login_screen.dart';
 import 'home_screen.dart';
 import 'profile_screen.dart';
 import 'admin_login_screen.dart';
+import 'admin_home.dart';
 import 'admin.dart';
 import 'screens/admin/vms_dashboard_screen.dart';
 import 'screens/admin/volunteer_detail_screen.dart';
@@ -12,16 +13,16 @@ import 'models/volunteer_model.dart';
 import 'config/app_colors.dart';
 
 void main() {
-  runApp(const TSFVMSApp());
+  runApp(const PY4PVMSApp());
 }
 
-class TSFVMSApp extends StatelessWidget {
-  const TSFVMSApp({super.key});
+class PY4PVMSApp extends StatelessWidget {
+  const PY4PVMSApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'TSF Visit Management System',
+      title: 'PY4P VOLUNTEER MANAGEMENT SYSTEM',
       theme: ThemeData(
         primaryColor: AppColors.primaryBlue,
         scaffoldBackgroundColor: AppColors.backgroundLight1,
@@ -43,7 +44,8 @@ class TSFVMSApp extends StatelessWidget {
         '/home': (context) => const HomePage(),
         '/profile': (context) => const ProfileScreen(),
         '/admin-login': (context) => const AdminLoginScreen(),
-        '/admin': (context) => const AdminScreen(),
+        '/admin': (context) => const AdminHomeScreen(),
+        '/admin/volunteers': (context) => const AdminScreen(),
         '/admin/vms/dashboard': (context) => const VMSDashboardScreen(),
         '/admin/vms/certificates': (context) => const CertificateManagementScreen(),
       },

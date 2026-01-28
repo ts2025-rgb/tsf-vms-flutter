@@ -14,7 +14,7 @@ The Flutter frontend is **100% complete** and ready to use. It just needs these 
   "success": true,
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
   "user": {
-    "email": "admin@tsf.com",
+    "email": "admin@py4p.com",
     "role": "admin"
   }
 }

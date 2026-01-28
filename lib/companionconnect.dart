@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -34,6 +35,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
   // Detailed Call Log Fields
   final TextEditingController _assistanceRequestOtherDetailController = TextEditingController();
   final TextEditingController _otherTopicController = TextEditingController();
+  final TextEditingController _otherFocusAreaController = TextEditingController();
   final TextEditingController _redFlagsController = TextEditingController();
   final TextEditingController _volunteerNoteController = TextEditingController();
   
@@ -41,12 +43,52 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
   double _volunteerComfort = 3.0;
   String _mentorHelpfulness = "Yes"; 
   
-  final List<Map<String, dynamic>> _checklistItems = [
-    {'label': 'Health & Hygiene', 'isAchieved': false},
-    {'label': 'Emotional Well-being', 'isAchieved': false},
-    {'label': 'Academic Progress', 'isAchieved': false},
-    {'label': 'Future Goals', 'isAchieved': false},
-  ];
+  List<Map<String, dynamic>> _checklistItems = [];
+  
+  List<Map<String, dynamic>> _getFocusAreasForCall(int callNumber) {
+    if (callNumber <= 2) {
+      return [
+        {'label': 'Emotional check-in', 'isAchieved': false},
+        {'label': 'Getting to know each other', 'isAchieved': false},
+        {'label': 'Comfort + trust', 'isAchieved': false},
+      ];
+    } else if (callNumber <= 4) {
+      return [
+        {'label': 'Emotional check-in', 'isAchieved': false},
+        {'label': 'Routines', 'isAchieved': false},
+        {'label': 'Stress', 'isAchieved': false},
+        {'label': 'Current concerns', 'isAchieved': false},
+      ];
+    } else if (callNumber <= 6) {
+      return [
+        {'label': 'Emotional check-in', 'isAchieved': false},
+        {'label': 'School experiences', 'isAchieved': false},
+        {'label': 'Challenges', 'isAchieved': false},
+        {'label': 'Strengths', 'isAchieved': false},
+      ];
+    } else if (callNumber <= 8) {
+      return [
+        {'label': 'Emotional check-in', 'isAchieved': false},
+        {'label': 'Strengths', 'isAchieved': false},
+        {'label': 'Confidence', 'isAchieved': false},
+        {'label': 'School experiences', 'isAchieved': false},
+      ];
+    } else if (callNumber <= 10) {
+      return [
+        {'label': 'Emotional check-in', 'isAchieved': false},
+        {'label': 'Future hopes', 'isAchieved': false},
+        {'label': 'Skills/interests', 'isAchieved': false},
+        {'label': 'Meaning-making', 'isAchieved': false},
+      ];
+    } else {
+      return [
+        {'label': 'Emotional check-in', 'isAchieved': false},
+        {'label': 'Reflection', 'isAchieved': false},
+        {'label': 'Looking ahead', 'isAchieved': false},
+        {'label': 'Closure', 'isAchieved': false},
+      ];
+    }
+  }
   
   final List<String> _availableTopics = ['Studies', 'Health', 'Family', 'Hobbies', 'Skills', 'Others'];
   final List<String> _selectedTopics = [];
@@ -58,6 +100,26 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
   void initState() {
     super.initState();
     _fetchMentee();
+  }
+  
+  @override
+  void dispose() {
+    _postCallNoteController.dispose();
+    _queryController.dispose();
+    _callDurationController.dispose();
+    _assistanceRequestOtherDetailController.dispose();
+    _otherTopicController.dispose();
+    _otherFocusAreaController.dispose();
+    _redFlagsController.dispose();
+    _volunteerNoteController.dispose();
+    super.dispose();
+  }
+  
+  void _updateChecklistForCurrentCall() {
+    final currentCell = _menteeData?['currentCell'] ?? 1;
+    setState(() {
+      _checklistItems = _getFocusAreasForCall(currentCell);
+    });
   }
 
   Future<void> _fetchMentee() async {
@@ -88,6 +150,8 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
             _menteeData = data['mentee'];
             _loadingMentee = false;
           });
+          // Update checklist based on current call
+          _updateChecklistForCurrentCall();
           // Fetch call notes
           _fetchCallNotes();
         } else {
@@ -157,6 +221,17 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
       final hasAssistanceRequest = _selectedAssistanceRequests.isNotEmpty && 
           !(_selectedAssistanceRequests.length == 1 && _selectedAssistanceRequests.contains('Not required'));
       
+      // Update Other focus area label with custom text
+      final checklistToSend = _checklistItems.map((item) {
+        if (item['label'] == 'Other' && _otherFocusAreaController.text.trim().isNotEmpty) {
+          return {
+            'label': 'Other: ${_otherFocusAreaController.text.trim()}',
+            'isAchieved': item['isAchieved'],
+          };
+        }
+        return item;
+      }).toList();
+      
       final bodyPayload = {
           'menteeId': menteeId,
           'note': _postCallNoteController.text.trim(),
@@ -166,7 +241,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
           'assistanceRequest': _selectedAssistanceRequests,
           'assistanceRequestOtherDetail': _selectedAssistanceRequests.contains('Other Concern') ? _assistanceRequestOtherDetailController.text.trim() : '',
           'moodScore': _moodScore,
-          'checklist': _checklistItems,
+          'checklist': checklistToSend,
           'topics': _selectedTopics,
           'otherTopicDetail': _selectedTopics.contains('Others') ? _otherTopicController.text.trim() : '',
           'mentorHelpfulness': _mentorHelpfulness,
@@ -193,7 +268,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
         if (data['success'] == true) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text("Note saved successfully!"),
+              content: Text("Report saved successfully!"),
               backgroundColor: Colors.green,
             ),
           );
@@ -201,6 +276,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
           _callDurationController.clear();
           _assistanceRequestOtherDetailController.clear();
           _otherTopicController.clear();
+          _otherFocusAreaController.clear();
           _redFlagsController.clear();
           _volunteerNoteController.clear();
           setState(() {
@@ -209,10 +285,26 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
              _mentorHelpfulness = "Yes";
              _selectedTopics.clear();
              _selectedAssistanceRequests.clear();
-             for (var item in _checklistItems) item['isAchieved'] = false;
+             _updateChecklistForCurrentCall(); // Reset checklist to fresh state
           });
           // Refresh notes
-          _fetchCallNotes();
+          await _fetchCallNotes();
+          
+          // Auto-advance to next call or mark complete for call 12
+          if (currentCell <= 12) {
+            await Future.delayed(Duration(milliseconds: 800));
+            if (currentCell < 12) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text("Moving to Call #${currentCell + 1}..."),
+                  backgroundColor: AppColors.primaryBlue,
+                  duration: Duration(seconds: 2),
+                ),
+              );
+            }
+            await Future.delayed(Duration(milliseconds: 500));
+            await _advanceProgress();
+          }
         }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -276,7 +368,45 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
     if (_menteeData == null) return;
     
     final currentCell = _menteeData!['currentCell'] ?? 1;
-    // Removed cap of 3. Allow unlimited calls.
+    
+    // For call 12, mark as complete and show celebration
+    if (currentCell >= 12) {
+      try {
+        final token = await secureStorage.read(key: "token");
+        final menteeId = _menteeData!['_id'];
+        
+        // Mark call 12 as complete by setting to 13 (indicating all calls done)
+        final response = await http.patch(
+          Uri.parse('$baseUrl/companion-connect/progress'),
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'application/json',
+          },
+          body: json.encode({
+            'menteeId': menteeId,
+            'newCell': 13,
+          }),
+        );
+
+        if (response.statusCode == 200) {
+          final data = json.decode(response.body);
+          if (data['success'] == true) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text("🎉 Congratulations! You've completed all 12 calls with your mentee!"),
+                backgroundColor: AppColors.accentGreen,
+                duration: Duration(seconds: 3),
+              ),
+            );
+            // Refresh mentee data to show completion
+            _fetchMentee();
+          }
+        }
+      } catch (e) {
+        print('Error marking completion: $e');
+      }
+      return;
+    }
 
     final newCell = currentCell + 1;
     
@@ -381,6 +511,9 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
             
             // Progress Tracker
             _buildProgressTracker(),
+            
+            // Focus Areas Guide
+            _buildFocusAreasGuide(),
             
             // Log Post Call Note
             _buildPostCallNoteSection(),
@@ -679,7 +812,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
     if (_menteeData == null) return const SizedBox.shrink();
 
     final int currentCell = _menteeData!['currentCell'] ?? 1;
-    final int totalCalls = currentCell + 5; // Show current + 5 upcoming calls
+    final int totalCalls = currentCell <= 12 ? (currentCell + 5 > 12 ? 12 : currentCell + 5) : 12; // Cap at 12 calls
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
@@ -735,12 +868,15 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                   children: [
                     Row(
                       children: [
-                        Text(
-                          "🗺️ Epic Journey",
-                          style: GoogleFonts.poppins(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.primaryBlue,
+                        Flexible(
+                          child: Text(
+                            "🗺️ Epic Journey",
+                            style: GoogleFonts.poppins(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.primaryBlue,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         SizedBox(width: 6),
@@ -873,6 +1009,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
           ),
           SizedBox(height: 16),
           // Complete Quest Button
+          if (currentCell < 12)
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -917,6 +1054,38 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
               ),
             ),
           ),
+          if (currentCell >= 12)
+          Container(
+            padding: EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.amber.shade400, Colors.orange.shade400],
+              ),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.amber.withOpacity(0.4),
+                  blurRadius: 12,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.emoji_events, color: Colors.white, size: 28),
+                SizedBox(width: 12),
+                Text(
+                  "Journey Complete! 🎉",
+                  style: GoogleFonts.poppins(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          ),
           const SizedBox(height: 24),
           
           // Scrollable Adventure Map Trail
@@ -935,26 +1104,34 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
               borderRadius: BorderRadius.circular(16),
               border: Border.all(color: AppColors.primaryBlue.withOpacity(0.2)),
             ),
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: totalCalls,
-              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 25),
-              itemBuilder: (context, index) {
-                final callNumber = index + 1;
-                final isCompleted = callNumber < currentCell;
-                final isCurrent = callNumber == currentCell;
-                final isUpcoming = callNumber > currentCell;
-                final isMilestone = callNumber % 5 == 0;
-                
-                return _buildStoryNode(
-                  callNumber: callNumber,
-                  isCompleted: isCompleted,
-                  isCurrent: isCurrent,
-                  isUpcoming: isUpcoming,
-                  isMilestone: isMilestone,
-                  isLast: index == totalCalls - 1,
-                );
-              },
+            child: ScrollConfiguration(
+              behavior: ScrollConfiguration.of(context).copyWith(
+                dragDevices: {
+                  PointerDeviceKind.touch,
+                  PointerDeviceKind.mouse,
+                },
+              ),
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: totalCalls,
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 25),
+                itemBuilder: (context, index) {
+                  final callNumber = index + 1;
+                  final isCompleted = callNumber < currentCell;
+                  final isCurrent = callNumber == currentCell;
+                  final isUpcoming = callNumber > currentCell;
+                  final isMilestone = callNumber % 5 == 0;
+                  
+                  return _buildStoryNode(
+                    callNumber: callNumber,
+                    isCompleted: isCompleted,
+                    isCurrent: isCurrent,
+                    isUpcoming: isUpcoming,
+                    isMilestone: isMilestone,
+                    isLast: callNumber == totalCalls,
+                  );
+                },
+              ),
             ),
           ),
           
@@ -1074,10 +1251,11 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Container(
-          width: isMilestone ? 110 : 100,
+        SizedBox(
+          width: isMilestone ? 120 : 110,
+          height: isMilestone ? 220 : 170,
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
               // Milestone Badge
               if (isMilestone)
@@ -1115,111 +1293,117 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                   ),
                 ),
               // Story Node with pulse animation
-              Stack(
-                alignment: Alignment.center,
-                children: [
-                  // Outer glow ring for current quest
-                  if (isCurrent)
-                    Container(
-                      width: isMilestone ? 100 : 90,
-                      height: isMilestone ? 100 : 90,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: RadialGradient(
-                          colors: [
-                            glowColor.withOpacity(0.4),
-                            glowColor.withOpacity(0.2),
-                            glowColor.withOpacity(0.0),
-                          ],
-                        ),
-                      ),
-                    ),
-                  // Main quest node
-                  Container(
-                    width: isMilestone ? 85 : 75,
-                    height: isMilestone ? 85 : 75,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: isUpcoming
-                            ? [nodeColor, nodeColor]
-                            : [nodeColor, nodeColor.withOpacity(0.75)],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: glowColor.withOpacity(isCurrent ? 0.6 : 0.25),
-                          blurRadius: isCurrent ? 20 : 10,
-                          spreadRadius: isCurrent ? 4 : 2,
-                          offset: Offset(0, isCurrent ? 6 : 3),
-                        ),
-                      ],
-                      border: Border.all(
-                        color: isCurrent ? Colors.white : Colors.white.withOpacity(0.4),
-                        width: isCurrent ? 5 : 3,
-                      ),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          emoji,
-                          style: TextStyle(fontSize: isMilestone ? 32 : 26),
-                        ),
-                        SizedBox(height: 3),
-                        Text(
-                          "#$callNumber",
-                          style: GoogleFonts.poppins(
-                            fontSize: isMilestone ? 16 : 14,
-                            fontWeight: FontWeight.w900,
-                            color: isUpcoming ? Colors.white.withOpacity(0.6) : Colors.white,
-                            shadows: [
-                              Shadow(
-                                color: Colors.black.withOpacity(0.3),
-                                offset: Offset(1, 1),
-                                blurRadius: 2,
-                              ),
+              GestureDetector(
+                onTap: isCompleted ? () {
+                  print("👆 Tapped on completed Call #$callNumber");
+                  _showCallDetails(callNumber);
+                } : null,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    // Outer glow ring for current quest
+                    if (isCurrent)
+                      Container(
+                        width: isMilestone ? 100 : 90,
+                        height: isMilestone ? 100 : 90,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: RadialGradient(
+                            colors: [
+                              glowColor.withOpacity(0.4),
+                              glowColor.withOpacity(0.2),
+                              glowColor.withOpacity(0.0),
                             ],
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                  // Reward badge
-                  if (isCompleted || isCurrent)
-                    Positioned(
-                      bottom: isMilestone ? -5 : -8,
-                      child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: isCompleted
-                                ? [AppColors.accentGreen, Colors.green.shade600]
-                                : [AppColors.accentYellow, AppColors.accentOrange],
-                          ),
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: Colors.white, width: 2),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
-                              blurRadius: 4,
-                              offset: Offset(0, 2),
-                            ),
-                          ],
+                      ),
+                    // Main quest node
+                    Container(
+                      width: isMilestone ? 85 : 75,
+                      height: isMilestone ? 85 : 75,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: isUpcoming
+                              ? [nodeColor, nodeColor]
+                              : [nodeColor, nodeColor.withOpacity(0.75)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
                         ),
-                        child: Text(
-                          rewardText,
-                          style: GoogleFonts.poppins(
-                            fontSize: 9,
-                            fontWeight: FontWeight.w900,
-                            color: Colors.white,
-                            letterSpacing: 0.5,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: glowColor.withOpacity(isCurrent ? 0.6 : 0.25),
+                            blurRadius: isCurrent ? 20 : 10,
+                            spreadRadius: isCurrent ? 4 : 2,
+                            offset: Offset(0, isCurrent ? 6 : 3),
+                          ),
+                        ],
+                        border: Border.all(
+                          color: isCurrent ? Colors.white : Colors.white.withOpacity(0.4),
+                          width: isCurrent ? 5 : 3,
+                        ),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            emoji,
+                            style: TextStyle(fontSize: isMilestone ? 32 : 26),
+                          ),
+                          SizedBox(height: 3),
+                          Text(
+                            "#$callNumber",
+                            style: GoogleFonts.poppins(
+                              fontSize: isMilestone ? 16 : 14,
+                              fontWeight: FontWeight.w900,
+                              color: isUpcoming ? Colors.white.withOpacity(0.6) : Colors.white,
+                              shadows: [
+                                Shadow(
+                                  color: Colors.black.withOpacity(0.3),
+                                  offset: Offset(1, 1),
+                                  blurRadius: 2,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Reward badge
+                    if (isCompleted || isCurrent)
+                      Positioned(
+                        bottom: isMilestone ? -5 : -8,
+                        child: Container(
+                          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: isCompleted
+                                  ? [AppColors.accentGreen, Colors.green.shade600]
+                                  : [AppColors.accentYellow, AppColors.accentOrange],
+                            ),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: Colors.white, width: 2),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.2),
+                                blurRadius: 4,
+                                offset: Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Text(
+                            rewardText,
+                            style: GoogleFonts.poppins(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.white,
+                              letterSpacing: 0.5,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                ],
+                  ],
+                ),
               ),
               SizedBox(height: 10),
               // Status Label with icon
@@ -1233,17 +1417,20 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                   if (isUpcoming)
                     Icon(Icons.lock, color: Colors.grey.shade500, size: 12),
                   SizedBox(width: 4),
-                  Text(
-                    isCompleted ? "Victory!" : isCurrent ? "In Battle" : "Upcoming",
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.poppins(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w800,
-                      color: isCompleted
-                          ? AppColors.accentGreen
-                          : isCurrent
-                              ? AppColors.primaryBlue
-                              : Colors.grey.shade500,
+                  Flexible(
+                    child: Text(
+                      isCompleted ? "Victory!" : isCurrent ? "In Battle" : "Upcoming",
+                      textAlign: TextAlign.center,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.poppins(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                        color: isCompleted
+                            ? AppColors.accentGreen
+                            : isCurrent
+                                ? AppColors.primaryBlue
+                                : Colors.grey.shade500,
+                      ),
                     ),
                   ),
                 ],
@@ -1426,6 +1613,188 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
       size: 20,
     );
   }
+  
+  Widget _buildFocusAreasGuide() {
+    if (_menteeData == null) return const SizedBox.shrink();
+    
+    final currentCell = _menteeData!['currentCell'] ?? 1;
+    final focusAreas = _getFocusAreasForCall(currentCell);
+    
+    String phaseTitle;
+    String phaseDescription;
+    Color phaseColor;
+    IconData phaseIcon;
+    
+    if (currentCell <= 2) {
+      phaseTitle = "Building Connection";
+      phaseDescription = "Focus on creating a safe, comfortable space";
+      phaseColor = AppColors.accentGreen;
+      phaseIcon = Icons.handshake;
+    } else if (currentCell <= 4) {
+      phaseTitle = "Understanding Daily Life";
+      phaseDescription = "Explore routines, stress, and current concerns";
+      phaseColor = AppColors.primaryBlue;
+      phaseIcon = Icons.calendar_today;
+    } else if (currentCell <= 6) {
+      phaseTitle = "School & Growth";
+      phaseDescription = "Discuss academic experiences and strengths";
+      phaseColor = AppColors.accentOrange;
+      phaseIcon = Icons.school;
+    } else if (currentCell <= 8) {
+      phaseTitle = "Building Confidence";
+      phaseDescription = "Reinforce strengths and self-belief";
+      phaseColor = AppColors.accentYellow;
+      phaseIcon = Icons.star;
+    } else if (currentCell <= 10) {
+      phaseTitle = "Future Aspirations";
+      phaseDescription = "Explore hopes, interests, and dreams";
+      phaseColor = Colors.purple.shade400;
+      phaseIcon = Icons.rocket_launch;
+    } else {
+      phaseTitle = "Reflection & Closure";
+      phaseDescription = "Look back on growth and plan for the future";
+      phaseColor = Colors.pink.shade400;
+      phaseIcon = Icons.favorite;
+    }
+    
+    return Container(
+      margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            phaseColor.withOpacity(0.1),
+            phaseColor.withOpacity(0.05),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: phaseColor.withOpacity(0.3), width: 2),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: phaseColor,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: phaseColor.withOpacity(0.3),
+                      blurRadius: 8,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Icon(phaseIcon, color: Colors.white, size: 24),
+              ),
+              SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      phaseTitle,
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: phaseColor,
+                      ),
+                    ),
+                    Text(
+                      phaseDescription,
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
+                        color: Colors.grey.shade700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 16),
+          Text(
+            "Suggested Focus Areas:",
+            style: GoogleFonts.poppins(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey.shade800,
+            ),
+          ),
+          SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: focusAreas.map((area) {
+              return Container(
+                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: phaseColor.withOpacity(0.3)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 4,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.circle,
+                      size: 8,
+                      color: phaseColor,
+                    ),
+                    SizedBox(width: 6),
+                    Text(
+                      area['label'],
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey.shade800,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
+          ),
+          SizedBox(height: 12),
+          Container(
+            padding: EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Colors.blue.shade50,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.blue.shade200),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.lightbulb, size: 16, color: Colors.blue.shade700),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    "These are conversation guides, not strict requirements. Follow the mentee's lead.",
+                    style: GoogleFonts.poppins(
+                      fontSize: 11,
+                      color: Colors.blue.shade700,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _buildPostCallNoteSection() {
     return Container(
@@ -1505,65 +1874,75 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
           // 2. Checklist
           Row(
             children: [
-              Text("Discussion Focus for this call?", style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 14)),
+              Expanded(
+                child: Text("Which focus areas were covered?", style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 14)),
+              ),
               const SizedBox(width: 6),
-              GestureDetector(
-                onTap: () {
-                  showDialog(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: Row(
-                        children: [
-                          Icon(Icons.info_outline, color: AppColors.primaryBlue),
-                          const SizedBox(width: 8),
-                          Text("Discussion Focus Areas", style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600)),
-                        ],
-                      ),
-                      content: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "What are the focus areas for this call session?",
-                            style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w500),
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            "Check the topics you discussed or covered during this call. These help track progress and identify what areas need more attention in future sessions.",
-                            style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade700),
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            "💡 Tip: You don't need to check all boxes every call. Focus on what's most relevant for this session.",
-                            style: GoogleFonts.poppins(fontSize: 12, color: AppColors.primaryBlue, fontStyle: FontStyle.italic),
-                          ),
-                        ],
-                      ),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: Text("Got it!", style: GoogleFonts.poppins(color: AppColors.primaryBlue, fontWeight: FontWeight.w600)),
-                        ),
-                      ],
-                    ),
-                  );
-                },
+              Tooltip(
+                message: "Check the topics you discussed during this call",
                 child: Icon(Icons.info_outline, size: 18, color: AppColors.primaryBlue),
               ),
             ],
           ),
           const SizedBox(height: 8),
+          if (_checklistItems.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: Text(
+                "Loading focus areas...",
+                style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey),
+              ),
+            ),
           ..._checklistItems.map((item) {
              return CheckboxListTile(
-                title: Text(item['label'], style: GoogleFonts.poppins(fontSize: 13)),
+                title: Text(item['label'] == 'Other' ? 'Other' : item['label'], style: GoogleFonts.poppins(fontSize: 13)),
                 value: item['isAchieved'],
                 activeColor: AppColors.primaryBlue,
                 dense: true,
                 contentPadding: EdgeInsets.zero,
                 controlAffinity: ListTileControlAffinity.leading,
-                onChanged: (v) => setState(() => item['isAchieved'] = v),
+                onChanged: (v) {
+                  setState(() {
+                    if (item['label'] == 'Other' && v == false) {
+                      // If unchecking "Other", remove it from the list
+                      _checklistItems.removeWhere((i) => i['label'] == 'Other');
+                      _otherFocusAreaController.clear();
+                    } else {
+                      item['isAchieved'] = v;
+                    }
+                  });
+                },
              );
           }).toList(),
+          if (!_checklistItems.any((item) => item['label'] == 'Other'))
+            CheckboxListTile(
+              title: Text('Other', style: GoogleFonts.poppins(fontSize: 13)),
+              value: false,
+              activeColor: AppColors.primaryBlue,
+              dense: true,
+              contentPadding: EdgeInsets.zero,
+              controlAffinity: ListTileControlAffinity.leading,
+              onChanged: (v) {
+                if (v == true) {
+                  setState(() {
+                    _checklistItems.add({'label': 'Other', 'isAchieved': true});
+                  });
+                }
+              },
+            ),
+          if (_checklistItems.any((item) => item['label'] == 'Other' && item['isAchieved'] == true)) ...[
+            const SizedBox(height: 8),
+            TextField(
+              controller: _otherFocusAreaController,
+              decoration: InputDecoration(
+                hintText: "Specify other focus area...",
+                hintStyle: GoogleFonts.poppins(fontSize: 12),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              ),
+              style: GoogleFonts.poppins(fontSize: 13),
+            ),
+          ],
           const SizedBox(height: 16),
 
           // 3. Topics
@@ -1667,7 +2046,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
           const SizedBox(height: 16),
           
           // 6. Mentor Helpfulness
-          Text("Did you find this call helpful?", style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 14)),
+          Text("Did this conversation feel meaningful??", style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 14)),
           Row(
             children: ["Yes", "Neutral", "No"].map((opt) => 
                Expanded(
@@ -2176,6 +2555,332 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
     );
   }
 
+  void _showCallDetails(int callNumber) {
+    print("🔍 _showCallDetails called for Call #$callNumber");
+    print("🔍 Total notes available: ${_callNotes.length}");
+    print("🔍 Call notes data: ${_callNotes.map((n) => 'Call #${n['cellNumber']}').join(', ')}");
+    
+    final callNote = _callNotes.firstWhere(
+      (note) => note['cellNumber'] == callNumber,
+      orElse: () => null,
+    );
+    
+    if (callNote == null) {
+      print("❌ No call note found for Call #$callNumber");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("No details found for Call #$callNumber"),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+    
+    print("✅ Found call note for Call #$callNumber: ${callNote.keys.toList()}");
+    
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.85,
+          minChildSize: 0.5,
+          maxChildSize: 0.95,
+          builder: (_, scrollController) {
+            return Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(24),
+                  topRight: Radius.circular(24),
+                ),
+              ),
+              child: Column(
+                children: [
+                  // Handle bar
+                  Container(
+                    margin: EdgeInsets.only(top: 12, bottom: 8),
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  // Header
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            gradient: AppColors.primaryGradient,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(Icons.history, color: Colors.white, size: 24),
+                        ),
+                        SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Call #$callNumber Report",
+                                style: GoogleFonts.poppins(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              Text(
+                                "Read-only view",
+                                style: GoogleFonts.poppins(
+                                  fontSize: 12,
+                                  color: Colors.grey.shade600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () => Navigator.pop(context),
+                          icon: Icon(Icons.close),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Divider(),
+                  // Content
+                  Expanded(
+                    child: ListView(
+                      controller: scrollController,
+                      padding: EdgeInsets.all(20),
+                      children: [
+                        _buildReadOnlyField("Date", _formatDate(callNote['createdAt'])),
+                        SizedBox(height: 16),
+                        _buildReadOnlyField("Call Duration", "${callNote['callDuration'] ?? 0} minutes"),
+                        SizedBox(height: 16),
+                        _buildReadOnlyField("Mentee's Mood", "${callNote['moodScore'] ?? 'N/A'} ${_getMoodEmoji(callNote['moodScore']?.toDouble() ?? 3.0)}"),
+                        SizedBox(height: 16),
+                        if (callNote['checklist'] != null && (callNote['checklist'] as List).isNotEmpty) ...[
+                          _buildReadOnlySection(
+                            "Focus Areas Covered",
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: (callNote['checklist'] as List)
+                                  .where((item) => item['isAchieved'] == true)
+                                  .map((item) => Padding(
+                                        padding: EdgeInsets.only(bottom: 8),
+                                        child: Row(
+                                          children: [
+                                            Icon(Icons.check_circle, color: AppColors.accentGreen, size: 18),
+                                            SizedBox(width: 8),
+                                            Text(
+                                              item['label'] ?? '',
+                                              style: GoogleFonts.poppins(fontSize: 14),
+                                            ),
+                                          ],
+                                        ),
+                                      ))
+                                  .toList(),
+                            ),
+                          ),
+                          SizedBox(height: 16),
+                        ],
+                        if (callNote['topics'] != null && (callNote['topics'] as List).isNotEmpty) ...[
+                          _buildReadOnlySection(
+                            "Topics Covered",
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: (callNote['topics'] as List)
+                                  .map((topic) => Chip(
+                                        label: Text(
+                                          topic,
+                                          style: GoogleFonts.poppins(fontSize: 12),
+                                        ),
+                                        backgroundColor: AppColors.primaryBlue.withOpacity(0.1),
+                                      ))
+                                  .toList(),
+                            ),
+                          ),
+                          SizedBox(height: 16),
+                        ],
+                        if (callNote['otherTopicDetail'] != null && callNote['otherTopicDetail'].toString().trim().isNotEmpty) ...[
+                          _buildReadOnlyField("Other Topic Details", callNote['otherTopicDetail']),
+                          SizedBox(height: 16),
+                        ],
+                        _buildReadOnlyField("Observations / Notes", callNote['note'] ?? 'No notes'),
+                        SizedBox(height: 16),
+                        if (callNote['assistanceRequest'] != null && (callNote['assistanceRequest'] as List).isNotEmpty) ...[
+                          _buildReadOnlySection(
+                            "Assistance Needed",
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: (callNote['assistanceRequest'] as List)
+                                  .map((request) => Chip(
+                                        label: Text(
+                                          request,
+                                          style: GoogleFonts.poppins(fontSize: 12),
+                                        ),
+                                        backgroundColor: Colors.orange.withOpacity(0.1),
+                                      ))
+                                  .toList(),
+                            ),
+                          ),
+                          SizedBox(height: 16),
+                        ],
+                        if (callNote['assistanceRequestOtherDetail'] != null && callNote['assistanceRequestOtherDetail'].toString().trim().isNotEmpty) ...[
+                          _buildReadOnlyField("Other Concern Details", callNote['assistanceRequestOtherDetail']),
+                          SizedBox(height: 16),
+                        ],
+                        _buildReadOnlyField("Conversation Meaningful?", callNote['mentorHelpfulness'] ?? 'N/A'),
+                        SizedBox(height: 16),
+                        if (callNote['redFlags'] != null && callNote['redFlags'].toString().trim().isNotEmpty) ...[
+                          Container(
+                            padding: EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.red.shade50,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: Colors.red.shade200),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(Icons.warning, color: Colors.red, size: 20),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      "Red Flags",
+                                      style: GoogleFonts.poppins(
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 14,
+                                        color: Colors.red,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 8),
+                                Text(
+                                  callNote['redFlags'],
+                                  style: GoogleFonts.poppins(fontSize: 13),
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(height: 16),
+                        ],
+                        if (callNote['volunteerComfort'] != null) ...[
+                          _buildReadOnlyField("Your Comfort Level", "${callNote['volunteerComfort']}/5"),
+                          SizedBox(height: 16),
+                        ],
+                        if (callNote['volunteerNote'] != null && callNote['volunteerNote'].toString().trim().isNotEmpty) ...[
+                          Container(
+                            padding: EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: AppColors.primaryBlue.withOpacity(0.05),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: AppColors.primaryBlue.withOpacity(0.2)),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(Icons.favorite, color: AppColors.primaryBlue, size: 20),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      "Your Personal Notes",
+                                      style: GoogleFonts.poppins(
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 14,
+                                        color: AppColors.primaryBlue,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 8),
+                                Text(
+                                  callNote['volunteerNote'],
+                                  style: GoogleFonts.poppins(fontSize: 13),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+  
+  Widget _buildReadOnlyField(String label, String value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.poppins(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: Colors.grey.shade700,
+          ),
+        ),
+        SizedBox(height: 6),
+        Container(
+          width: double.infinity,
+          padding: EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade100,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Colors.grey.shade300),
+          ),
+          child: Text(
+            value,
+            style: GoogleFonts.poppins(fontSize: 14),
+          ),
+        ),
+      ],
+    );
+  }
+  
+  Widget _buildReadOnlySection(String title, Widget content) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: GoogleFonts.poppins(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: Colors.grey.shade700,
+          ),
+        ),
+        SizedBox(height: 8),
+        content,
+      ],
+    );
+  }
+  
+  String _formatDate(String? dateStr) {
+    if (dateStr == null) return 'N/A';
+    try {
+      final date = DateTime.parse(dateStr);
+      return "${date.day}/${date.month}/${date.year} at ${date.hour}:${date.minute.toString().padLeft(2, '0')}";
+    } catch (e) {
+      return 'N/A';
+    }
+  }
+
   void _showMenteeProfile() {
     if (_menteeData == null) return;
     
@@ -2302,6 +3007,13 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
           ),
         ),
         const SizedBox(height: 16),
+        _buildResourceItem(
+          "Ethical Code of Conduct", 
+          "PDF • Google Drive", 
+          Icons.gavel, 
+          Colors.blue.shade700,
+          url: "https://drive.google.com/file/d/1Xuu7iIUtExIQxPI_HJexbhlSWUx44l4q/view?usp=sharing"
+        ),
         _buildResourceItem("Introduction to Mentoring", "PDF • 2.5 MB", Icons.picture_as_pdf, Colors.red),
         _buildResourceItem("Communication Skills", "Video • 15 min", Icons.video_library, Colors.purple),
         _buildResourceItem("Active Listening Guide", "PDF • 1.8 MB", Icons.picture_as_pdf, Colors.red),
@@ -2310,49 +3022,71 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
     );
   }
 
-  Widget _buildResourceItem(String title, String subtitle, IconData icon, Color color) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(10),
+  Widget _buildResourceItem(String title, String subtitle, IconData icon, Color color, {String? url}) {
+    return InkWell(
+      onTap: url != null ? () async {
+        try {
+          final uri = Uri.parse(url);
+          if (await canLaunchUrl(uri)) {
+            await launchUrl(uri, mode: LaunchMode.externalApplication);
+          } else {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Could not open resource')),
+              );
+            }
+          }
+        } catch (e) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Error opening resource: $e')),
+            );
+          }
+        }
+      } : null,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: color.withOpacity(0.3)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon, color: color),
             ),
-            child: Icon(icon, color: color),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: GoogleFonts.poppins(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: GoogleFonts.poppins(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
                   ),
-                ),
-                Text(
-                  subtitle,
-                  style: GoogleFonts.poppins(
-                    fontSize: 12,
-                    color: Colors.grey.shade600,
+                  Text(
+                    subtitle,
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      color: Colors.grey.shade600,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          Icon(Icons.download, color: color),
-        ],
+            Icon(url != null ? Icons.open_in_new : Icons.download, color: color),
+          ],
+        ),
       ),
     );
   }

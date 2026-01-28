@@ -100,7 +100,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    "TSF Volunteer Management System",
+                    "PY4P Volunteer Management System",
                     style: GoogleFonts.poppins(
                       fontSize: 16,
                       color: Colors.grey[600],
