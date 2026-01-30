@@ -2242,16 +2242,6 @@ class _AdminScreenState extends State<AdminScreen>
             ),
             actions: [
               IconButton(
-                icon: const Icon(
-                  Icons.settings_suggest_rounded,
-                  color: Colors.white,
-                ),
-                onPressed: () {
-                  Navigator.pushNamed(context, '/admin/vms/dashboard');
-                },
-                tooltip: 'VMS & CCP Controls',
-              ),
-              IconButton(
                 icon: const Icon(Icons.refresh_rounded, color: Colors.white),
                 onPressed: () async {
                   await _fetchPendingVolunteers();

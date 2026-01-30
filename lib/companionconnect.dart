@@ -551,7 +551,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
               child: _buildActionButton(
                 icon: Icons.help_outline,
                 label: "Support",
-                color: AppColors.primaryBlue,
+                color: AppColors.accentGreen,
                 onTap: () => _showBottomSheet(2),
               ),
             ),
@@ -561,7 +561,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
               child: _buildActionButton(
                 icon: Icons.phone,
                 label: "Call",
-                color: AppColors.accentGreen,
+                color: AppColors.accentOrange,
                 onTap: _makePhoneCall,
               ),
             ),
@@ -571,7 +571,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
               child: _buildActionButton(
                 icon: Icons.folder_open,
                 label: "Resources",
-                color: AppColors.accentOrange,
+                color: AppColors.secondaryBlue,
                 onTap: () => _showBottomSheet(0),
               ),
             ),

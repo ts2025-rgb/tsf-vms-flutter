@@ -9,6 +9,7 @@ import 'screens/admin/vms_dashboard_screen.dart';
 import 'screens/admin/volunteer_detail_screen.dart';
 import 'screens/admin/handover_form_screen.dart';
 import 'screens/admin/certificate_management_screen.dart';
+import 'screens/admin/ccp_admin_dashboard_screen.dart';
 import 'models/volunteer_model.dart';
 import 'config/app_colors.dart';
 
@@ -47,6 +48,7 @@ class PY4PVMSApp extends StatelessWidget {
         '/admin': (context) => const AdminHomeScreen(),
         '/admin/volunteers': (context) => const AdminScreen(),
         '/admin/vms/dashboard': (context) => const VMSDashboardScreen(),
+        '/admin/ccp/dashboard': (context) => const CCPAdminDashboardScreen(),
         '/admin/vms/certificates': (context) => const CertificateManagementScreen(),
       },
       onGenerateRoute: (settings) {

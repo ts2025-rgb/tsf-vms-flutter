@@ -21,7 +21,10 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
   List<dynamic> _mentees = [];
   List<dynamic> _volunteers = [];
   List<dynamic> _programs = [];
+  List<dynamic> _allCCVolunteers = [];
+  List<dynamic> _approvedCCVolunteers = [];
   String? _companionConnectProgramId;
+  String? _companionConnectProgramMongoId;
   bool _loading = true;
   String _filter = 'all'; // all, assigned, unassigned
 
@@ -69,8 +72,9 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
             );
             
             if (ccProgram != null) {
-              _companionConnectProgramId = ccProgram['id']; // Changed from _id to id
-              print('✅ Found Companion Connect ID: $_companionConnectProgramId');
+              _companionConnectProgramId = ccProgram['id']; // API id field
+              _companionConnectProgramMongoId = ccProgram['_id']; // MongoDB _id field
+              print('✅ Found Companion Connect ID: $_companionConnectProgramId, MongoID: $_companionConnectProgramMongoId');
             } else {
               print('❌ Companion Connect program not found!');
             }
@@ -144,15 +148,76 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
       );
 
       if (response.statusCode == 200) {
+        print('📡 Volunteers API Response Status: ${response.statusCode}');
+        print('📡 Volunteers API Response: ${response.body.substring(0, response.body.length > 500 ? 500 : response.body.length)}');
+        
         final data = json.decode(response.body);
         if (data['success'] == true) {
+          final allVolunteers = (data['volunteers'] as List);
+          print('📊 Total volunteers from API: ${allVolunteers.length}');
+          
+          // Debug: Check first few volunteers
+          if (allVolunteers.isNotEmpty) {
+            print('🔍 Sample volunteer data: ${allVolunteers[0]}');
+          }
+          
+          // Debug: Count volunteers by role
+          final volunteersByRole = allVolunteers.where((v) => v['role'] == 'volunteer').length;
+          final allUsers = allVolunteers.length;
+          print('👥 Total users: $allUsers, Volunteers: $volunteersByRole');
+          
+          // All volunteers enrolled in Companion Connect program
+          _allCCVolunteers = (_companionConnectProgramId != null || _companionConnectProgramMongoId != null) ? allVolunteers.where((v) {
+            if (v['role'] != 'volunteer') {
+              return false;
+            }
+            if (v['interestedPrograms'] == null) {
+              print('⚠️ Volunteer ${v['fullName']} has no interestedPrograms');
+              return false;
+            }
+            final interestedPrograms = v['interestedPrograms'] as List;
+            print('📋 Volunteer ${v['fullName']} interestedPrograms: $interestedPrograms');
+            print('🔍 Looking for CC ID: $_companionConnectProgramId or $_companionConnectProgramMongoId');
+            // Check if interestedPrograms contains the Companion Connect program ID
+            // Handle both 'id' and '_id' formats in case of API inconsistencies
+            final hasCCProgram = interestedPrograms.contains(_companionConnectProgramId) ||
+                               interestedPrograms.contains(_companionConnectProgramMongoId);
+            if (hasCCProgram) {
+              print('✅ Volunteer ${v['fullName']} has CC program');
+            } else {
+              print('❌ Volunteer ${v['fullName']} does not have CC program');
+            }
+            return hasCCProgram;
+          }).toList() : [];
+          
+          print('🎯 CC Volunteers found: ${_allCCVolunteers.length}');
+          
+          // Approved volunteers for assignment
+          _approvedCCVolunteers = _allCCVolunteers.where((v) {
+            final approvalStatus = v['approvalStatus'] ?? v['status'];
+            final isApproved = approvalStatus == 'approved' || 
+                             approvalStatus == 'active' || 
+                             approvalStatus == true ||
+                             approvalStatus == null; // Assume approved if no status field
+            if (!isApproved) {
+              print('❌ Volunteer ${v['fullName']} not approved (status: $approvalStatus)');
+            } else {
+              print('✅ Volunteer ${v['fullName']} is approved');
+            }
+            return isApproved;
+          }).toList();
+          
+          // Fallback: if no approved volunteers found, use all CC volunteers (assume approved by default)
+          if (_approvedCCVolunteers.isEmpty && _allCCVolunteers.isNotEmpty) {
+            print('⚠️ No approved volunteers found, using all CC volunteers as active');
+            _approvedCCVolunteers = _allCCVolunteers;
+          }
+          
+          print('✅ Final Approved CC Volunteers: ${_approvedCCVolunteers.length}');
+          
           setState(() {
-            // Filter only approved volunteers with Companion Connect program
-            _volunteers = (data['volunteers'] as List).where((v) {
-              return v['approvalStatus'] == 'approved' &&
-                     v['interestedPrograms'] != null &&
-                     (v['interestedPrograms'] as List).isNotEmpty;
-            }).toList();
+            // For assignment dialog, use approved volunteers
+            _volunteers = _approvedCCVolunteers;
           });
         }
       }
@@ -287,7 +352,7 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
           // Check if Companion Connect program exists
-          if (_companionConnectProgramId == null) {
+          if (_companionConnectProgramId == null && _companionConnectProgramMongoId == null) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text('Error: Companion Connect program not found in database'),
@@ -307,7 +372,7 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
             context,
             MaterialPageRoute(
               builder: (context) => CreateMenteePage(
-                companionConnectProgramId: _companionConnectProgramId!,
+                companionConnectProgramId: _companionConnectProgramMongoId ?? _companionConnectProgramId!,
               ),
             ),
           );
@@ -454,8 +519,11 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
   }
 
   Widget _buildStats() {
-    final assignedCount = _mentees.where((m) => m['assignedTo'] != null).length;
-    final activeCount = _mentees.where((m) => m['status'] == 'active').length;
+    final totalCCVolunteers = _allCCVolunteers.length;
+    final activeCCVolunteers = _approvedCCVolunteers.length;
+    final availableCCVolunteers = _approvedCCVolunteers.where((v) {
+      return !_mentees.any((m) => m['assignedTo'] != null && m['assignedTo']['id'] == v['id']);
+    }).length;
     
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
@@ -470,9 +538,9 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _buildStatItem(Icons.people, 'Total', _mentees.length.toString()),
-          _buildStatItem(Icons.link, 'Assigned', assignedCount.toString()),
-          _buildStatItem(Icons.check_circle, 'Active', activeCount.toString()),
+          _buildStatItem(Icons.people, 'Total Volunteers', totalCCVolunteers.toString()),
+          _buildStatItem(Icons.check_circle, 'Active Volunteers', activeCCVolunteers.toString()),
+          _buildStatItem(Icons.person_add, 'Available', availableCCVolunteers.toString()),
         ],
       ),
     );
@@ -493,7 +561,7 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
         ),
         Text(
           label,
-          style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey.shade600),
+          style: GoogleFonts.poppins(fontSize: 12, color: const Color.fromARGB(255, 0, 0, 0)),
         ),
       ],
     );
@@ -586,7 +654,7 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                             decoration: BoxDecoration(
-                              color: status == 'active' ? Colors.green.shade100 : Colors.grey.shade200,
+                              color: status == 'active' ? AppColors.accentGreen.withOpacity(0.1) : Colors.grey.shade200,
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
@@ -594,7 +662,7 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
                               style: GoogleFonts.poppins(
                                 fontSize: 10,
                                 fontWeight: FontWeight.w600,
-                                color: status == 'active' ? Colors.green.shade700 : Colors.grey.shade700,
+                                color: status == 'active' ? AppColors.accentGreen : Colors.grey.shade700,
                               ),
                             ),
                           ),
@@ -624,10 +692,10 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: isAssigned ? Colors.green.shade50 : Colors.orange.shade50,
+                color: isAssigned ? AppColors.accentGreen.withOpacity(0.1) : AppColors.accentOrange.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: isAssigned ? Colors.green.shade200 : Colors.orange.shade200,
+                  color: isAssigned ? AppColors.accentGreen.withOpacity(0.3) : AppColors.accentOrange.withOpacity(0.3),
                 ),
               ),
               child: Row(
@@ -635,7 +703,7 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
                   Icon(
                     isAssigned ? Icons.check_circle : Icons.warning,
                     size: 16,
-                    color: isAssigned ? Colors.green.shade700 : Colors.orange.shade700,
+                    color: isAssigned ? AppColors.accentGreen : AppColors.accentOrange,
                   ),
                   const SizedBox(width: 8),
                   Expanded(
@@ -645,7 +713,7 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
                           : 'Not assigned to any volunteer',
                       style: GoogleFonts.poppins(
                         fontSize: 12,
-                        color: isAssigned ? Colors.green.shade700 : Colors.orange.shade700,
+                        color: isAssigned ? AppColors.accentGreen : AppColors.accentOrange,
                       ),
                     ),
                   ),

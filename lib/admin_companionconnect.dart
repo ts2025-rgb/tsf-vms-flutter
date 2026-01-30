@@ -5,6 +5,7 @@ import 'admin_mentee_management.dart';
 import 'admin_query_management.dart';
 import 'config/app_colors.dart';
 import 'screens/admin/ccp_admin_dashboard_screen.dart';
+import 'screens/admin/admin_management.dart';
 
 class AdminCompanionConnectScreen extends StatefulWidget {
   const AdminCompanionConnectScreen({super.key});
@@ -151,6 +152,22 @@ class _AdminCompanionConnectScreenState
                       context,
                       MaterialPageRoute(
                         builder: (context) => const AdminQueryManagementPage(),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 16),
+                _buildModuleCard(
+                  context,
+                  title: 'Admin Management',
+                  description: 'Create and manage administrator accounts',
+                  icon: Icons.admin_panel_settings_rounded,
+                  color: AppColors.secondaryBlue,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const AdminManagementPage(),
                       ),
                     );
                   },

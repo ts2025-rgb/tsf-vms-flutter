@@ -4,6 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'config/api_config.dart';
+import 'config/app_colors.dart';
 
 class AdminLoginScreen extends StatefulWidget {
   const AdminLoginScreen({super.key});
@@ -95,7 +96,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                     style: GoogleFonts.poppins(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
-                      color: Colors.teal[800],
+                      color: AppColors.primaryBlue,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -114,13 +115,13 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                     style: GoogleFonts.poppins(),
                     decoration: InputDecoration(
                       labelText: "Admin Email",
-                      prefixIcon: const Icon(Icons.admin_panel_settings, color: Colors.teal),
+                      prefixIcon: const Icon(Icons.admin_panel_settings, color: AppColors.primaryBlue),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Colors.teal[700]!),
+                        borderSide: BorderSide(color: AppColors.secondaryBlue),
                       ),
                     ),
                     validator: (value) {
@@ -142,7 +143,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                     style: GoogleFonts.poppins(),
                     decoration: InputDecoration(
                       labelText: "Password",
-                      prefixIcon: const Icon(Icons.lock, color: Colors.teal),
+                      prefixIcon: const Icon(Icons.lock, color: AppColors.primaryBlue),
                       suffixIcon: IconButton(
                         icon: Icon(
                           _obscurePassword ? Icons.visibility : Icons.visibility_off,
@@ -157,7 +158,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Colors.teal[700]!),
+                        borderSide: BorderSide(color: AppColors.secondaryBlue),
                       ),
                     ),
                     validator: (value) {
@@ -175,7 +176,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                     child: ElevatedButton(
                       onPressed: _isLoading ? null : _adminLogin,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.teal[700],
+                        backgroundColor: AppColors.secondaryBlue,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
@@ -210,7 +211,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                     child: Text(
                       "Back to Volunteer Login",
                       style: GoogleFonts.poppins(
-                        color: Colors.teal[700],
+                        color: AppColors.secondaryBlue,
                         fontWeight: FontWeight.w500,
                       ),
                     ),

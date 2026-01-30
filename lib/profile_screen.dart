@@ -18,6 +18,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Map<String, dynamic> userData = {};
   String? jwtToken;
 
+  // Programs
+  List<Map<String, dynamic>> _availablePrograms = [];
+  bool _loadingPrograms = true;
+
   // Controllers for editable fields
   final fullNameController = TextEditingController();
   final addressController = TextEditingController();
@@ -29,7 +33,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final highestQualificationController = TextEditingController();
   final currentOccupationController = TextEditingController();
   final organizationNameController = TextEditingController();
-  final expertiseController = TextEditingController();
+  // final expertiseController = TextEditingController();
   final socialMediaController = TextEditingController();
   final whyVolunteerController = TextEditingController();
   final skillsDescController = TextEditingController();
@@ -46,7 +50,50 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     super.initState();
-    _loadUser();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    await _fetchPrograms();
+    await _loadUser();
+  }
+
+  Future<void> _fetchPrograms() async {
+    setState(() {
+      _loadingPrograms = true;
+    });
+
+    try {
+      final response = await http.get(
+        Uri.parse('${ApiConfig.apiUrl}/programs'),
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['success'] == true && data['programs'] != null) {
+          setState(() {
+            _availablePrograms = List<Map<String, dynamic>>.from(data['programs']);
+            _loadingPrograms = false;
+          });
+          print('Programs loaded: ${_availablePrograms.length}');
+        } else {
+          setState(() {
+            _loadingPrograms = false;
+          });
+          print('Programs API failed: success=${data['success']}, programs=${data['programs']}');
+        }
+      } else {
+        setState(() {
+          _loadingPrograms = false;
+        });
+        print('Failed to load programs: ${response.statusCode}, body: ${response.body}');
+      }
+    } catch (e) {
+      setState(() {
+        _loadingPrograms = false;
+      });
+      print('Error fetching programs: $e');
+    }
   }
 
   Future<void> _loadUser() async {
@@ -66,11 +113,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
       highestQualificationController.text = userData["highestQualification"] ?? "";
       currentOccupationController.text = userData["currentOccupation"] ?? "";
       organizationNameController.text = userData["organizationName"] ?? "";
-      expertiseController.text = userData["expertise"] ?? "";
+      // expertiseController.text = userData["expertise"] ?? "";
       socialMediaController.text = userData["socialMedia"] ?? "";
       whyVolunteerController.text = userData["whyVolunteer"] ?? "";
       skillsDescController.text = userData["skillsDesc"] ?? "";
-      interestedProgramController.text = userData["interestedProgram"] ?? "";
+      interestedProgramController.text = _getProgramNames(userData["interestedPrograms"]) ?? userData["interestedProgram"] ?? "";
       priorVolunteeringDescController.text = userData["priorVolunteeringDesc"] ?? "";
       referenceNameController.text = userData["referenceName"] ?? "";
       referencePhoneController.text = userData["referencePhone"] ?? "";
@@ -81,6 +128,43 @@ class _ProfileScreenState extends State<ProfileScreen> {
       conflictSituationController.text = userData["conflictSituation"] ?? "";
       setState(() {});
     }
+  }
+
+  String? _getProgramNames(dynamic programs) {
+    if (programs is List) {
+      List<String> names = [];
+      for (var id in programs) {
+        var program = _availablePrograms.firstWhere(
+          (p) => p['_id'] == id || p['id'] == id,
+          orElse: () => {},
+        );
+        if (program['name'] != null) {
+          names.add(program['name']);
+        } else {
+          // If name not found, use ID
+          names.add(id.toString());
+        }
+      }
+      return names.join(", ");
+    }
+    return null;
+  }
+
+  List<String> _getProgramIds(String namesText) {
+    List<String> names = namesText.split(", ").map((e) => e.trim()).toList();
+    List<String> ids = [];
+    for (var name in names) {
+      var program = _availablePrograms.firstWhere(
+        (p) => p['name'] == name,
+        orElse: () => {},
+      );
+      if (program['_id'] != null) {
+        ids.add(program['_id']);
+      } else if (program['id'] != null) {
+        ids.add(program['id']);
+      }
+    }
+    return ids;
   }
 
   Future<void> _saveProfile() async {
@@ -102,11 +186,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
         "highestQualification": highestQualificationController.text,
         "currentOccupation": currentOccupationController.text,
         "organizationName": organizationNameController.text,
-        "expertise": expertiseController.text,
+        // "expertise": expertiseController.text,
         "socialMedia": socialMediaController.text,
         "whyVolunteer": whyVolunteerController.text,
         "skillsDesc": skillsDescController.text,
-        "interestedProgram": interestedProgramController.text,
+        "interestedPrograms": _getProgramIds(interestedProgramController.text),
         "priorVolunteeringDesc": priorVolunteeringDescController.text,
         "referenceName": referenceNameController.text,
         "referencePhone": referencePhoneController.text,
@@ -358,7 +442,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     _buildTextField(highestQualificationController, "Highest Qualification"),
                     _buildTextField(currentOccupationController, "Current Occupation"),
                     _buildTextField(organizationNameController, "Organization Name"),
-                    _buildTextField(expertiseController, "Expertise"),
+                    // _buildTextField(expertiseController, "Expertise"),
                     _buildTextField(socialMediaController, "Social Media"),
                     _sectionHeader("Volunteering Information"),
                     _buildTextField(whyVolunteerController, "Why Volunteer"),
