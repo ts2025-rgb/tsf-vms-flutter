@@ -6,6 +6,7 @@ import 'admin_query_management.dart';
 import 'config/app_colors.dart';
 import 'screens/admin/ccp_admin_dashboard_screen.dart';
 import 'screens/admin/admin_management.dart';
+import 'screens/admin/resource_management_screen.dart';
 
 class AdminCompanionConnectScreen extends StatefulWidget {
   const AdminCompanionConnectScreen({super.key});
@@ -152,6 +153,22 @@ class _AdminCompanionConnectScreenState
                       context,
                       MaterialPageRoute(
                         builder: (context) => const AdminQueryManagementPage(),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 16),
+                _buildModuleCard(
+                  context,
+                  title: 'Resource Management',
+                  description: 'Manage learning resources and materials',
+                  icon: Icons.library_books_rounded,
+                  color: AppColors.accentOrange,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const AdminResourceManagementScreen(),
                       ),
                     );
                   },

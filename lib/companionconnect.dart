@@ -7,6 +7,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'config/api_config.dart';
 import 'config/app_colors.dart';
+import 'screens/volunteer_resources_screen.dart';
 
 class CompanionConnectPage extends StatefulWidget {
   final String programId;
@@ -569,10 +570,17 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
             // Resources Button
             Expanded(
               child: _buildActionButton(
-                icon: Icons.folder_open,
+                icon: Icons.library_books,
                 label: "Resources",
                 color: AppColors.secondaryBlue,
-                onTap: () => _showBottomSheet(0),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const VolunteerResourcesScreen(),
+                    ),
+                  );
+                },
               ),
             ),
           ],
