@@ -77,8 +77,13 @@ class _HomePageState extends State<HomePage> {
     Navigator.pushReplacementNamed(context, "/login");
   }
 
-  void _navigateToProfile() {
-    Navigator.pushNamed(context, "/profile");
+  void _navigateToProfile() async {
+    final result = await Navigator.pushNamed(context, "/profile");
+    if (result == true) {
+      // Profile was updated, refresh the data
+      await _loadUser();
+      await _fetchPrograms();
+    }
   }
 
   Widget _buildWelcomeMessage() {

@@ -69,7 +69,6 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController _referenceNameController = TextEditingController();
   final TextEditingController _referenceRelationController = TextEditingController();
   final TextEditingController _referencePhoneController = TextEditingController();
-  final TextEditingController _referenceAffiliationController = TextEditingController();
 
   // Section 6: Situational & Personal Reflection
   final TextEditingController _trustworthyMeaningController = TextEditingController();
@@ -605,7 +604,6 @@ class _RegisterPageState extends State<RegisterPage> {
     request.fields['referenceName'] = _referenceNameController.text.trim();
     request.fields['referenceRelation'] = _referenceRelationController.text.trim();
     request.fields['referencePhone'] = _referencePhoneController.text.trim();
-    request.fields['referenceAffiliation'] = _referenceAffiliationController.text.trim();
     request.fields['trustworthyMeaning'] = _trustworthyMeaningController.text.trim();
     request.fields['conflictSituation'] = _conflictSituationController.text.trim();
 
@@ -1554,18 +1552,6 @@ class _RegisterPageState extends State<RegisterPage> {
             decoration: InputDecoration(
               labelText: "Reference Phone Number",
               prefixIcon: const Icon(Icons.phone_outlined, color: Colors.teal),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-            ),
-            validator: (v) => v == null || v.isEmpty ? "Required" : null,
-          ),
-          const SizedBox(height: 16),
-          TextFormField(
-            controller: _referenceAffiliationController,
-            style: GoogleFonts.poppins(),
-            decoration: InputDecoration(
-              labelText: "Reference Affiliation/Organization",
-              prefixIcon: const Icon(Icons.business_outlined, color: Colors.teal),
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             ),

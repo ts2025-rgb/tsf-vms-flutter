@@ -1,4 +1,4 @@
-package com.example.py4p_vms
+package com.py4p.vms
 
 import io.flutter.embedding.android.FlutterActivity
 

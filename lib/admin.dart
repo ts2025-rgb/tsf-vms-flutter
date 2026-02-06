@@ -1648,11 +1648,6 @@ class _AdminScreenState extends State<AdminScreen>
           'Reference Relation',
           volunteer['referenceRelation'],
         ),
-        _buildModernInfoRow(
-          Icons.business_rounded,
-          'Reference Affiliation',
-          volunteer['referenceAffiliation'],
-        ),
       ]),
 
       if (volunteer['whyVolunteer'] != null &&

@@ -141,7 +141,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                 crossAxisCount: 2,
                 mainAxisSpacing: 20,
                 crossAxisSpacing: 20,
-                childAspectRatio: 1.0,
+                childAspectRatio: 0.85,
               ),
               delegate: SliverChildListDelegate([
                 _buildModuleCard(

@@ -43,3 +43,8 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+
+#pems
+.uploaded_certificate_new.pem
+.upload-keystore.jks

@@ -21,6 +21,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   // Programs
   List<Map<String, dynamic>> _availablePrograms = [];
   bool _loadingPrograms = true;
+  List<String> _selectedProgramIds = []; // Track selected program IDs
 
   // Controllers for editable fields
   final fullNameController = TextEditingController();
@@ -37,12 +38,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final socialMediaController = TextEditingController();
   final whyVolunteerController = TextEditingController();
   final skillsDescController = TextEditingController();
-  final interestedProgramController = TextEditingController();
+  // Remove: final interestedProgramController = TextEditingController();
   final priorVolunteeringDescController = TextEditingController();
   final referenceNameController = TextEditingController();
   final referencePhoneController = TextEditingController();
   final referenceRelationController = TextEditingController();
-  final referenceAffiliationController = TextEditingController();
   final specialRequirementsController = TextEditingController();
   final trustworthyMeaningController = TextEditingController();
   final conflictSituationController = TextEditingController();
@@ -102,6 +102,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final decoded = json.decode(data);
       jwtToken = decoded["token"];
       userData = decoded["user"] ?? {};
+      
+      // Set selected program IDs from userData
+      final interestedPrograms = userData["interestedPrograms"];
+      if (interestedPrograms is List) {
+        _selectedProgramIds = List<String>.from(interestedPrograms);
+      } else if (interestedPrograms is String) {
+        try {
+          _selectedProgramIds = List<String>.from(json.decode(interestedPrograms));
+        } catch (e) {
+          _selectedProgramIds = [];
+        }
+      } else {
+        _selectedProgramIds = [];
+      }
+      
       // Populate controllers
       fullNameController.text = userData["fullName"] ?? "";
       addressController.text = userData["address"] ?? "";
@@ -117,12 +132,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
       socialMediaController.text = userData["socialMedia"] ?? "";
       whyVolunteerController.text = userData["whyVolunteer"] ?? "";
       skillsDescController.text = userData["skillsDesc"] ?? "";
-      interestedProgramController.text = _getProgramNames(userData["interestedPrograms"]) ?? userData["interestedProgram"] ?? "";
+      // Remove: interestedProgramController.text = _getProgramNames(userData["interestedPrograms"]) ?? userData["interestedProgram"] ?? "";
       priorVolunteeringDescController.text = userData["priorVolunteeringDesc"] ?? "";
       referenceNameController.text = userData["referenceName"] ?? "";
       referencePhoneController.text = userData["referencePhone"] ?? "";
       referenceRelationController.text = userData["referenceRelation"] ?? "";
-      referenceAffiliationController.text = userData["referenceAffiliation"] ?? "";
       specialRequirementsController.text = userData["specialRequirements"] ?? "";
       trustworthyMeaningController.text = userData["trustworthyMeaning"] ?? "";
       conflictSituationController.text = userData["conflictSituation"] ?? "";
@@ -130,44 +144,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  String? _getProgramNames(dynamic programs) {
-    if (programs is List) {
-      List<String> names = [];
-      for (var id in programs) {
-        var program = _availablePrograms.firstWhere(
-          (p) => p['_id'] == id || p['id'] == id,
-          orElse: () => {},
-        );
-        if (program['name'] != null) {
-          names.add(program['name']);
-        } else {
-          // If name not found, use ID
-          names.add(id.toString());
-        }
-      }
-      return names.join(", ");
-    }
-    return null;
-  }
-
-  List<String> _getProgramIds(String namesText) {
-    List<String> names = namesText.split(", ").map((e) => e.trim()).toList();
-    List<String> ids = [];
-    for (var name in names) {
-      var program = _availablePrograms.firstWhere(
-        (p) => p['name'] == name,
-        orElse: () => {},
-      );
-      if (program['_id'] != null) {
-        ids.add(program['_id']);
-      } else if (program['id'] != null) {
-        ids.add(program['id']);
-      }
-    }
-    return ids;
-  }
-
-  Future<void> _saveProfile() async {
+  Future<bool> _saveProfile() async {
     final url = Uri.parse("${ApiConfig.apiUrl}/auth/update-profile");
     final response = await http.patch(
       url,
@@ -190,12 +167,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
         "socialMedia": socialMediaController.text,
         "whyVolunteer": whyVolunteerController.text,
         "skillsDesc": skillsDescController.text,
-        "interestedPrograms": _getProgramIds(interestedProgramController.text),
+        "interestedPrograms": _selectedProgramIds, // Use selected program IDs directly
         "priorVolunteeringDesc": priorVolunteeringDescController.text,
         "referenceName": referenceNameController.text,
         "referencePhone": referencePhoneController.text,
         "referenceRelation": referenceRelationController.text,
-        "referenceAffiliation": referenceAffiliationController.text,
         "specialRequirements": specialRequirementsController.text,
         "trustworthyMeaning": trustworthyMeaningController.text,
         "conflictSituation": conflictSituationController.text,
@@ -215,10 +191,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Profile updated successfully!")),
       );
+      return true; // Return success
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Update failed: ${response.body}")),
       );
+      return false; // Return failure
     }
   }
 
@@ -295,6 +273,113 @@ class _ProfileScreenState extends State<ProfileScreen> {
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         ),
         style: GoogleFonts.poppins(fontSize: 14),
+      ),
+    );
+  }
+
+  Widget _buildProgramsSelection() {
+    if (_loadingPrograms) {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.grey.shade300),
+          ),
+          child: Center(
+            child: Column(
+              children: [
+                CircularProgressIndicator(color: AppColors.primaryBlue),
+                const SizedBox(height: 8),
+                Text(
+                  "Loading programs...",
+                  style: GoogleFonts.poppins(
+                    fontSize: 12,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey.shade300),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Interested Programs",
+              style: GoogleFonts.poppins(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: AppColors.primaryBlue,
+              ),
+            ),
+            const SizedBox(height: 12),
+            if (_availablePrograms.isEmpty)
+              Text(
+                "No programs available",
+                style: GoogleFonts.poppins(
+                  fontSize: 12,
+                  color: Colors.grey.shade600,
+                ),
+              )
+            else
+              ..._availablePrograms.map((program) {
+                final programId = program['_id'] ?? program['id'];
+                final programName = program['name'] ?? 'Unknown Program';
+                final programDescription = program['description'] ?? '';
+
+                return CheckboxListTile(
+                  title: Text(
+                    programName,
+                    style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  subtitle: programDescription.isNotEmpty
+                      ? Text(
+                          programDescription,
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            color: Colors.grey.shade600,
+                          ),
+                        )
+                      : null,
+                  value: _selectedProgramIds.contains(programId),
+                  onChanged: (bool? value) {
+                    setState(() {
+                      if (value == true) {
+                        if (!_selectedProgramIds.contains(programId)) {
+                          _selectedProgramIds.add(programId);
+                        }
+                      } else {
+                        _selectedProgramIds.remove(programId);
+                      }
+                    });
+                  },
+                  activeColor: AppColors.primaryBlue,
+                  checkColor: Colors.white,
+                  contentPadding: EdgeInsets.zero,
+                  controlAffinity: ListTileControlAffinity.leading,
+                  dense: true,
+                );
+              }).toList(),
+          ],
+        ),
       ),
     );
   }
@@ -447,14 +532,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     _sectionHeader("Volunteering Information"),
                     _buildTextField(whyVolunteerController, "Why Volunteer"),
                     _buildTextField(skillsDescController, "Skills Description"),
-                    _buildTextField(interestedProgramController, "Interested Program"),
+                    // Replace text field with program checkboxes
+                    _buildProgramsSelection(),
                     _buildTextField(priorVolunteeringDescController, "Prior Volunteering Description"),
                     _buildTextField(specialRequirementsController, "Special Requirements"),
                     _sectionHeader("Reference Information"),
                     _buildTextField(referenceNameController, "Reference Name"),
                     _buildTextField(referencePhoneController, "Reference Phone"),
                     _buildTextField(referenceRelationController, "Reference Relation"),
-                    _buildTextField(referenceAffiliationController, "Reference Affiliation"),
                     _sectionHeader("Other Information"),
                     _buildTextField(trustworthyMeaningController, "Trustworthy Meaning"),
                     _buildTextField(conflictSituationController, "Conflict Situation"),
@@ -480,7 +565,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ],
                             ),
                             child: ElevatedButton.icon(
-                              onPressed: _saveProfile,
+                              onPressed: () async {
+                                final success = await _saveProfile();
+                                if (success) {
+                                  // Return true to indicate profile was updated
+                                  Navigator.of(context).pop(true);
+                                }
+                              },
                               icon: const Icon(Icons.save, color: Colors.white, size: 20),
                               label: Text(
                                 "Save Changes",
