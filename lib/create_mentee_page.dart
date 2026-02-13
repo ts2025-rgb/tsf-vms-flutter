@@ -27,7 +27,6 @@ class _CreateMenteePageState extends State<CreateMenteePage> {
   // Form fields
   final TextEditingController _fullNameController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
-  final TextEditingController _regionController = TextEditingController();
   final TextEditingController _gradeController = TextEditingController();
   final TextEditingController _pointOfContactController = TextEditingController();
   final TextEditingController _notesController = TextEditingController();
@@ -43,7 +42,6 @@ class _CreateMenteePageState extends State<CreateMenteePage> {
   void dispose() {
     _fullNameController.dispose();
     _phoneController.dispose();
-    _regionController.dispose();
     _gradeController.dispose();
     _pointOfContactController.dispose();
     _notesController.dispose();
@@ -76,7 +74,7 @@ class _CreateMenteePageState extends State<CreateMenteePage> {
       context: context,
       initialDate: DateTime(2010, 1, 1),
       firstDate: DateTime(2000),
-      lastDate: DateTime(2020),
+      lastDate: DateTime(2025),
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
@@ -133,7 +131,6 @@ class _CreateMenteePageState extends State<CreateMenteePage> {
           'dob': _selectedDate!.toIso8601String(),
           'gender': _gender,
           'phone': _phoneController.text.trim(),
-          'region': _regionController.text.trim(),
           'grade': _gradeController.text.trim(),
           'pointOfContact': _pointOfContactController.text.trim(),
           'programId': widget.companionConnectProgramId,
@@ -320,28 +317,6 @@ class _CreateMenteePageState extends State<CreateMenteePage> {
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
                   return 'Phone number is required';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 16),
-
-            // Region
-            TextFormField(
-              controller: _regionController,
-              style: GoogleFonts.poppins(),
-              decoration: InputDecoration(
-                labelText: 'Region *',
-                prefixIcon: Icon(Icons.location_on, color: AppColors.primaryBlue),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: AppColors.primaryBlue, width: 2),
-                ),
-              ),
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'Region is required';
                 }
                 return null;
               },

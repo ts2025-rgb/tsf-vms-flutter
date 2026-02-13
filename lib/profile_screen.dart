@@ -1,8 +1,10 @@
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
+import 'package:file_picker/file_picker.dart';
 import 'config/api_config.dart';
 import 'config/app_colors.dart';
 
@@ -17,6 +19,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
   Map<String, dynamic> userData = {};
   String? jwtToken;
+
+  // Photo upload
+  Uint8List? _photoBytes;
+  String? _photoFileName;
+  bool _uploadingPhoto = false;
 
   // Programs
   List<Map<String, dynamic>> _availablePrograms = [];
@@ -203,6 +210,86 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _logout() async {
     await secureStorage.deleteAll();
     Navigator.pushReplacementNamed(context, "/login");
+  }
+
+  Future<void> _pickAndUploadPhoto() async {
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.image,
+        allowMultiple: false,
+        withData: true,
+      );
+
+      if (result != null && result.files.single.bytes != null) {
+        setState(() {
+          _photoBytes = result.files.single.bytes;
+          _photoFileName = result.files.single.name;
+        });
+
+        // Upload immediately
+        await _uploadPhoto();
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error picking photo: $e'), backgroundColor: Colors.red),
+      );
+    }
+  }
+
+  Future<void> _uploadPhoto() async {
+    if (_photoBytes == null || _photoFileName == null) return;
+
+    setState(() => _uploadingPhoto = true);
+
+    try {
+      final url = Uri.parse("${ApiConfig.apiUrl}/auth/update-profile");
+      final request = http.MultipartRequest('PATCH', url);
+      
+      request.headers['Authorization'] = 'Bearer $jwtToken';
+      
+      request.files.add(
+        http.MultipartFile.fromBytes(
+          'photo',
+          _photoBytes!,
+          filename: _photoFileName,
+        ),
+      );
+
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+
+      if (response.statusCode == 200) {
+        final updated = json.decode(response.body);
+        userData = updated["user"] ?? userData;
+        
+        await secureStorage.write(
+          key: "userData",
+          value: json.encode({
+            "token": jwtToken,
+            "user": userData,
+          }),
+        );
+        
+        setState(() {
+          _photoBytes = null;
+          _photoFileName = null;
+        });
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Profile photo updated successfully!"), backgroundColor: Colors.green),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Photo upload failed: ${response.body}"), backgroundColor: Colors.red),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error uploading photo: $e"), backgroundColor: Colors.red),
+      );
+    }
+
+    setState(() => _uploadingPhoto = false);
   }
 
   Widget _sectionHeader(String title) {
@@ -446,28 +533,69 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               child: Column(
                 children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 4),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
-                          blurRadius: 10,
-                          offset: Offset(0, 4),
+                  Stack(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 4),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2),
+                              blurRadius: 10,
+                              offset: Offset(0, 4),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                    child: CircleAvatar(
-                      radius: 55,
-                      backgroundImage: userData["photoUrl"] != null
-                          ? NetworkImage(userData["photoUrl"])
-                          : null,
-                      backgroundColor: Colors.white,
-                      child: userData["photoUrl"] == null
-                          ? Icon(Icons.person, color: AppColors.primaryBlue, size: 50)
-                          : null,
-                    ),
+                        child: _uploadingPhoto
+                            ? CircleAvatar(
+                                radius: 55,
+                                backgroundColor: Colors.white,
+                                child: CircularProgressIndicator(
+                                  color: AppColors.primaryBlue,
+                                ),
+                              )
+                            : CircleAvatar(
+                                radius: 55,
+                                backgroundImage: _photoBytes != null
+                                    ? MemoryImage(_photoBytes!)
+                                    : (userData["photoUrl"] != null
+                                        ? NetworkImage(userData["photoUrl"])
+                                        : null) as ImageProvider?,
+                                backgroundColor: Colors.white,
+                                child: _photoBytes == null && userData["photoUrl"] == null
+                                    ? Icon(Icons.person, color: AppColors.primaryBlue, size: 50)
+                                    : null,
+                              ),
+                      ),
+                      Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: GestureDetector(
+                          onTap: _uploadingPhoto ? null : _pickAndUploadPhoto,
+                          child: Container(
+                            padding: EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: AppColors.primaryBlue,
+                              shape: BoxShape.circle,
+                              border: Border.all(color: Colors.white, width: 2),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.2),
+                                  blurRadius: 6,
+                                  offset: Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Icon(
+                              Icons.camera_alt,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                   SizedBox(height: 16),
                   Text(

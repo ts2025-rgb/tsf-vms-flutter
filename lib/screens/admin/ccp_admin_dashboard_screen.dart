@@ -104,47 +104,19 @@ class _CCPAdminDashboardScreenState extends State<CCPAdminDashboardScreen> {
           final basicVolunteers = data['volunteers'] ?? [];
           print('Total volunteers fetched: ${basicVolunteers.length}');
 
-          // Now fetch detailed data for each volunteer to get callRecords
-          _volunteers = [];
+          // Fetch detailed data for ALL volunteers in parallel
+          print('Fetching detailed data for ${basicVolunteers.length} volunteers in parallel...');
+          
+          final List<Future<Map<String, dynamic>>> detailFutures = [];
+          
           for (var volunteer in basicVolunteers) {
-            final volunteerId = volunteer['_id'];
-            print('Fetching detailed data for volunteer: ${volunteer['fullName']}');
-
-            try {
-              final detailResponse = await http.get(
-                Uri.parse('$baseUrl/admin/companion-connect/volunteers/$volunteerId'),
-                headers: {'Authorization': token},
-              );
-
-              if (detailResponse.statusCode == 200) {
-                final detailData = json.decode(detailResponse.body);
-                if (detailData['success'] == true) {
-                  // Merge basic volunteer data with detailed data
-                  final detailedVolunteer = {
-                    ...volunteer,
-                    'callRecords': detailData['callRecords'] ?? [],
-                    'insights': detailData['insights'] ?? volunteer['insights'] ?? {},
-                  };
-                  _volunteers.add(detailedVolunteer);
-                  print('Successfully fetched details for ${volunteer['fullName']} - ${detailData['callRecords']?.length ?? 0} call records');
-                } else {
-                  // Fallback to basic data if detail fetch fails
-                  _volunteers.add(volunteer);
-                  print('Failed to fetch details for ${volunteer['fullName']}, using basic data');
-                }
-              } else {
-                // Fallback to basic data if detail fetch fails
-                _volunteers.add(volunteer);
-                print('Failed to fetch details for ${volunteer['fullName']}, using basic data');
-              }
-            } catch (detailError) {
-              // Fallback to basic data if detail fetch fails
-              _volunteers.add(volunteer);
-              print('Error fetching details for ${volunteer['fullName']}: $detailError, using basic data');
-            }
+            detailFutures.add(_fetchSingleVolunteerData(volunteer, token));
           }
 
-          print('Final volunteer count with details: ${_volunteers.length}');
+          // Wait for all requests to complete
+          _volunteers = await Future.wait(detailFutures);
+          
+          print('✅ Successfully fetched details for ${_volunteers.length} volunteers in parallel');
           if (_volunteers.isNotEmpty) {
             print('First volunteer keys: ${_volunteers[0].keys}');
             print('First volunteer has callRecords: ${_volunteers[0].containsKey("callRecords")}');
@@ -157,6 +129,34 @@ class _CCPAdminDashboardScreenState extends State<CCPAdminDashboardScreen> {
     } catch (e) {
       print('Error fetching volunteers: $e');
     }
+  }
+  
+  Future<Map<String, dynamic>> _fetchSingleVolunteerData(Map<String, dynamic> volunteer, String token) async {
+    final volunteerId = volunteer['_id'];
+    
+    try {
+      final detailResponse = await http.get(
+        Uri.parse('$baseUrl/admin/companion-connect/volunteers/$volunteerId'),
+        headers: {'Authorization': 'Bearer $token'},
+      );
+
+      if (detailResponse.statusCode == 200) {
+        final detailData = json.decode(detailResponse.body);
+        if (detailData['success'] == true) {
+          // Merge basic volunteer data with detailed data
+          return {
+            ...volunteer,
+            'callRecords': detailData['callRecords'] ?? [],
+            'insights': detailData['insights'] ?? volunteer['insights'] ?? {},
+          };
+        }
+      }
+    } catch (detailError) {
+      print('Error fetching details for ${volunteer['fullName']}: $detailError');
+    }
+    
+    // Fallback to basic data if detail fetch fails
+    return volunteer;
   }
   
   Future<void> _fetchMentees(String token) async {

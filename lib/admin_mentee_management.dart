@@ -1046,7 +1046,6 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
 
   void _showMenteeDetailsDialog(Map<String, dynamic> mentee) {
     final TextEditingController phoneController = TextEditingController(text: mentee['phone'] ?? '');
-    final TextEditingController regionController = TextEditingController(text: mentee['region'] ?? '');
     final TextEditingController gradeController = TextEditingController(text: mentee['grade'] ?? '');
     final TextEditingController pointOfContactController = TextEditingController(text: mentee['pointOfContact'] ?? '');
     final TextEditingController notesController = TextEditingController(text: mentee['notes'] ?? '');
@@ -1131,19 +1130,6 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
                   ),
                   const SizedBox(height: 16),
                   
-                  // Region
-                  Text('Region', style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.grey.shade700)),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: regionController,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                      prefixIcon: Icon(Icons.location_on, size: 20),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  
                   // Grade
                   Text('Grade', style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.grey.shade700)),
                   const SizedBox(height: 8),
@@ -1216,7 +1202,6 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
                 await _updateMenteeDetails(
                   mentee['id'],
                   phoneController.text,
-                  regionController.text,
                   gradeController.text,
                   pointOfContactController.text,
                   notesController.text,
@@ -1255,7 +1240,6 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
   Future<void> _updateMenteeDetails(
     String menteeId,
     String phone,
-    String region,
     String grade,
     String pointOfContact,
     String notes,
@@ -1272,7 +1256,7 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
       }
       
       print('🔑 Updating mentee with token: ${token.substring(0, 20)}...');
-      print('📝 Update payload: phone=$phone, region=$region, grade=$grade, status=$status');
+      print('📝 Update payload: phone=$phone, grade=$grade, status=$status');
       
       final response = await http.patch(
         Uri.parse('$baseUrl/companion-connect/admin/mentees/$menteeId'),
@@ -1282,7 +1266,6 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
         },
         body: json.encode({
           'phone': phone,
-          'region': region,
           'grade': grade,
           'pointOfContact': pointOfContact,
           'notes': notes,

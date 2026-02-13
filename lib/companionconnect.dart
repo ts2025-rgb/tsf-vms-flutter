@@ -665,7 +665,6 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
     final int menteeAge = _menteeData!['age'] ?? 0;
     final String gender = _menteeData!['gender'] ?? 'N/A';
     final String phone = _menteeData!['phone'] ?? 'N/A';
-    final String region = _menteeData!['region'] ?? 'N/A';
     final String grade = _menteeData!['grade'] ?? 'N/A';
     final String pointOfContact = _menteeData!['pointOfContact'] ?? 'N/A';
     final String assignedDate = _menteeData!['assignedAt'] != null
@@ -738,8 +737,6 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
           _buildInfoRow(Icons.wc, "Gender", gender),
           const SizedBox(height: 12),
           _buildInfoRow(Icons.school_outlined, "Grade", grade),
-          const SizedBox(height: 12),
-          _buildInfoRow(Icons.location_on_outlined, "Region", region),
           const SizedBox(height: 12),
           _buildInfoRow(Icons.person_outline, "Point of Contact", pointOfContact),
           const SizedBox(height: 12),
@@ -1016,84 +1013,8 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
             ],
           ),
           SizedBox(height: 16),
-          // Complete Quest Button
-          if (currentCell < 12)
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [AppColors.accentGreen, Colors.green.shade600],
-              ),
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.accentGreen.withOpacity(0.4),
-                  blurRadius: 12,
-                  offset: Offset(0, 4),
-                  spreadRadius: 2,
-                ),
-              ],
-            ),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: _advanceProgress,
-                borderRadius: BorderRadius.circular(16),
-                child: Container(
-                  padding: EdgeInsets.symmetric(vertical: 14),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.emoji_events, color: Colors.white, size: 24),
-                      SizedBox(width: 10),
-                      Text(
-                        "COMPLETE QUEST & EARN 100 XP",
-                        style: GoogleFonts.poppins(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                      SizedBox(width: 10),
-                      Icon(Icons.arrow_forward, color: Colors.white, size: 20),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-          if (currentCell >= 12)
-          Container(
-            padding: EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.amber.shade400, Colors.orange.shade400],
-              ),
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.amber.withOpacity(0.4),
-                  blurRadius: 12,
-                  offset: Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.emoji_events, color: Colors.white, size: 28),
-                SizedBox(width: 12),
-                Text(
-                  "Journey Complete! 🎉",
-                  style: GoogleFonts.poppins(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ],
-            ),
-          ),
+          // Complete Quest Button removed - now integrated with report submission
+          
           const SizedBox(height: 24),
           
           // Scrollable Adventure Map Trail
@@ -1302,8 +1223,8 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                 ),
               // Story Node with pulse animation
               GestureDetector(
-                onTap: isCompleted ? () {
-                  print("👆 Tapped on completed Call #$callNumber");
+                onTap: (isCompleted || isCurrent) ? () {
+                  print("👆 Tapped on Call #$callNumber");
                   _showCallDetails(callNumber);
                 } : null,
                 child: Stack(
@@ -2079,7 +2000,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
             maxLines: 4,
             style: GoogleFonts.poppins(fontSize: 13),
             decoration: InputDecoration(
-              hintText: "Use only if something felt concerning or unsafe.Briefly write what raised concern.",
+              hintText: "Use only if something felt concerning or unsafe.Briefly write what raised concern. DONT WRITE NA OR NONE.",
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.red.shade200)),
               enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.red.shade200)),
               contentPadding: const EdgeInsets.all(12),
@@ -2193,7 +2114,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                     ? SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(Colors.white)))
                     : Icon(Icons.save, color: Colors.white),
                 label: Text(
-                  _savingNote ? "Saving Report..." : "Submit Report",
+                  _savingNote ? "Saving Report..." : "Complete Quest and Earn 100 XP",
                   style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
                 ),
                 style: ElevatedButton.styleFrom(
@@ -2591,240 +2512,11 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) {
-        return DraggableScrollableSheet(
-          initialChildSize: 0.85,
-          minChildSize: 0.5,
-          maxChildSize: 0.95,
-          builder: (_, scrollController) {
-            return Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(24),
-                  topRight: Radius.circular(24),
-                ),
-              ),
-              child: Column(
-                children: [
-                  // Handle bar
-                  Container(
-                    margin: EdgeInsets.only(top: 12, bottom: 8),
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade300,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                  // Header
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            gradient: AppColors.primaryGradient,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Icon(Icons.history, color: Colors.white, size: 24),
-                        ),
-                        SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "Call #$callNumber Report",
-                                style: GoogleFonts.poppins(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              Text(
-                                "Read-only view",
-                                style: GoogleFonts.poppins(
-                                  fontSize: 12,
-                                  color: Colors.grey.shade600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        IconButton(
-                          onPressed: () => Navigator.pop(context),
-                          icon: Icon(Icons.close),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Divider(),
-                  // Content
-                  Expanded(
-                    child: ListView(
-                      controller: scrollController,
-                      padding: EdgeInsets.all(20),
-                      children: [
-                        _buildReadOnlyField("Date", _formatDate(callNote['createdAt'])),
-                        SizedBox(height: 16),
-                        _buildReadOnlyField("Call Duration", "${callNote['callDuration'] ?? 0} minutes"),
-                        SizedBox(height: 16),
-                        _buildReadOnlyField("Mentee's Mood", "${callNote['moodScore'] ?? 'N/A'} ${_getMoodEmoji(callNote['moodScore']?.toDouble() ?? 3.0)}"),
-                        SizedBox(height: 16),
-                        if (callNote['checklist'] != null && (callNote['checklist'] as List).isNotEmpty) ...[
-                          _buildReadOnlySection(
-                            "Focus Areas Covered",
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: (callNote['checklist'] as List)
-                                  .where((item) => item['isAchieved'] == true)
-                                  .map((item) => Padding(
-                                        padding: EdgeInsets.only(bottom: 8),
-                                        child: Row(
-                                          children: [
-                                            Icon(Icons.check_circle, color: AppColors.accentGreen, size: 18),
-                                            SizedBox(width: 8),
-                                            Text(
-                                              item['label'] ?? '',
-                                              style: GoogleFonts.poppins(fontSize: 14),
-                                            ),
-                                          ],
-                                        ),
-                                      ))
-                                  .toList(),
-                            ),
-                          ),
-                          SizedBox(height: 16),
-                        ],
-                        if (callNote['topics'] != null && (callNote['topics'] as List).isNotEmpty) ...[
-                          _buildReadOnlySection(
-                            "Topics Covered",
-                            Wrap(
-                              spacing: 8,
-                              runSpacing: 8,
-                              children: (callNote['topics'] as List)
-                                  .map((topic) => Chip(
-                                        label: Text(
-                                          topic,
-                                          style: GoogleFonts.poppins(fontSize: 12),
-                                        ),
-                                        backgroundColor: AppColors.primaryBlue.withOpacity(0.1),
-                                      ))
-                                  .toList(),
-                            ),
-                          ),
-                          SizedBox(height: 16),
-                        ],
-                        if (callNote['otherTopicDetail'] != null && callNote['otherTopicDetail'].toString().trim().isNotEmpty) ...[
-                          _buildReadOnlyField("Other Topic Details", callNote['otherTopicDetail']),
-                          SizedBox(height: 16),
-                        ],
-                        _buildReadOnlyField("Observations / Notes", callNote['note'] ?? 'No notes'),
-                        SizedBox(height: 16),
-                        if (callNote['assistanceRequest'] != null && (callNote['assistanceRequest'] as List).isNotEmpty) ...[
-                          _buildReadOnlySection(
-                            "Assistance Needed",
-                            Wrap(
-                              spacing: 8,
-                              runSpacing: 8,
-                              children: (callNote['assistanceRequest'] as List)
-                                  .map((request) => Chip(
-                                        label: Text(
-                                          request,
-                                          style: GoogleFonts.poppins(fontSize: 12),
-                                        ),
-                                        backgroundColor: Colors.orange.withOpacity(0.1),
-                                      ))
-                                  .toList(),
-                            ),
-                          ),
-                          SizedBox(height: 16),
-                        ],
-                        if (callNote['assistanceRequestOtherDetail'] != null && callNote['assistanceRequestOtherDetail'].toString().trim().isNotEmpty) ...[
-                          _buildReadOnlyField("Other Concern Details", callNote['assistanceRequestOtherDetail']),
-                          SizedBox(height: 16),
-                        ],
-                        _buildReadOnlyField("Conversation Meaningful?", callNote['mentorHelpfulness'] ?? 'N/A'),
-                        SizedBox(height: 16),
-                        if (callNote['redFlags'] != null && callNote['redFlags'].toString().trim().isNotEmpty) ...[
-                          Container(
-                            padding: EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: Colors.red.shade50,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: Colors.red.shade200),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Icon(Icons.warning, color: Colors.red, size: 20),
-                                    SizedBox(width: 8),
-                                    Text(
-                                      "Red Flags",
-                                      style: GoogleFonts.poppins(
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 14,
-                                        color: Colors.red,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: 8),
-                                Text(
-                                  callNote['redFlags'],
-                                  style: GoogleFonts.poppins(fontSize: 13),
-                                ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(height: 16),
-                        ],
-                        if (callNote['volunteerComfort'] != null) ...[
-                          _buildReadOnlyField("Your Comfort Level", "${callNote['volunteerComfort']}/5"),
-                          SizedBox(height: 16),
-                        ],
-                        if (callNote['volunteerNote'] != null && callNote['volunteerNote'].toString().trim().isNotEmpty) ...[
-                          Container(
-                            padding: EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: AppColors.primaryBlue.withOpacity(0.05),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: AppColors.primaryBlue.withOpacity(0.2)),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Icon(Icons.favorite, color: AppColors.primaryBlue, size: 20),
-                                    SizedBox(width: 8),
-                                    Text(
-                                      "Your Personal Notes",
-                                      style: GoogleFonts.poppins(
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 14,
-                                        color: AppColors.primaryBlue,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: 8),
-                                Text(
-                                  callNote['volunteerNote'],
-                                  style: GoogleFonts.poppins(fontSize: 13),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            );
+        return EditableCallDetailsSheet(
+          callNote: callNote,
+          onSave: () {
+            _fetchCallNotes();
+            Navigator.pop(context);
           },
         );
       },
@@ -2954,7 +2646,6 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                SizedBox(height: 24),
                _buildProfileDetailRow(Icons.cake, "Age / Gender", "${_menteeData!['age']} years • ${_menteeData!['gender'] ?? 'N/A'}"),
                _buildProfileDetailRow(Icons.school_outlined, "Grade", "${_menteeData!['grade'] ?? 'N/A'}"),
-               _buildProfileDetailRow(Icons.location_on, "Region", "${_menteeData!['region'] ?? 'N/A'}"),
                _buildProfileDetailRow(Icons.person_outline, "Point of Contact", "${_menteeData!['pointOfContact'] ?? 'N/A'}"),
                _buildProfileDetailRow(Icons.school, "Program", "${_menteeData!['program']?['name'] ?? 'N/A'}"),
                _buildProfileDetailRow(Icons.calendar_today, "Assigned On", "${_menteeData!['assignedAt']?.substring(0,10) ?? 'N/A'}"),
@@ -3468,6 +3159,492 @@ class _VolunteerQuerySheetState extends State<VolunteerQuerySheet> {
   void dispose() {
     _queryController.dispose();
     super.dispose();
+  }
+}
+
+class EditableCallDetailsSheet extends StatefulWidget {
+  final Map<String, dynamic> callNote;
+  final VoidCallback onSave;
+
+  const EditableCallDetailsSheet({Key? key, required this.callNote, required this.onSave}) : super(key: key);
+
+  @override
+  State<EditableCallDetailsSheet> createState() => _EditableCallDetailsSheetState();
+}
+
+class _EditableCallDetailsSheetState extends State<EditableCallDetailsSheet> {
+  final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
+  final String baseUrl = ApiConfig.apiUrl;
+
+  late TextEditingController _noteController;
+  late TextEditingController _callDurationController;
+  late TextEditingController _otherTopicController;
+  late TextEditingController _assistanceRequestOtherDetailController;
+  late TextEditingController _redFlagsController;
+  late TextEditingController _volunteerNoteController;
+  late TextEditingController _otherFocusAreaController;
+
+  double _moodScore = 3.0;
+  double _volunteerComfort = 3.0;
+  String _mentorHelpfulness = "Yes";
+
+  List<Map<String, dynamic>> _checklistItems = [];
+  List<String> _selectedTopics = [];
+  List<String> _selectedAssistanceRequests = [];
+
+  final List<String> _availableTopics = ['Studies', 'Health', 'Family', 'Hobbies', 'Skills', 'Others'];
+  final List<String> _availableAssistanceOptions = ['Emotional Support', 'Safety Concern', 'Academic Support', 'Other Concern', 'Not required'];
+
+  bool _isSaving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeFields();
+  }
+
+  void _initializeFields() {
+    _noteController = TextEditingController(text: widget.callNote['note'] ?? '');
+    _callDurationController = TextEditingController(text: (widget.callNote['callDuration'] ?? 0).toString());
+    _otherTopicController = TextEditingController(text: widget.callNote['otherTopicDetail'] ?? '');
+    _assistanceRequestOtherDetailController = TextEditingController(text: widget.callNote['assistanceRequestOtherDetail'] ?? '');
+    _redFlagsController = TextEditingController(text: widget.callNote['redFlags'] ?? '');
+    _volunteerNoteController = TextEditingController(text: widget.callNote['volunteerNote'] ?? '');
+    _otherFocusAreaController = TextEditingController(text: widget.callNote['otherFocusAreaDetail'] ?? '');
+
+    _moodScore = (widget.callNote['moodScore'] ?? 3.0).toDouble();
+    _volunteerComfort = (widget.callNote['volunteerComfort'] ?? 3.0).toDouble();
+    _mentorHelpfulness = widget.callNote['mentorHelpfulness'] ?? "Yes";
+
+    _checklistItems = (widget.callNote['checklist'] as List<dynamic>?)?.map((item) => Map<String, dynamic>.from(item)).toList() ?? [];
+    _selectedTopics = (widget.callNote['topics'] as List<dynamic>?)?.map((t) => t.toString()).toList() ?? [];
+    _selectedAssistanceRequests = (widget.callNote['assistanceRequest'] as List<dynamic>?)?.map((r) => r.toString()).toList() ?? [];
+  }
+
+  @override
+  void dispose() {
+    _noteController.dispose();
+    _callDurationController.dispose();
+    _otherTopicController.dispose();
+    _assistanceRequestOtherDetailController.dispose();
+    _redFlagsController.dispose();
+    _volunteerNoteController.dispose();
+    _otherFocusAreaController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _saveChanges() async {
+    if (_noteController.text.trim().length < 10) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Note must be at least 10 characters long"),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    setState(() => _isSaving = true);
+
+    try {
+      final token = await secureStorage.read(key: "token");
+      final noteId = widget.callNote['_id'];
+
+      final hasAssistanceRequest = _selectedAssistanceRequests.isNotEmpty &&
+          !(_selectedAssistanceRequests.length == 1 && _selectedAssistanceRequests.contains('Not required'));
+
+      final bodyPayload = {
+        'note': _noteController.text.trim(),
+        'callDuration': int.tryParse(_callDurationController.text) ?? 0,
+        'followUpRequired': hasAssistanceRequest,
+        'assistanceRequest': _selectedAssistanceRequests,
+        'assistanceRequestOtherDetail': _selectedAssistanceRequests.contains('Other Concern') ? _assistanceRequestOtherDetailController.text.trim() : '',
+        'moodScore': _moodScore,
+        'checklist': _checklistItems,
+        'topics': _selectedTopics,
+        'otherTopicDetail': _selectedTopics.contains('Others') ? _otherTopicController.text.trim() : '',
+        'otherFocusAreaDetail': _otherFocusAreaController.text.trim(),
+        'mentorHelpfulness': _mentorHelpfulness,
+        'redFlags': _redFlagsController.text.trim(),
+        'volunteerComfort': _volunteerComfort,
+        'volunteerNote': _volunteerNoteController.text.trim(),
+      };
+
+      final response = await http.patch(
+        Uri.parse('$baseUrl/companion-connect/notes/$noteId'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        body: json.encode(bodyPayload),
+      );
+
+      setState(() => _isSaving = false);
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['success'] == true) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("Call note updated successfully!"),
+              backgroundColor: Colors.green,
+            ),
+          );
+          widget.onSave();
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("Failed to update note"),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Failed to update note"),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      print('Error updating note: $e');
+      setState(() => _isSaving = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Error updating note"),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Widget _buildReadOnlyField(String label, String value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.poppins(
+            fontSize: 13,
+            color: Colors.grey.shade600,
+          ),
+        ),
+        SizedBox(height: 6),
+        Container(
+          width: double.infinity,
+          padding: EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade50,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Colors.grey.shade300),
+          ),
+          child: Text(
+            value,
+            style: GoogleFonts.poppins(fontSize: 14),
+          ),
+        ),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return DraggableScrollableSheet(
+      initialChildSize: 0.85,
+      minChildSize: 0.5,
+      maxChildSize: 0.95,
+      builder: (_, scrollController) {
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(24),
+              topRight: Radius.circular(24),
+            ),
+          ),
+          child: Column(
+            children: [
+              // Handle bar
+              Container(
+                margin: EdgeInsets.only(top: 12, bottom: 8),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              // Header
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        gradient: AppColors.primaryGradient,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(Icons.edit, color: Colors.white, size: 24),
+                    ),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Edit Call #${widget.callNote['cellNumber']} Report",
+                            style: GoogleFonts.poppins(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          Text(
+                            "Make changes and save",
+                            style: GoogleFonts.poppins(
+                              fontSize: 12,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: Icon(Icons.close),
+                    ),
+                  ],
+                ),
+              ),
+              Divider(),
+              // Content
+              Expanded(
+                child: ListView(
+                  controller: scrollController,
+                  padding: EdgeInsets.all(20),
+                  children: [
+                    // Date (read-only)
+                    _buildReadOnlyField("Date", _formatDate(widget.callNote['createdAt'])),
+                    SizedBox(height: 16),
+                    // Cell Number (read-only)
+                    _buildReadOnlyField("Call Number", widget.callNote['cellNumber'].toString()),
+                    SizedBox(height: 16),
+                    // Call Duration
+                    Text("Call Duration (minutes)", style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 14)),
+                    SizedBox(height: 8),
+                    TextField(
+                      controller: _callDurationController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                        hintText: "Enter duration in minutes",
+                      ),
+                    ),
+                    SizedBox(height: 16),
+                    // Mood Score
+                    Text("Mentee's Mood", style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 14)),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Slider(
+                            value: _moodScore,
+                            min: 1.0,
+                            max: 5.0,
+                            divisions: 4,
+                            onChanged: (value) => setState(() => _moodScore = value),
+                          ),
+                        ),
+                        Text("${_moodScore.toStringAsFixed(1)} ${_getMoodEmoji(_moodScore)}"),
+                      ],
+                    ),
+                    SizedBox(height: 16),
+                    // Checklist
+                    Text("Focus Areas Covered", style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 14)),
+                    SizedBox(height: 8),
+                    ..._checklistItems.map((item) => CheckboxListTile(
+                      title: Text(item['label'] ?? ''),
+                      value: item['isAchieved'] ?? false,
+                      onChanged: (value) => setState(() => item['isAchieved'] = value ?? false),
+                    )),
+                    SizedBox(height: 16),
+                    // Topics
+                    Text("Topics Covered", style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 14)),
+                    SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: _availableTopics.map((topic) => FilterChip(
+                        label: Text(topic),
+                        selected: _selectedTopics.contains(topic),
+                        onSelected: (selected) {
+                          setState(() {
+                            if (selected) {
+                              _selectedTopics.add(topic);
+                            } else {
+                              _selectedTopics.remove(topic);
+                            }
+                          });
+                        },
+                      )).toList(),
+                    ),
+                    if (_selectedTopics.contains('Others')) ...[
+                      SizedBox(height: 8),
+                      TextField(
+                        controller: _otherTopicController,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(),
+                          hintText: "Specify other topic",
+                        ),
+                      ),
+                    ],
+                    SizedBox(height: 16),
+                    // Observations / Notes
+                    Text("Observations / Notes", style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 14)),
+                    SizedBox(height: 8),
+                    TextField(
+                      controller: _noteController,
+                      maxLines: 4,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                        hintText: "Enter your observations...",
+                      ),
+                    ),
+                    SizedBox(height: 16),
+                    // Assistance Request
+                    Text("Assistance Needed / Follow-up", style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 14)),
+                    SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: _availableAssistanceOptions.map((option) => FilterChip(
+                        label: Text(option),
+                        selected: _selectedAssistanceRequests.contains(option),
+                        onSelected: (selected) {
+                          setState(() {
+                            if (selected) {
+                              _selectedAssistanceRequests.add(option);
+                            } else {
+                              _selectedAssistanceRequests.remove(option);
+                            }
+                          });
+                        },
+                      )).toList(),
+                    ),
+                    if (_selectedAssistanceRequests.contains('Other Concern')) ...[
+                      SizedBox(height: 8),
+                      TextField(
+                        controller: _assistanceRequestOtherDetailController,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(),
+                          hintText: "Specify other concern",
+                        ),
+                      ),
+                    ],
+                    SizedBox(height: 16),
+                    // Mentor Helpfulness
+                    Text("Did this conversation feel meaningful?", style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 14)),
+                    Row(
+                      children: ["Yes", "Neutral", "No"].map((option) => Expanded(
+                        child: RadioListTile<String>(
+                          title: Text(option),
+                          value: option,
+                          groupValue: _mentorHelpfulness,
+                          onChanged: (value) => setState(() => _mentorHelpfulness = value!),
+                        ),
+                      )).toList(),
+                    ),
+                    SizedBox(height: 16),
+                    // Red Flags
+                    Text("Red Flags (Optional)", style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 14, color: Colors.red)),
+                    SizedBox(height: 8),
+                    TextField(
+                      controller: _redFlagsController,
+                      maxLines: 2,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                        hintText: "Any red flags to note...",
+                      ),
+                    ),
+                    SizedBox(height: 16),
+                    // Volunteer Comfort
+                    Text("Your Comfort Level", style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 14)),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Slider(
+                            value: _volunteerComfort,
+                            min: 1.0,
+                            max: 5.0,
+                            divisions: 4,
+                            onChanged: (value) => setState(() => _volunteerComfort = value),
+                          ),
+                        ),
+                        Text("${_volunteerComfort.toStringAsFixed(1)}/5"),
+                      ],
+                    ),
+                    SizedBox(height: 16),
+                    // Volunteer Note
+                    Text("Your Personal Notes", style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 14)),
+                    SizedBox(height: 8),
+                    TextField(
+                      controller: _volunteerNoteController,
+                      maxLines: 3,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                        hintText: "Personal reflections...",
+                      ),
+                    ),
+                    SizedBox(height: 24),
+                    // Buttons
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: _isSaving ? null : () => Navigator.pop(context),
+                            child: Text("Cancel"),
+                          ),
+                        ),
+                        SizedBox(width: 16),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: _isSaving ? null : _saveChanges,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primaryBlue,
+                            ),
+                            child: _isSaving
+                                ? SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white))
+                                : Text("Save Changes", style: TextStyle(color: Colors.white)),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  String _getMoodEmoji(double score) {
+    if (score >= 4.5) return "🤩";
+    if (score >= 3.5) return "🙂";
+    if (score >= 2.5) return "😐";
+    if (score >= 1.5) return "😟";
+    return "😭";
+  }
+
+  String _formatDate(String? dateStr) {
+    if (dateStr == null) return 'N/A';
+    try {
+      final date = DateTime.parse(dateStr);
+      return "${date.day}/${date.month}/${date.year} at ${date.hour}:${date.minute.toString().padLeft(2, '0')}";
+    } catch (e) {
+      return 'N/A';
+    }
   }
 }
 
