@@ -1045,12 +1045,18 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
   }
 
   void _showMenteeDetailsDialog(Map<String, dynamic> mentee) {
-    final TextEditingController phoneController = TextEditingController(text: mentee['phone'] ?? '');
+    final TextEditingController fullNameController = TextEditingController(text: mentee['fullName'] ?? '');
+    final TextEditingController ageController = TextEditingController(text: mentee['age']?.toString() ?? '');
+    final TextEditingController dobController = TextEditingController(
+      text: mentee['dob'] != null ? mentee['dob'].toString().substring(0, 10) : '',
+    );
     final TextEditingController gradeController = TextEditingController(text: mentee['grade'] ?? '');
+    final TextEditingController phoneController = TextEditingController(text: mentee['phone'] ?? '');
     final TextEditingController pointOfContactController = TextEditingController(text: mentee['pointOfContact'] ?? '');
     final TextEditingController notesController = TextEditingController(text: mentee['notes'] ?? '');
     String selectedStatus = mentee['status'] ?? 'active';
-    
+    String? selectedGender = mentee['gender'];
+
     showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
@@ -1097,7 +1103,88 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Status Dropdown
+                  // Full Name
+                  Text('Full Name', style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.grey.shade700)),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: fullNameController,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                      prefixIcon: Icon(Icons.person, size: 20),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Age & Gender row
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Age', style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.grey.shade700)),
+                            const SizedBox(height: 8),
+                            TextField(
+                              controller: ageController,
+                              keyboardType: TextInputType.number,
+                              decoration: InputDecoration(
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                                hintText: '5–25',
+                                prefixIcon: Icon(Icons.cake, size: 20),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Gender', style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.grey.shade700)),
+                            const SizedBox(height: 8),
+                            DropdownButtonFormField<String>(
+                              value: selectedGender,
+                              decoration: InputDecoration(
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              ),
+                              hint: Text('Select'),
+                              items: ['Male', 'Female', 'Other'].map((g) {
+                                return DropdownMenuItem(value: g, child: Text(g));
+                              }).toList(),
+                              onChanged: (value) => setDialogState(() => selectedGender = value),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  // DOB
+                  Text('Date of Birth (YYYY-MM-DD)', style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.grey.shade700)),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Note: changing DOB will not auto-recalculate age',
+                    style: GoogleFonts.poppins(fontSize: 10, color: Colors.orange.shade700),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: dobController,
+                    keyboardType: TextInputType.datetime,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                      hintText: 'YYYY-MM-DD',
+                      prefixIcon: Icon(Icons.calendar_today, size: 20),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Status
                   Text('Status', style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.grey.shade700)),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<String>(
@@ -1106,22 +1193,19 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                       contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     ),
-                    items: ['active', 'paused', 'completed'].map((status) {
-                      return DropdownMenuItem(value: status, child: Text(status.toUpperCase()));
+                    items: ['active', 'paused', 'completed'].map((s) {
+                      return DropdownMenuItem(value: s, child: Text(s.toUpperCase()));
                     }).toList(),
-                    onChanged: (value) {
-                      setDialogState(() {
-                        selectedStatus = value!;
-                      });
-                    },
+                    onChanged: (value) => setDialogState(() => selectedStatus = value!),
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Phone
                   Text('Phone', style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.grey.shade700)),
                   const SizedBox(height: 8),
                   TextField(
                     controller: phoneController,
+                    keyboardType: TextInputType.phone,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                       contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
@@ -1129,7 +1213,7 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Grade
                   Text('Grade', style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.grey.shade700)),
                   const SizedBox(height: 8),
@@ -1142,7 +1226,7 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Point of Contact
                   Text('Point of Contact', style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.grey.shade700)),
                   const SizedBox(height: 8),
@@ -1155,7 +1239,7 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Notes
                   Text('Notes', style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.grey.shade700)),
                   const SizedBox(height: 8),
@@ -1169,7 +1253,7 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Read-only info
                   Container(
                     padding: EdgeInsets.all(12),
@@ -1180,11 +1264,9 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
                     ),
                     child: Column(
                       children: [
-                        _buildInfoRowDialog(Icons.calendar_today, 'Date of Birth', mentee['dob']?.substring(0, 10) ?? 'N/A'),
                         _buildInfoRowDialog(Icons.school, 'Program', mentee['program']?['name'] ?? 'N/A'),
                         if (mentee['assignedTo'] != null)
                           _buildInfoRowDialog(Icons.person, 'Assigned To', mentee['assignedTo']['fullName'] ?? 'N/A'),
-                        _buildInfoRowDialog(Icons.flag, 'Cell', 'Cell ${mentee['currentCell'] ?? 1}'),
                       ],
                     ),
                   ),
@@ -1199,15 +1281,21 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
             ),
             ElevatedButton(
               onPressed: () async {
-                await _updateMenteeDetails(
-                  mentee['id'],
-                  phoneController.text,
-                  gradeController.text,
-                  pointOfContactController.text,
-                  notesController.text,
-                  selectedStatus,
-                );
-                Navigator.pop(context);
+                final fields = <String, dynamic>{
+                  'status': selectedStatus,
+                };
+                if (fullNameController.text.trim().isNotEmpty) fields['fullName'] = fullNameController.text.trim();
+                final ageVal = int.tryParse(ageController.text.trim());
+                if (ageVal != null) fields['age'] = ageVal;
+                if (dobController.text.trim().isNotEmpty) fields['dob'] = dobController.text.trim();
+                if (selectedGender != null) fields['gender'] = selectedGender;
+                if (gradeController.text.trim().isNotEmpty) fields['grade'] = gradeController.text.trim();
+                if (phoneController.text.trim().isNotEmpty) fields['phone'] = phoneController.text.trim();
+                if (pointOfContactController.text.trim().isNotEmpty) fields['pointOfContact'] = pointOfContactController.text.trim();
+                if (notesController.text.trim().isNotEmpty) fields['notes'] = notesController.text.trim();
+
+                await _updateMenteeDetails(mentee['id'], fields);
+                if (mounted) Navigator.pop(context);
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryBlue,
@@ -1239,64 +1327,63 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
   
   Future<void> _updateMenteeDetails(
     String menteeId,
-    String phone,
-    String grade,
-    String pointOfContact,
-    String notes,
-    String status,
+    Map<String, dynamic> fields,
   ) async {
     try {
       final token = await secureStorage.read(key: "adminToken");
-      
+
       if (token == null || token.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Authentication token not found. Please login again.'), backgroundColor: Colors.red),
         );
         return;
       }
-      
-      print('🔑 Updating mentee with token: ${token.substring(0, 20)}...');
-      print('📝 Update payload: phone=$phone, grade=$grade, status=$status');
-      
+
+      print('🔑 Updating mentee $menteeId');
+      print('📝 Update payload: $fields');
+
       final response = await http.patch(
-        Uri.parse('$baseUrl/companion-connect/admin/mentees/$menteeId'),
+        Uri.parse('$baseUrl/admin/mentees/$menteeId'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
         },
-        body: json.encode({
-          'phone': phone,
-          'grade': grade,
-          'pointOfContact': pointOfContact,
-          'notes': notes,
-          'status': status,
-        }),
+        body: json.encode(fields),
       );
-      
+
       print('📥 Update Response Status: ${response.statusCode}');
       print('📥 Update Response Body: ${response.body}');
-      
+
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data['success'] == true) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Mentee updated successfully!'), backgroundColor: Colors.green),
-          );
-          _fetchData(); // Refresh the list
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Mentee updated successfully!'), backgroundColor: Colors.green),
+            );
+          }
+          _fetchData();
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(data['message'] ?? 'Failed to update mentee'), backgroundColor: Colors.red),
-          );
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(data['message'] ?? 'Failed to update mentee'), backgroundColor: Colors.red),
+            );
+          }
         }
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error updating mentee'), backgroundColor: Colors.red),
-        );
+        final data = json.decode(response.body);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(data['message'] ?? 'Error updating mentee'), backgroundColor: Colors.red),
+          );
+        }
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+        );
+      }
     }
   }
 

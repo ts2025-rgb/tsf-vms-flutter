@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:csv/csv.dart';
+import 'package:excel/excel.dart' as xls;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
@@ -42,6 +44,9 @@ class _CCPAdminDashboardScreenState extends State<CCPAdminDashboardScreen> {
   // Red flags data
   List<Map<String, dynamic>> _volunteersWithRedFlags = [];
   int _totalRedFlags = 0;
+
+  // Volunteer list expand/collapse
+  bool _showAllVolunteers = false;
   
   // Additional insights data
   Map<String, int> _topicFrequency = {};
@@ -1241,7 +1246,281 @@ class _CCPAdminDashboardScreenState extends State<CCPAdminDashboardScreen> {
       );
     }
   }
-  
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Excel download: one sheet per volunteer + overall summary sheet
+  // ─────────────────────────────────────────────────────────────────────────
+  Future<void> _downloadAllVolunteersExcel() async {
+    // Ask user which volunteers to include
+    final choice = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Icon(Icons.table_chart, color: Colors.green.shade700),
+            SizedBox(width: 8),
+            Text(
+              'Download Excel',
+              style: GoogleFonts.poppins(fontWeight: FontWeight.w700, fontSize: 18),
+            ),
+          ],
+        ),
+        content: Text(
+          'Which volunteers should be included in the Excel file?',
+          style: GoogleFonts.poppins(fontSize: 14),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text('Cancel', style: GoogleFonts.poppins(color: Colors.grey)),
+          ),
+          ElevatedButton.icon(
+            onPressed: () => Navigator.pop(ctx, 'withCalls'),
+            icon: Icon(Icons.phone, size: 16),
+            label: Text('With Calls Only', style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryBlue,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+          ),
+          ElevatedButton.icon(
+            onPressed: () => Navigator.pop(ctx, 'all'),
+            icon: Icon(Icons.people, size: 16),
+            label: Text('All Volunteers', style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.accentGreen,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (choice == null) return; // cancelled
+
+    final volunteersToExport = choice == 'withCalls'
+        ? _volunteers.where((v) {
+            final calls = v['callRecords'] as List?;
+            return calls != null && calls.isNotEmpty;
+          }).toList()
+        : _volunteers.toList();
+
+    if (volunteersToExport.isEmpty) {
+      _showError('No volunteers to export for the selected filter.');
+      return;
+    }
+
+    try {
+      final excel = xls.Excel.createExcel();
+      // Use filtered list for export
+      final exportList = volunteersToExport;
+
+      // ── Header style helper ───────────────────────────────────────────────
+      xls.CellStyle headerStyle() {
+        return xls.CellStyle(
+          bold: true,
+          backgroundColorHex: xls.ExcelColor.fromHexString('#1565C0'),
+          fontColorHex: xls.ExcelColor.fromHexString('#FFFFFF'),
+          horizontalAlign: xls.HorizontalAlign.Center,
+        );
+      }
+
+      xls.CellStyle subHeaderStyle() {
+        return xls.CellStyle(
+          bold: true,
+          backgroundColorHex: xls.ExcelColor.fromHexString('#E3F2FD'),
+          fontColorHex: xls.ExcelColor.fromHexString('#0D47A1'),
+        );
+      }
+
+      // ── Per-volunteer sheets ──────────────────────────────────────────────
+      for (var volunteer in exportList) {
+        final name = (volunteer['fullName'] as String? ?? 'Unknown')
+            .replaceAll(RegExp(r'[\\/*?:\[\]]'), '_');
+        // Excel sheet names max 31 chars
+        final sheetName = name.length > 31 ? name.substring(0, 31) : name;
+
+        final sheet = excel[sheetName];
+        final callRecords = volunteer['callRecords'] as List? ?? [];
+        final insights = volunteer['insights'] ?? {};
+
+        // Volunteer summary block
+        sheet.appendRow([xls.TextCellValue('Volunteer Summary')]);
+        sheet.cell(xls.CellIndex.indexByString('A1')).cellStyle = subHeaderStyle();
+
+        final summaryRows = [
+          ['Full Name', volunteer['fullName'] ?? ''],
+          ['Email', volunteer['email'] ?? ''],
+          ['Phone', volunteer['phone'] ?? ''],
+          ['Status', volunteer['status'] ?? ''],
+          ['Total Calls', insights['totalCalls']?.toString() ?? '0'],
+          ['Total Call Hours', insights['totalCallHours']?.toString() ?? '0'],
+          ['Average Rating', (insights['averageRating'] as num?)?.toStringAsFixed(2) ?? '0'],
+          ['Red Flag Calls', insights['callsWithRedFlags']?.toString() ?? '0'],
+        ];
+        for (var row in summaryRows) {
+          sheet.appendRow([xls.TextCellValue(row[0]), xls.TextCellValue(row[1])]);
+        }
+        sheet.appendRow([xls.TextCellValue('')]);
+
+        // Call records header
+        final callHeaders = [
+          'Date', 'Cell Number', 'Duration (min)', 'Topics',
+          'Assistance Requests', 'Checklist Items (Achieved)',
+          'Mood Score', 'Mentor Helpfulness', 'Follow Up Required',
+          'Red Flags', 'Notes', 'Volunteer Note',
+        ];
+        final headerRow = callHeaders.map((h) => xls.TextCellValue(h)).toList();
+        sheet.appendRow(headerRow);
+
+        // Style the call header row (it starts at row index = summaryRows.length + 2)
+        final callHeaderRowIdx = summaryRows.length + 2; // 0-based index
+        for (var c = 0; c < callHeaders.length; c++) {
+          sheet
+              .cell(xls.CellIndex.indexByColumnRow(columnIndex: c, rowIndex: callHeaderRowIdx))
+              .cellStyle = headerStyle();
+        }
+
+        for (var call in callRecords) {
+          final date = call['callDate'] != null
+              ? DateTime.parse(call['callDate']).toString().split(' ')[0]
+              : '';
+          final cellNumber = call['cellNumber']?.toString() ?? '';
+          final duration = call['callDuration']?.toString() ?? '';
+          final topics = (call['topics'] as List?)?.join('; ') ?? '';
+          final assistance = (call['assistanceRequest'] as List?)?.join('; ') ?? '';
+          final checklist = (call['checklist'] as List?)
+                  ?.where((item) => item['isAchieved'] == true)
+                  .map((item) => item['label'].toString())
+                  .join('; ') ??
+              '';
+          final mood = call['moodScore']?.toString() ?? '';
+          final mentorHelp = call['mentorHelpfulness']?.toString() ?? '';
+          final followUp = call['followUpRequired'] == true ? 'Yes' : 'No';
+          final redFlags = call['redFlags']?.toString() ?? '';
+          final notes = call['note']?.toString() ?? '';
+          final volunteerNote = call['volunteerNote']?.toString() ?? '';
+
+          sheet.appendRow([
+            xls.TextCellValue(date),
+            xls.TextCellValue(cellNumber),
+            xls.TextCellValue(duration),
+            xls.TextCellValue(topics),
+            xls.TextCellValue(assistance),
+            xls.TextCellValue(checklist),
+            xls.TextCellValue(mood),
+            xls.TextCellValue(mentorHelp),
+            xls.TextCellValue(followUp),
+            xls.TextCellValue(redFlags),
+            xls.TextCellValue(notes),
+            xls.TextCellValue(volunteerNote),
+          ]);
+        }
+
+        // Set column widths
+        for (var c = 0; c < callHeaders.length; c++) {
+          sheet.setColumnWidth(c, 20.0);
+        }
+      }
+
+      // ── Overall summary sheet ─────────────────────────────────────────────
+      const overallName = 'Overall Summary';
+      final overallSheet = excel[overallName];
+
+      // Remove default blank sheet if it exists
+      if (excel.sheets.containsKey('Sheet1')) {
+        excel.delete('Sheet1');
+      }
+
+      // Programme metrics header
+      final metricsHeaders = ['Metric', 'Value'];
+      overallSheet.appendRow(metricsHeaders.map((h) => xls.TextCellValue(h)).toList());
+      for (var c = 0; c < metricsHeaders.length; c++) {
+        overallSheet
+            .cell(xls.CellIndex.indexByColumnRow(columnIndex: c, rowIndex: 0))
+            .cellStyle = headerStyle();
+      }
+
+      final metrics = [
+        ['Total Volunteers', _totalVolunteers.toString()],
+        ['Active Volunteers', _activeVolunteers.toString()],
+        ['Total Mentees', _totalMentees.toString()],
+        ['Assigned Mentees', _assignedMentees.toString()],
+        ['Unassigned Mentees', _unassignedMentees.toString()],
+        ['Pending Queries', _pendingQueries.toString()],
+        ['Total Call Hours', _totalCallHours.toString()],
+        ['Avg Call Duration (min)', _avgCallDuration.toStringAsFixed(1)],
+        ['Total Red Flags', _totalRedFlags.toString()],
+      ];
+      for (var row in metrics) {
+        overallSheet.appendRow([xls.TextCellValue(row[0]), xls.TextCellValue(row[1])]);
+      }
+
+      overallSheet.appendRow([xls.TextCellValue('')]);
+
+      // Topics
+      overallSheet.appendRow([xls.TextCellValue('Topics Discussed'), xls.TextCellValue('Count')]);
+      for (var entry in (_topicFrequency.entries.toList()..sort((a, b) => b.value.compareTo(a.value)))) {
+        overallSheet.appendRow([xls.TextCellValue(entry.key), xls.TextCellValue(entry.value.toString())]);
+      }
+      overallSheet.appendRow([xls.TextCellValue('')]);
+
+      // Assistance
+      overallSheet.appendRow([xls.TextCellValue('Assistance Requests'), xls.TextCellValue('Count')]);
+      for (var entry in (_assistanceFrequency.entries.toList()..sort((a, b) => b.value.compareTo(a.value)))) {
+        overallSheet.appendRow([xls.TextCellValue(entry.key), xls.TextCellValue(entry.value.toString())]);
+      }
+      overallSheet.appendRow([xls.TextCellValue('')]);
+
+      // Checklist
+      overallSheet.appendRow([xls.TextCellValue('Checklist Items (Achieved)'), xls.TextCellValue('Count')]);
+      for (var entry in (_checklistCompletion.entries.toList()..sort((a, b) => b.value.compareTo(a.value)))) {
+        overallSheet.appendRow([xls.TextCellValue(entry.key), xls.TextCellValue(entry.value.toString())]);
+      }
+      overallSheet.appendRow([xls.TextCellValue('')]);
+
+      // Mentor helpfulness
+      overallSheet.appendRow([xls.TextCellValue('Mentor Helpfulness'), xls.TextCellValue('Count')]);
+      for (var entry in (_mentorHelpfulnessFrequency.entries.toList()..sort((a, b) => b.value.compareTo(a.value)))) {
+        overallSheet.appendRow([xls.TextCellValue(entry.key), xls.TextCellValue(entry.value.toString())]);
+      }
+
+      overallSheet.setColumnWidth(0, 30.0);
+      overallSheet.setColumnWidth(1, 15.0);
+
+      // Set overall sheet as first tab
+      excel.setDefaultSheet(overallName);
+
+      // Encode and trigger browser download
+      final encoded = excel.encode();
+      if (encoded == null) {
+        _showError('Failed to generate Excel file.');
+        return;
+      }
+      final bytes = Uint8List.fromList(encoded);
+      final blob = html.Blob(
+          [bytes],
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      final url = html.Url.createObjectUrlFromBlob(blob);
+      html.AnchorElement(href: url)
+        ..setAttribute('download', 'CCP_Volunteers_Calls.xlsx')
+        ..click();
+      html.Url.revokeObjectUrl(url);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Excel downloaded: ${exportList.length} volunteer sheets + Overall'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      _showError('Error generating Excel: $e');
+    }
+  }
+
   void _downloadVolunteerCSV(String volunteerId, String volunteerName, List<dynamic> callRecords) {
     try {
       // Prepare CSV data
@@ -1359,6 +1638,11 @@ class _CCPAdminDashboardScreenState extends State<CCPAdminDashboardScreen> {
           style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
         ),
         actions: [
+          IconButton(
+            icon: Icon(Icons.table_chart),
+            onPressed: _downloadAllVolunteersExcel,
+            tooltip: "Download All Volunteers Excel (.xlsx)",
+          ),
           IconButton(
             icon: Icon(Icons.download),
             onPressed: _downloadOverallCSV,
@@ -1745,12 +2029,18 @@ class _CCPAdminDashboardScreenState extends State<CCPAdminDashboardScreen> {
       return bHours.compareTo(aHours);
     });
     
-    final topPerformers = sortedVolunteers.take(5).toList();
+    // Show ALL volunteers, not just top 5
+    final allVolunteers = sortedVolunteers;
     
-    if (topPerformers.isEmpty) {
+    if (allVolunteers.isEmpty) {
       return SizedBox.shrink();
     }
     
+    // Max hours for progress bar scaling
+    final maxHours = allVolunteers.isNotEmpty
+        ? (allVolunteers.first['insights']?['totalCallHours'] as num?)?.toDouble() ?? 1
+        : 1.0;
+
     return Container(
       padding: EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -1771,19 +2061,41 @@ class _CCPAdminDashboardScreenState extends State<CCPAdminDashboardScreen> {
             children: [
               Icon(Icons.emoji_events, color: Colors.amber.shade700),
               SizedBox(width: 8),
-              Text(
-                "CCP Volunteers",
-                style: GoogleFonts.poppins(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
+              Expanded(
+                child: Text(
+                  "CCP Volunteers (${allVolunteers.length})",
+                  style: GoogleFonts.poppins(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              TextButton.icon(
+                onPressed: _downloadAllVolunteersExcel,
+                icon: Icon(Icons.download, size: 18, color: Colors.green.shade700),
+                label: Text(
+                  "Download Excel",
+                  style: GoogleFonts.poppins(
+                    fontSize: 12,
+                    color: Colors.green.shade700,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                style: TextButton.styleFrom(
+                  backgroundColor: Colors.green.shade50,
+                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    side: BorderSide(color: Colors.green.shade200),
+                  ),
                 ),
               ),
             ],
           ),
           SizedBox(height: 20),
-          // List view instead of chart for better compatibility
+          // Volunteer list — initially collapsed to 5
           Column(
-            children: topPerformers.asMap().entries.map((entry) {
+            children: (_showAllVolunteers ? allVolunteers : allVolunteers.take(5).toList()).asMap().entries.map((entry) {
               final index = entry.key;
               final volunteer = entry.value;
               final insights = volunteer['insights'] ?? {};
@@ -1793,10 +2105,7 @@ class _CCPAdminDashboardScreenState extends State<CCPAdminDashboardScreen> {
               final name = volunteer['fullName'] as String? ?? 'Unknown';
               final hasRedFlags = volunteer['hasRedFlags'] as bool? ?? false;
               
-              final maxHours = topPerformers.isNotEmpty 
-                  ? (topPerformers.first['insights']?['totalCallHours'] as num?)?.toDouble() ?? 1
-                  : 1;
-              final percentage = (maxHours > 0 ? (hours / maxHours) : 0.0) as double;
+              final percentage = maxHours > 0 ? (hours / maxHours) : 0.0;
               
               return InkWell(
                 onTap: () => _fetchVolunteerDetails(volunteer['_id']),
@@ -1919,11 +2228,36 @@ class _CCPAdminDashboardScreenState extends State<CCPAdminDashboardScreen> {
             );
           }).toList(),
           ),
+          // See More / See Less toggle
+          if (allVolunteers.length > 5) ...
+            [
+              SizedBox(height: 4),
+              Center(
+                child: TextButton.icon(
+                  onPressed: () => setState(() => _showAllVolunteers = !_showAllVolunteers),
+                  icon: Icon(
+                    _showAllVolunteers ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                    size: 18,
+                    color: AppColors.primaryBlue,
+                  ),
+                  label: Text(
+                    _showAllVolunteers
+                        ? 'See Less'
+                        : 'See More (${allVolunteers.length - 5} more)',
+                    style: GoogleFonts.poppins(
+                      fontSize: 13,
+                      color: AppColors.primaryBlue,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            ],
         ],
       ),
     );
   }
-  
+
   Widget _buildQueriesSection() {
     final recentQueries = _queries.take(5).toList();
     

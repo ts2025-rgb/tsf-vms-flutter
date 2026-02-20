@@ -1872,38 +1872,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     color: Colors.grey[700],
                   ),
                 ),
-                const SizedBox(height: 20),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: _isSubmitting ? null : _submitForm,
-                    icon: _isSubmitting 
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2,
-                            ),
-                          )
-                        : const Icon(Icons.send_outlined, color: Colors.white),
-                    label: Text(
-                      _isSubmitting ? "Submitting Registration..." : "Submit Registration",
-                      style: GoogleFonts.poppins(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _isSubmitting ? Colors.grey.shade400 : Colors.teal.shade700,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                  ),
-                ),
+
               ],
             ),
           ),
@@ -2025,7 +1994,9 @@ class _RegisterPageState extends State<RegisterPage> {
                     type: StepperType.vertical,
                     currentStep: _currentStep,
                     onStepContinue: () {
-                      if (_currentStep < _steps.length - 1) {
+                      if (_currentStep == _steps.length - 1) {
+                        _submitForm();
+                      } else {
                         setState(() => _currentStep += 1);
                       }
                     },

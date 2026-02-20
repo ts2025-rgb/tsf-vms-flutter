@@ -45,6 +45,7 @@ dependencies:
 
   lottie: ^2.7.0
   csv: ^6.0.0
+  excel: ^4.0.6
   universal_html: ^2.3.0
   shared_preferences: ^2.2.3
 
