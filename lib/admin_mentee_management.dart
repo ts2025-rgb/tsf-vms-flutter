@@ -1343,7 +1343,7 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
       print('📝 Update payload: $fields');
 
       final response = await http.patch(
-        Uri.parse('$baseUrl/admin/mentees/$menteeId'),
+        Uri.parse('$baseUrl/companion-connect/admin/mentees/$menteeId'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
