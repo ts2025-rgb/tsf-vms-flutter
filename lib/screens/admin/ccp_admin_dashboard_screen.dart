@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:csv/csv.dart';
 import 'package:excel/excel.dart' as xls;
 import 'package:flutter/material.dart';
@@ -2107,125 +2109,16 @@ class _CCPAdminDashboardScreenState extends State<CCPAdminDashboardScreen> {
               
               final percentage = maxHours > 0 ? (hours / maxHours) : 0.0;
               
-              return InkWell(
+              return _DashVolunteerHoverCard(
+                index: index,
+                volunteer: volunteer,
+                hours: hours,
+                calls: calls,
+                avgRating: avgRating,
+                percentage: percentage,
+                hasRedFlags: hasRedFlags,
                 onTap: () => _fetchVolunteerDetails(volunteer['_id']),
-                child: Container(
-                margin: EdgeInsets.only(bottom: 12),
-                padding: EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: index == 0 
-                      ? Colors.amber.shade50 
-                      : Colors.grey.shade50,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: index == 0 
-                        ? Colors.amber.shade200 
-                        : (hasRedFlags ? Colors.red.shade200 : Colors.grey.shade200),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 32,
-                      height: 32,
-                      decoration: BoxDecoration(
-                        color: index == 0 
-                            ? Colors.amber.shade700 
-                            : (hasRedFlags ? Colors.red : AppColors.primaryBlue),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Center(
-                        child: Text(
-                          '${index + 1}',
-                          style: GoogleFonts.poppins(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  name,
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                              if (hasRedFlags)
-                                Icon(
-                                  Icons.warning,
-                                  color: Colors.red,
-                                  size: 16,
-                                ),
-                            ],
-                          ),
-                          SizedBox(height: 4),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(4),
-                                  child: LinearProgressIndicator(
-                                    value: percentage,
-                                    minHeight: 6,
-                                    backgroundColor: Colors.grey.shade200,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      AppColors.accentGreen,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              SizedBox(width: 8),
-                              Text(
-                                '${hours.toStringAsFixed(1)}h',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.accentGreen,
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 2),
-                          Row(
-                            children: [
-                              Text(
-                                '$calls calls',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 10,
-                                  color: Colors.grey.shade600,
-                                ),
-                              ),
-                              if (avgRating > 0) ...[
-                                SizedBox(width: 8),
-                                Icon(Icons.star, size: 10, color: Colors.amber),
-                                Text(
-                                  '${avgRating.toStringAsFixed(1)}',
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 10,
-                                    color: Colors.grey.shade600,
-                                  ),
-                                ),
-                              ],
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
+              );
           }).toList(),
           ),
           // See More / See Less toggle
@@ -3158,6 +3051,495 @@ class _CCPAdminDashboardScreenState extends State<CCPAdminDashboardScreen> {
           ),
         ],
       ),
+    );
+  }
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Hover card: shows volunteer details + assigned mentee on web/desktop hover
+// ──────────────────────────────────────────────────────────────────────────────
+class _DashVolunteerHoverCard extends StatefulWidget {
+  final int index;
+  final Map<String, dynamic> volunteer;
+  final double hours;
+  final int calls;
+  final double avgRating;
+  final double percentage;
+  final bool hasRedFlags;
+  final VoidCallback onTap;
+
+  const _DashVolunteerHoverCard({
+    required this.index,
+    required this.volunteer,
+    required this.hours,
+    required this.calls,
+    required this.avgRating,
+    required this.percentage,
+    required this.hasRedFlags,
+    required this.onTap,
+  });
+
+  @override
+  State<_DashVolunteerHoverCard> createState() =>
+      _DashVolunteerHoverCardState();
+}
+
+class _DashVolunteerHoverCardState extends State<_DashVolunteerHoverCard> {
+  OverlayEntry? _overlayEntry;
+  Timer? _hideTimer;
+
+  Map<String, dynamic>? _volunteer;
+  Map<String, dynamic>? _mentee;
+  bool _fetched = false;
+  bool _fetching = false;
+  Offset? _lastPos;
+
+  final FlutterSecureStorage _storage = const FlutterSecureStorage();
+
+  bool get _isDesktopOrWeb {
+    if (kIsWeb) return true;
+    return defaultTargetPlatform == TargetPlatform.windows ||
+        defaultTargetPlatform == TargetPlatform.macOS ||
+        defaultTargetPlatform == TargetPlatform.linux;
+  }
+
+  String? get _volunteerId =>
+      widget.volunteer['_id']?.toString() ??
+      widget.volunteer['id']?.toString();
+
+  Future<void> _fetchDetails() async {
+    if (_fetched || _fetching) return;
+    final id = _volunteerId;
+    if (id == null) return;
+    _fetching = true;
+    try {
+      final token = await _storage.read(key: 'adminToken');
+      final res = await http.get(
+        Uri.parse('${ApiConfig.apiUrl}/companion-connect/admin/volunteers/$id/mentee'),
+        headers: {'Authorization': 'Bearer $token'},
+      );
+      if (res.statusCode == 200) {
+        final data = json.decode(res.body);
+        if (data['success'] == true && mounted) {
+          _volunteer = data['volunteer'] as Map<String, dynamic>?;
+          _mentee = data['mentee'] as Map<String, dynamic>?;
+          _fetched = true;
+          if (_overlayEntry != null && _lastPos != null) {
+            _removeOverlay();
+            _insertOverlay(_lastPos!);
+          }
+        }
+      }
+    } catch (_) {}
+    _fetching = false;
+  }
+
+  void _showOverlayAt(Offset pos) {
+    if (!_isDesktopOrWeb) return;
+    _hideTimer?.cancel();
+    _lastPos = pos;
+    if (_overlayEntry != null) return;
+    _insertOverlay(pos);
+    _fetchDetails();
+  }
+
+  void _insertOverlay(Offset pos) {
+    const w = 300.0;
+    const maxH = 460.0;
+    final screen = MediaQuery.of(context).size;
+    double left = pos.dx + 16;
+    double top = pos.dy - 20;
+    if (left + w > screen.width - 8) left = pos.dx - w - 16;
+    if (top + maxH > screen.height - 8) top = screen.height - maxH - 8;
+    if (top < 8) top = 8;
+    if (left < 8) left = 8;
+
+    _overlayEntry = OverlayEntry(
+      builder: (_) => Positioned(
+        left: left,
+        top: top,
+        child: Material(
+          color: Colors.transparent,
+          child: MouseRegion(
+            onEnter: (_) => _cancelHide(),
+            onExit: (_) => _scheduleHide(),
+            child: _buildPopup(),
+          ),
+        ),
+      ),
+    );
+    Overlay.of(context).insert(_overlayEntry!);
+  }
+
+  void _scheduleHide() {
+    _hideTimer?.cancel();
+    _hideTimer = Timer(const Duration(milliseconds: 150), _removeOverlay);
+  }
+
+  void _cancelHide() => _hideTimer?.cancel();
+
+  void _removeOverlay() {
+    _overlayEntry?.remove();
+    _overlayEntry = null;
+  }
+
+  @override
+  void dispose() {
+    _hideTimer?.cancel();
+    _removeOverlay();
+    super.dispose();
+  }
+
+  String _fmtDob(String? dob) {
+    if (dob == null) return 'N/A';
+    try {
+      final d = DateTime.parse(dob);
+      return '${d.day}/${d.month}/${d.year}';
+    } catch (_) {
+      return dob.length >= 10 ? dob.substring(0, 10) : dob;
+    }
+  }
+
+  Widget _popRow(IconData icon, String label, String value,
+      {Color? iconColor}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 5),
+      child: Row(
+        children: [
+          Icon(icon, size: 13,
+              color: iconColor ?? Colors.grey.shade500),
+          const SizedBox(width: 6),
+          Text('$label: ',
+              style: GoogleFonts.poppins(
+                  fontSize: 11, color: Colors.grey.shade500)),
+          Expanded(
+            child: Text(value,
+                style: GoogleFonts.poppins(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey.shade800),
+                overflow: TextOverflow.ellipsis),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _menteeRow(IconData icon, String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 3),
+      child: Row(
+        children: [
+          Icon(icon, size: 11,
+              color: AppColors.accentGreen.withOpacity(0.7)),
+          const SizedBox(width: 5),
+          Text('$label: ',
+              style: GoogleFonts.poppins(
+                  fontSize: 10,
+                  color: AppColors.accentGreen.withOpacity(0.8))),
+          Expanded(
+            child: Text(value,
+                style: GoogleFonts.poppins(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey.shade700),
+                overflow: TextOverflow.ellipsis),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPopup() {
+    final v = widget.volunteer;
+    final vol = _volunteer;
+    final mentee = _mentee;
+    final isLoading = !_fetched && _volunteerId != null;
+    final hasRedFlags = widget.hasRedFlags;
+
+    return Container(
+      width: 300,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.primaryBlue.withOpacity(0.18)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.14),
+            blurRadius: 24,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // ── Header ─────────────────────────────────────────────────────
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 20,
+                backgroundColor: AppColors.primaryBlue.withOpacity(0.12),
+                child: Text(
+                  (v['fullName'] ?? 'V')[0].toUpperCase(),
+                  style: GoogleFonts.poppins(
+                      color: AppColors.primaryBlue,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  vol?['fullName'] ?? v['fullName'] ?? 'Unknown',
+                  style: GoogleFonts.poppins(
+                      fontWeight: FontWeight.w700, fontSize: 13),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              if (hasRedFlags)
+                Icon(Icons.warning_rounded,
+                    color: Colors.red, size: 18),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Divider(height: 1, color: Colors.grey.shade200),
+          const SizedBox(height: 10),
+
+          if (isLoading)
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                child: SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(
+                      strokeWidth: 2, color: AppColors.primaryBlue),
+                ),
+              ),
+            )
+          else ...[
+            // ── Volunteer details ───────────────────────────────────────
+            _popRow(Icons.phone_outlined, 'Phone',
+                vol?['phone'] ?? v['phone'] ?? 'N/A'),
+            _popRow(Icons.cake_outlined, 'Date of Birth',
+                _fmtDob(vol?['dob']?.toString() ?? v['dob']?.toString())),
+            _popRow(Icons.badge_outlined, 'Volunteer Code',
+                vol?['volunteerCode'] ?? v['volunteerCode'] ?? 'N/A'),
+            // _popRow(Icons.verified_user_outlined, 'Status',
+            //     vol?['approvalStatus'] ?? vol?['status'] ??
+            //         v['approvalStatus'] ?? v['status'] ?? 'N/A'),
+            // ── Stats row ──────────────────────────────────────────────
+            _popRow(Icons.timer_outlined, 'Call Hours',
+                '${widget.hours.toStringAsFixed(1)} h'),
+            _popRow(Icons.call_outlined, 'Total Calls',
+                '${widget.calls}'),
+            if (widget.avgRating > 0)
+              _popRow(Icons.star_outline_rounded, 'Avg Rating',
+                  widget.avgRating.toStringAsFixed(1),
+                  iconColor: Colors.amber.shade700),
+            const SizedBox(height: 8),
+
+            // ── Assigned mentee ─────────────────────────────────────────
+            Container(
+              width: double.infinity,
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              decoration: BoxDecoration(
+                color: mentee != null
+                    ? AppColors.accentGreen.withOpacity(0.08)
+                    : Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: mentee != null
+                      ? AppColors.accentGreen.withOpacity(0.35)
+                      : Colors.grey.shade300,
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        mentee != null
+                            ? Icons.person_rounded
+                            : Icons.person_off_outlined,
+                        size: 14,
+                        color: mentee != null
+                            ? AppColors.accentGreen
+                            : Colors.grey.shade500,
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          mentee != null
+                              ? (mentee['fullName'] ?? 'Unknown Mentee')
+                              : 'No mentee assigned',
+                          style: GoogleFonts.poppins(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: mentee != null
+                                ? AppColors.accentGreen
+                                : Colors.grey.shade500,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (mentee != null) ...[
+                    const SizedBox(height: 6),
+                    _menteeRow(Icons.cake_outlined, 'Age',
+                        '${mentee['age'] ?? 'N/A'}'),
+                    _menteeRow(Icons.calendar_today_outlined, 'DOB',
+                        _fmtDob(mentee['dob']?.toString())),
+                    _menteeRow(Icons.phone_outlined, 'Phone',
+                        mentee['phone'] ?? 'N/A'),
+                    _menteeRow(Icons.grid_view_rounded, 'Cell',
+                        'Cell ${mentee['currentCell'] ?? 'N/A'}'),
+                    _menteeRow(Icons.circle, 'Status',
+                        mentee['status'] ?? 'N/A'),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final v = widget.volunteer;
+    final name = v['fullName'] as String? ?? 'Unknown';
+
+    final card = InkWell(
+      onTap: widget.onTap,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: widget.index == 0
+              ? Colors.amber.shade50
+              : Colors.grey.shade50,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: widget.index == 0
+                ? Colors.amber.shade200
+                : (widget.hasRedFlags
+                    ? Colors.red.shade200
+                    : Colors.grey.shade200),
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: widget.index == 0
+                    ? Colors.amber.shade700
+                    : (widget.hasRedFlags
+                        ? Colors.red
+                        : AppColors.primaryBlue),
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: Text(
+                  '${widget.index + 1}',
+                  style: GoogleFonts.poppins(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          name,
+                          style: GoogleFonts.poppins(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      if (widget.hasRedFlags)
+                        const Icon(Icons.warning,
+                            color: Colors.red, size: 16),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(4),
+                          child: LinearProgressIndicator(
+                            value: widget.percentage,
+                            minHeight: 6,
+                            backgroundColor: Colors.grey.shade200,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                                AppColors.accentGreen),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        '${widget.hours.toStringAsFixed(1)}h',
+                        style: GoogleFonts.poppins(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.accentGreen,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  Row(
+                    children: [
+                      Text('${widget.calls} calls',
+                          style: GoogleFonts.poppins(
+                              fontSize: 10,
+                              color: Colors.grey.shade600)),
+                      if (widget.avgRating > 0) ...[
+                        const SizedBox(width: 8),
+                        const Icon(Icons.star,
+                            size: 10, color: Colors.amber),
+                        Text(
+                          '${widget.avgRating.toStringAsFixed(1)}',
+                          style: GoogleFonts.poppins(
+                              fontSize: 10,
+                              color: Colors.grey.shade600),
+                        ),
+                      ],
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (!_isDesktopOrWeb) return card;
+
+    return MouseRegion(
+      onEnter: (e) => _showOverlayAt(e.position),
+      onExit: (_) => _scheduleHide(),
+      child: card,
     );
   }
 }
