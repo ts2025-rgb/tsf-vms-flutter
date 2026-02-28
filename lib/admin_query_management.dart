@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -392,167 +394,13 @@ class _AdminQueryManagementPageState extends State<AdminQueryManagementPage> wit
   }
 
   Widget _buildQueryCard(Map<String, dynamic> query, bool isPending) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      elevation: 2,
-      color: Colors.white,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                CircleAvatar(
-                  radius: 16,
-                  backgroundColor: AppColors.primaryBlue.withOpacity(0.1),
-                  child: Text(
-                    (query['volunteerName'] ?? 'V')[0].toUpperCase(),
-                    style: GoogleFonts.poppins(
-                      color: AppColors.primaryBlue,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        query['volunteerName'] ?? 'Unknown Volunteer',
-                        style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 14),
-                      ),
-                      Text(
-                        _formatDate(query['createdAt']),
-                        style: GoogleFonts.poppins(fontSize: 11, color: Colors.grey),
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: isPending ? Colors.orange.withOpacity(0.1) : Colors.green.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    isPending ? "Pending" : "Replied",
-                    style: GoogleFonts.poppins(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
-                      color: isPending ? Colors.orange.shade800 : Colors.green.shade800,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade50,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.grey.shade200),
-              ),
-              child: Text(
-                query['query'] ?? '',
-                style: GoogleFonts.poppins(fontSize: 13, height: 1.5),
-              ),
-            ),
-            if (!isPending && query['reply'] != null) ...[
-              const SizedBox(height: 12),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(Icons.reply, size: 16, color: Colors.grey.shade500),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Admin Reply:",
-                          style: GoogleFonts.poppins(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.grey.shade700,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          query['reply'],
-                          style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade800),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ],
-            if (isPending) ...[
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  IconButton(
-                    onPressed: () => _showDeleteQueryDialog(query),
-                    icon: Icon(Icons.delete_outline, size: 20),
-                    color: Colors.red,
-                    tooltip: 'Delete Query',
-                    style: IconButton.styleFrom(
-                      backgroundColor: Colors.red.shade50,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  ElevatedButton.icon(
-                    onPressed: () => _showReplyDialog(query),
-                    icon: Icon(Icons.reply, size: 16),
-                    label: Text("Reply"),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryBlue,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-            if (!isPending) ...[
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  IconButton(
-                    onPressed: () => _showDeleteQueryDialog(query),
-                    icon: Icon(Icons.delete_outline, size: 20),
-                    color: Colors.red,
-                    tooltip: 'Delete Query',
-                    style: IconButton.styleFrom(
-                      backgroundColor: Colors.red.shade50,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  OutlinedButton.icon(
-                    onPressed: () => _showEditQueryDialog(query),
-                    icon: Icon(Icons.edit, size: 16),
-                    label: Text("Edit"),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.primaryBlue,
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ],
-        ),
-      ),
+    return _QueryHoverCard(
+      query: query,
+      isPending: isPending,
+      onReply: () => _showReplyDialog(query),
+      onEdit: () => _showEditQueryDialog(query),
+      onDelete: () => _showDeleteQueryDialog(query),
+      formatDate: _formatDate,
     );
   }
 
@@ -1111,5 +959,566 @@ class _AdminQueryManagementPageState extends State<AdminQueryManagementPage> wit
     } catch (e) {
       return '';
     }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Hover card – shows volunteer & mentee details on web/desktop hover
+// ---------------------------------------------------------------------------
+class _QueryHoverCard extends StatefulWidget {
+  final Map<String, dynamic> query;
+  final bool isPending;
+  final VoidCallback onReply;
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
+  final String Function(String?) formatDate;
+
+  const _QueryHoverCard({
+    required this.query,
+    required this.isPending,
+    required this.onReply,
+    required this.onEdit,
+    required this.onDelete,
+    required this.formatDate,
+  });
+
+  @override
+  State<_QueryHoverCard> createState() => _QueryHoverCardState();
+}
+
+class _QueryHoverCardState extends State<_QueryHoverCard> {
+  OverlayEntry? _overlayEntry;
+  Timer? _hideTimer;
+
+  // Fetched from API
+  Map<String, dynamic>? _volunteer;
+  Map<String, dynamic>? _mentee;
+  bool _fetched = false;
+  bool _fetching = false;
+
+  // Cached position for overlay rebuild after fetch
+  Offset? _lastPosition;
+
+  final FlutterSecureStorage _storage = const FlutterSecureStorage();
+
+  bool get _isDesktopOrWeb {
+    if (kIsWeb) return true;
+    return defaultTargetPlatform == TargetPlatform.windows ||
+        defaultTargetPlatform == TargetPlatform.macOS ||
+        defaultTargetPlatform == TargetPlatform.linux;
+  }
+
+  String? get _volunteerId {
+    final q = widget.query;
+    // Try common field names the API might return
+    return q['volunteerId']?.toString() ??
+        q['volunteer']?['_id']?.toString() ??
+        q['volunteer']?['id']?.toString();
+  }
+
+  Future<void> _fetchVolunteerDetails() async {
+    if (_fetched || _fetching) return;
+    final id = _volunteerId;
+    if (id == null) return;
+
+    _fetching = true;
+    try {
+      final token = await _storage.read(key: 'adminToken');
+      final response = await http.get(
+        Uri.parse('${ApiConfig.apiUrl}/companion-connect/admin/volunteers/$id/mentee'),
+        headers: {'Authorization': 'Bearer $token'},
+      );
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['success'] == true && mounted) {
+          _volunteer = data['volunteer'] as Map<String, dynamic>?;
+          _mentee = data['mentee'] as Map<String, dynamic>?;
+          _fetched = true;
+          // Rebuild the overlay with real data
+          if (_overlayEntry != null && _lastPosition != null) {
+            _removeOverlay();
+            _buildAndInsertOverlay(_lastPosition!);
+          }
+        }
+      }
+    } catch (_) {}
+    _fetching = false;
+  }
+
+  void _showOverlayAt(Offset globalPosition) {
+    if (!_isDesktopOrWeb) return;
+    _hideTimer?.cancel();
+    _lastPosition = globalPosition;
+    if (_overlayEntry != null) return;
+    _buildAndInsertOverlay(globalPosition);
+    _fetchVolunteerDetails(); // fetch in background; rebuilds overlay when done
+  }
+
+  void _buildAndInsertOverlay(Offset globalPosition) {
+    const double popupWidth = 300;
+    const double popupMaxHeight = 440;
+    final screenSize = MediaQuery.of(context).size;
+
+    double left = globalPosition.dx + 16;
+    double top = globalPosition.dy - 20;
+
+    if (left + popupWidth > screenSize.width - 8) {
+      left = globalPosition.dx - popupWidth - 16;
+    }
+    if (top + popupMaxHeight > screenSize.height - 8) {
+      top = screenSize.height - popupMaxHeight - 8;
+    }
+    if (top < 8) top = 8;
+    if (left < 8) left = 8;
+
+    _overlayEntry = OverlayEntry(
+      builder: (_) => Positioned(
+        left: left,
+        top: top,
+        child: Material(
+          color: Colors.transparent,
+          child: MouseRegion(
+            onEnter: (_) => _cancelHide(),
+            onExit: (_) => _scheduleHide(),
+            child: _buildPopup(),
+          ),
+        ),
+      ),
+    );
+    Overlay.of(context).insert(_overlayEntry!);
+  }
+
+  void _scheduleHide() {
+    _hideTimer?.cancel();
+    _hideTimer = Timer(const Duration(milliseconds: 150), _removeOverlay);
+  }
+
+  void _cancelHide() {
+    _hideTimer?.cancel();
+  }
+
+  void _removeOverlay() {
+    _overlayEntry?.remove();
+    _overlayEntry = null;
+  }
+
+  @override
+  void dispose() {
+    _hideTimer?.cancel();
+    _removeOverlay();
+    super.dispose();
+  }
+
+  String _fmtDob(String? dob) {
+    if (dob == null) return 'N/A';
+    try {
+      final d = DateTime.parse(dob);
+      return '${d.day}/${d.month}/${d.year}';
+    } catch (_) {
+      return dob.length >= 10 ? dob.substring(0, 10) : dob;
+    }
+  }
+
+  Widget _buildPopup() {
+    final q = widget.query;
+    final isPending = widget.isPending;
+    final vol = _volunteer;
+    final mentee = _mentee;
+    final isLoading = !_fetched && _volunteerId != null;
+
+    return Container(
+      width: 300,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.primaryBlue.withOpacity(0.18)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.14),
+            blurRadius: 24,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // ── Header ───────────────────────────────────────────────────────
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 20,
+                backgroundColor: AppColors.primaryBlue.withOpacity(0.12),
+                child: Text(
+                  (q['volunteerName'] ?? 'V')[0].toUpperCase(),
+                  style: GoogleFonts.poppins(
+                      color: AppColors.primaryBlue,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  vol?['fullName'] ?? q['volunteerName'] ?? 'Unknown Volunteer',
+                  style: GoogleFonts.poppins(
+                      fontWeight: FontWeight.w700, fontSize: 13),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: isPending
+                      ? Colors.orange.withOpacity(0.12)
+                      : Colors.green.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  isPending ? 'Pending' : 'Replied',
+                  style: GoogleFonts.poppins(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    color: isPending
+                        ? Colors.orange.shade800
+                        : Colors.green.shade800,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Divider(height: 1, color: Colors.grey.shade200),
+          const SizedBox(height: 10),
+
+          // ── Loading spinner ───────────────────────────────────────────────
+          if (isLoading)
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                child: SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(
+                      strokeWidth: 2, color: AppColors.primaryBlue),
+                ),
+              ),
+            )
+          else ...[
+            // ── Volunteer details ─────────────────────────────────────────
+            _row(Icons.phone_outlined, 'Phone',
+                vol?['phone'] ?? 'N/A'),
+            _row(Icons.cake_outlined, 'Date of Birth',
+                _fmtDob(vol?['dob']?.toString())),
+            _row(Icons.badge_outlined, 'Volunteer Code',
+                vol?['volunteerCode'] ?? 'N/A'),
+            // _row(Icons.verified_user_outlined, 'Status',
+            //     vol?['approvalStatus'] ?? vol?['status'] ?? 'N/A'),
+            const SizedBox(height: 8),
+
+            // ── Assigned mentee ───────────────────────────────────────────
+            Container(
+              width: double.infinity,
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              decoration: BoxDecoration(
+                color: mentee != null
+                    ? AppColors.accentGreen.withOpacity(0.08)
+                    : Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: mentee != null
+                      ? AppColors.accentGreen.withOpacity(0.35)
+                      : Colors.grey.shade300,
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        mentee != null
+                            ? Icons.person_rounded
+                            : Icons.person_off_outlined,
+                        size: 14,
+                        color: mentee != null
+                            ? AppColors.accentGreen
+                            : Colors.grey.shade500,
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          mentee != null
+                              ? mentee['fullName'] ?? 'Unknown Mentee'
+                              : 'No mentee assigned',
+                          style: GoogleFonts.poppins(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: mentee != null
+                                ? AppColors.accentGreen
+                                : Colors.grey.shade500,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (mentee != null) ...[
+                    const SizedBox(height: 6),
+                    _menteeRow(Icons.cake_outlined, 'Age',
+                        '${mentee['age'] ?? 'N/A'}'),
+                    _menteeRow(Icons.calendar_today_outlined, 'DOB',
+                        _fmtDob(mentee['dob']?.toString())),
+                    _menteeRow(Icons.phone_outlined, 'Phone',
+                        mentee['phone'] ?? 'N/A'),
+                    _menteeRow(Icons.grid_view_rounded, 'Cell',
+                        'Cell ${mentee['currentCell'] ?? 'N/A'}'),
+                    _menteeRow(Icons.circle, 'Status',
+                        mentee['status'] ?? 'N/A'),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _row(IconData icon, String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 5),
+      child: Row(
+        children: [
+          Icon(icon, size: 13, color: Colors.grey.shade500),
+          const SizedBox(width: 6),
+          Text('$label: ',
+              style: GoogleFonts.poppins(
+                  fontSize: 11, color: Colors.grey.shade500)),
+          Expanded(
+            child: Text(value,
+                style: GoogleFonts.poppins(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey.shade800),
+                overflow: TextOverflow.ellipsis),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _menteeRow(IconData icon, String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 3),
+      child: Row(
+        children: [
+          Icon(icon, size: 11, color: AppColors.accentGreen.withOpacity(0.7)),
+          const SizedBox(width: 5),
+          Text('$label: ',
+              style: GoogleFonts.poppins(
+                  fontSize: 10,
+                  color: AppColors.accentGreen.withOpacity(0.8))),
+          Expanded(
+            child: Text(value,
+                style: GoogleFonts.poppins(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey.shade700),
+                overflow: TextOverflow.ellipsis),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final q = widget.query;
+    final isPending = widget.isPending;
+
+    final card = Card(
+      margin: const EdgeInsets.only(bottom: 16),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 2,
+      color: Colors.white,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 16,
+                  backgroundColor: AppColors.primaryBlue.withOpacity(0.1),
+                  child: Text(
+                    (q['volunteerName'] ?? 'V')[0].toUpperCase(),
+                    style: GoogleFonts.poppins(
+                      color: AppColors.primaryBlue,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        q['volunteerName'] ?? 'Unknown Volunteer',
+                        style: GoogleFonts.poppins(
+                            fontWeight: FontWeight.w600, fontSize: 14),
+                      ),
+                      Text(
+                        widget.formatDate(q['createdAt']),
+                        style: GoogleFonts.poppins(
+                            fontSize: 11, color: Colors.grey),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: isPending
+                        ? Colors.orange.withOpacity(0.1)
+                        : Colors.green.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    isPending ? 'Pending' : 'Replied',
+                    style: GoogleFonts.poppins(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                      color: isPending
+                          ? Colors.orange.shade800
+                          : Colors.green.shade800,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade50,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.grey.shade200),
+              ),
+              child: Text(
+                q['query'] ?? '',
+                style: GoogleFonts.poppins(fontSize: 13, height: 1.5),
+              ),
+            ),
+            if (!isPending && q['reply'] != null) ...[
+              const SizedBox(height: 12),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.reply, size: 16, color: Colors.grey.shade500),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Admin Reply:',
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey.shade700,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          q['reply'],
+                          style: GoogleFonts.poppins(
+                              fontSize: 13, color: Colors.grey.shade800),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+            if (isPending) ...[
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  IconButton(
+                    onPressed: widget.onDelete,
+                    icon: Icon(Icons.delete_outline, size: 20),
+                    color: Colors.red,
+                    tooltip: 'Delete Query',
+                    style: IconButton.styleFrom(
+                        backgroundColor: Colors.red.shade50),
+                  ),
+                  const SizedBox(width: 8),
+                  ElevatedButton.icon(
+                    onPressed: widget.onReply,
+                    icon: Icon(Icons.reply, size: 16),
+                    label: Text('Reply'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primaryBlue,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8)),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+            if (!isPending) ...[
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  IconButton(
+                    onPressed: widget.onDelete,
+                    icon: Icon(Icons.delete_outline, size: 20),
+                    color: Colors.red,
+                    tooltip: 'Delete Query',
+                    style: IconButton.styleFrom(
+                        backgroundColor: Colors.red.shade50),
+                  ),
+                  const SizedBox(width: 8),
+                  OutlinedButton.icon(
+                    onPressed: widget.onEdit,
+                    icon: Icon(Icons.edit, size: 16),
+                    label: Text('Edit'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.primaryBlue,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8)),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+
+    if (!_isDesktopOrWeb) return card;
+
+    return MouseRegion(
+      onEnter: (event) => _showOverlayAt(event.position),
+      onExit: (_) => _scheduleHide(),
+      child: card,
+    );
   }
 }

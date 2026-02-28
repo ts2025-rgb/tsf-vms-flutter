@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
@@ -595,180 +597,12 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
   }
 
   Widget _buildMenteeCard(Map<String, dynamic> mentee) {
-    final isAssigned = mentee['assignedTo'] != null;
-    final volunteerName = isAssigned ? mentee['assignedTo']['fullName'] : null;
-    final status = mentee['status'] ?? 'active';
-    final currentCell = mentee['currentCell'] ?? 1;
-
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                CircleAvatar(
-                  radius: 30,
-                  backgroundColor: AppColors.primaryBlue.withOpacity(0.1),
-                  child: mentee['photoUrl'] != null && mentee['photoUrl'].toString().isNotEmpty
-                      ? ClipOval(
-                          child: Image.network(
-                            mentee['photoUrl'],
-                            width: 60,
-                            height: 60,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) => Icon(Icons.person, color: AppColors.primaryBlue, size: 30),
-                          ),
-                        )
-                      : Icon(Icons.person, color: AppColors.primaryBlue, size: 30),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        mentee['fullName'] ?? 'Unknown',
-                        style: GoogleFonts.poppins(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          Icon(Icons.cake, size: 14, color: Colors.grey.shade600),
-                          const SizedBox(width: 4),
-                          Text(
-                            'Age: ${mentee['age'] ?? 'N/A'}',
-                            style: GoogleFonts.poppins(
-                              fontSize: 12,
-                              color: Colors.grey.shade600,
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: status == 'active' ? AppColors.accentGreen.withOpacity(0.1) : Colors.grey.shade200,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Text(
-                              status.toUpperCase(),
-                              style: GoogleFonts.poppins(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w600,
-                                color: status == 'active' ? AppColors.accentGreen : Colors.grey.shade700,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryBlue.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    'Cell $currentCell',
-                    style: GoogleFonts.poppins(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.primaryBlue,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: isAssigned ? AppColors.accentGreen.withOpacity(0.1) : AppColors.accentOrange.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: isAssigned ? AppColors.accentGreen.withOpacity(0.3) : AppColors.accentOrange.withOpacity(0.3),
-                ),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    isAssigned ? Icons.check_circle : Icons.warning,
-                    size: 16,
-                    color: isAssigned ? AppColors.accentGreen : AppColors.accentOrange,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      isAssigned
-                          ? 'Assigned to: $volunteerName'
-                          : 'Not assigned to any volunteer',
-                      style: GoogleFonts.poppins(
-                        fontSize: 12,
-                        color: isAssigned ? AppColors.accentGreen : AppColors.accentOrange,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                if (isAssigned)
-                  TextButton.icon(
-                    onPressed: () => _showUnassignDialog(mentee),
-                    icon: Icon(Icons.link_off, size: 16),
-                    label: Text('Unassign'),
-                    style: TextButton.styleFrom(
-                      foregroundColor: Colors.red,
-                    ),
-                  ),
-                if (!isAssigned)
-                  ElevatedButton.icon(
-                    onPressed: () => _showAssignDialog(mentee),
-                    icon: Icon(Icons.person_add, size: 16),
-                    label: Text('Assign'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryBlue,
-                      foregroundColor: Colors.white,
-                    ),
-                  ),
-                const SizedBox(width: 8),
-                OutlinedButton.icon(
-                  onPressed: () {
-                    _showMenteeDetailsDialog(mentee);
-                  },
-                  icon: Icon(Icons.visibility, size: 16),
-                  label: Text('View'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.primaryBlue,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                IconButton(
-                  onPressed: () => _showDeleteMenteeDialog(mentee),
-                  icon: Icon(Icons.delete_outline, size: 20),
-                  color: Colors.red,
-                  tooltip: 'Delete Mentee',
-                  style: IconButton.styleFrom(
-                    backgroundColor: Colors.red.shade50,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
+    return _MenteeHoverCard(
+      mentee: mentee,
+      onAssign: () => _showAssignDialog(mentee),
+      onUnassign: () => _showUnassignDialog(mentee),
+      onView: () => _showMenteeDetailsDialog(mentee),
+      onDelete: () => _showDeleteMenteeDialog(mentee),
     );
   }
 
@@ -1737,5 +1571,533 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
         ),
       );
     }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Hover card widget – shows a read-only detail popup on web / desktop hover
+// ---------------------------------------------------------------------------
+class _MenteeHoverCard extends StatefulWidget {
+  final Map<String, dynamic> mentee;
+  final VoidCallback onAssign;
+  final VoidCallback onUnassign;
+  final VoidCallback onView;
+  final VoidCallback onDelete;
+
+  const _MenteeHoverCard({
+    required this.mentee,
+    required this.onAssign,
+    required this.onUnassign,
+    required this.onView,
+    required this.onDelete,
+  });
+
+  @override
+  State<_MenteeHoverCard> createState() => _MenteeHoverCardState();
+}
+
+class _MenteeHoverCardState extends State<_MenteeHoverCard> {
+  OverlayEntry? _overlayEntry;
+  Timer? _hideTimer;
+
+  bool get _isDesktopOrWeb {
+    if (kIsWeb) return true;
+    return defaultTargetPlatform == TargetPlatform.windows ||
+        defaultTargetPlatform == TargetPlatform.macOS ||
+        defaultTargetPlatform == TargetPlatform.linux;
+  }
+
+  void _showOverlayAt(Offset globalPosition) {
+    if (!_isDesktopOrWeb) return;
+    _hideTimer?.cancel();
+    if (_overlayEntry != null) return;
+
+    const double popupWidth = 300;
+    const double popupMaxHeight = 460;
+    final screenSize = MediaQuery.of(context).size;
+
+    double left = globalPosition.dx + 16;
+    double top = globalPosition.dy - 20;
+
+    if (left + popupWidth > screenSize.width - 8) {
+      left = globalPosition.dx - popupWidth - 16;
+    }
+    if (top + popupMaxHeight > screenSize.height - 8) {
+      top = screenSize.height - popupMaxHeight - 8;
+    }
+    if (top < 8) top = 8;
+    if (left < 8) left = 8;
+
+    _overlayEntry = OverlayEntry(
+      builder: (_) => Positioned(
+        left: left,
+        top: top,
+        child: Material(
+          color: Colors.transparent,
+          child: MouseRegion(
+            onEnter: (_) => _cancelHide(),
+            onExit: (_) => _scheduleHide(),
+            child: _buildPopup(),
+          ),
+        ),
+      ),
+    );
+    Overlay.of(context).insert(_overlayEntry!);
+  }
+
+  void _scheduleHide() {
+    _hideTimer?.cancel();
+    _hideTimer = Timer(const Duration(milliseconds: 150), _removeOverlay);
+  }
+
+  void _cancelHide() {
+    _hideTimer?.cancel();
+  }
+
+  void _removeOverlay() {
+    _overlayEntry?.remove();
+    _overlayEntry = null;
+  }
+
+  @override
+  void dispose() {
+    _hideTimer?.cancel();
+    _removeOverlay();
+    super.dispose();
+  }
+
+  Widget _buildPopup() {
+    final mentee = widget.mentee;
+    final isAssigned = mentee['assignedTo'] != null;
+    final volunteerName = isAssigned ? (mentee['assignedTo']['fullName'] ?? 'Unknown') : null;
+    final status = mentee['status'] ?? 'active';
+    final currentCell = mentee['currentCell'] ?? 1;
+    final dob = mentee['dob'] != null
+        ? mentee['dob'].toString().substring(
+            0,
+            mentee['dob'].toString().length >= 10 ? 10 : mentee['dob'].toString().length,
+          )
+        : 'N/A';
+
+    return Material(
+      color: Colors.transparent,
+      child: Container(
+        width: 290,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.primaryBlue.withOpacity(0.18)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.14),
+              blurRadius: 24,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // ── Header ──────────────────────────────────────────────────────
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 22,
+                  backgroundColor: AppColors.primaryBlue.withOpacity(0.1),
+                  child: mentee['photoUrl'] != null &&
+                          mentee['photoUrl'].toString().isNotEmpty
+                      ? ClipOval(
+                          child: Image.network(
+                            mentee['photoUrl'],
+                            width: 44,
+                            height: 44,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => Icon(
+                                Icons.person,
+                                color: AppColors.primaryBlue,
+                                size: 20),
+                          ),
+                        )
+                      : Icon(Icons.person,
+                          color: AppColors.primaryBlue, size: 20),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        mentee['fullName'] ?? 'Unknown',
+                        style: GoogleFonts.poppins(
+                            fontWeight: FontWeight.w700, fontSize: 13),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 3),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 7, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: status == 'active'
+                              ? AppColors.accentGreen.withOpacity(0.15)
+                              : Colors.grey.shade200,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          status.toUpperCase(),
+                          style: GoogleFonts.poppins(
+                            fontSize: 9,
+                            fontWeight: FontWeight.w700,
+                            color: status == 'active'
+                                ? AppColors.accentGreen
+                                : Colors.grey.shade700,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    gradient: AppColors.primaryGradient,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    'Cell $currentCell',
+                    style: GoogleFonts.poppins(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Divider(height: 1, color: Colors.grey.shade200),
+            const SizedBox(height: 10),
+            // ── Details ─────────────────────────────────────────────────────
+            _popupRow(Icons.cake_outlined, 'Age',
+                '${mentee['age'] ?? 'N/A'}'),
+            _popupRow(
+                Icons.calendar_today_outlined, 'Date of Birth', dob),
+            _popupRow(Icons.school_outlined, 'Grade',
+                mentee['grade'] ?? 'N/A'),
+            _popupRow(
+                Icons.wc_outlined, 'Gender', mentee['gender'] ?? 'N/A'),
+            _popupRow(Icons.phone_outlined, 'Phone',
+                mentee['phone'] ?? 'N/A'),
+            _popupRow(Icons.contact_phone_outlined, 'Point of Contact',
+                mentee['pointOfContact'] ?? 'N/A'),
+            const SizedBox(height: 8),
+            // ── Assignment badge ────────────────────────────────────────────
+            Container(
+              width: double.infinity,
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+              decoration: BoxDecoration(
+                color: isAssigned
+                    ? AppColors.accentGreen.withOpacity(0.08)
+                    : AppColors.accentOrange.withOpacity(0.08),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: isAssigned
+                      ? AppColors.accentGreen.withOpacity(0.35)
+                      : AppColors.accentOrange.withOpacity(0.35),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    isAssigned
+                        ? Icons.link_rounded
+                        : Icons.link_off_rounded,
+                    size: 14,
+                    color: isAssigned
+                        ? AppColors.accentGreen
+                        : AppColors.accentOrange,
+                  ),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      isAssigned
+                          ? 'Assigned to $volunteerName'
+                          : 'Not assigned to any volunteer',
+                      style: GoogleFonts.poppins(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                        color: isAssigned
+                            ? AppColors.accentGreen
+                            : AppColors.accentOrange,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // ── Notes ───────────────────────────────────────────────────────
+            if (mentee['notes'] != null &&
+                mentee['notes'].toString().isNotEmpty) ...([
+              const SizedBox(height: 8),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(9),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.grey.shade200),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Notes',
+                        style: GoogleFonts.poppins(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey.shade600)),
+                    const SizedBox(height: 3),
+                    Text(
+                      mentee['notes'].toString(),
+                      style: GoogleFonts.poppins(
+                          fontSize: 11, color: Colors.grey.shade800),
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+            ]),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _popupRow(IconData icon, String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Row(
+        children: [
+          Icon(icon, size: 13, color: Colors.grey.shade500),
+          const SizedBox(width: 6),
+          Text('$label: ',
+              style: GoogleFonts.poppins(
+                  fontSize: 11, color: Colors.grey.shade500)),
+          Expanded(
+            child: Text(
+              value,
+              style: GoogleFonts.poppins(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey.shade800),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final mentee = widget.mentee;
+    final isAssigned = mentee['assignedTo'] != null;
+    final volunteerName =
+        isAssigned ? mentee['assignedTo']['fullName'] : null;
+    final status = mentee['status'] ?? 'active';
+    final currentCell = mentee['currentCell'] ?? 1;
+
+    final card = Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      shape:
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 30,
+                  backgroundColor: AppColors.primaryBlue.withOpacity(0.1),
+                  child: mentee['photoUrl'] != null &&
+                          mentee['photoUrl'].toString().isNotEmpty
+                      ? ClipOval(
+                          child: Image.network(
+                            mentee['photoUrl'],
+                            width: 60,
+                            height: 60,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) =>
+                                Icon(Icons.person,
+                                    color: AppColors.primaryBlue, size: 30),
+                          ),
+                        )
+                      : Icon(Icons.person,
+                          color: AppColors.primaryBlue, size: 30),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        mentee['fullName'] ?? 'Unknown',
+                        style: GoogleFonts.poppins(
+                            fontSize: 16, fontWeight: FontWeight.w600),
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Icon(Icons.cake,
+                              size: 14, color: Colors.grey.shade600),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Age: ${mentee['age'] ?? 'N/A'}',
+                            style: GoogleFonts.poppins(
+                                fontSize: 12,
+                                color: Colors.grey.shade600),
+                          ),
+                          const SizedBox(width: 16),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: status == 'active'
+                                  ? AppColors.accentGreen.withOpacity(0.1)
+                                  : Colors.grey.shade200,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              status.toUpperCase(),
+                              style: GoogleFonts.poppins(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w600,
+                                color: status == 'active'
+                                    ? AppColors.accentGreen
+                                    : Colors.grey.shade700,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryBlue.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    'Cell $currentCell',
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.primaryBlue,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: isAssigned
+                    ? AppColors.accentGreen.withOpacity(0.1)
+                    : AppColors.accentOrange.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: isAssigned
+                      ? AppColors.accentGreen.withOpacity(0.3)
+                      : AppColors.accentOrange.withOpacity(0.3),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    isAssigned ? Icons.check_circle : Icons.warning,
+                    size: 16,
+                    color: isAssigned
+                        ? AppColors.accentGreen
+                        : AppColors.accentOrange,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      isAssigned
+                          ? 'Assigned to: $volunteerName'
+                          : 'Not assigned to any volunteer',
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
+                        color: isAssigned
+                            ? AppColors.accentGreen
+                            : AppColors.accentOrange,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                if (isAssigned)
+                  TextButton.icon(
+                    onPressed: widget.onUnassign,
+                    icon: Icon(Icons.link_off, size: 16),
+                    label: Text('Unassign'),
+                    style:
+                        TextButton.styleFrom(foregroundColor: Colors.red),
+                  ),
+                if (!isAssigned)
+                  ElevatedButton.icon(
+                    onPressed: widget.onAssign,
+                    icon: Icon(Icons.person_add, size: 16),
+                    label: Text('Assign'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primaryBlue,
+                      foregroundColor: Colors.white,
+                    ),
+                  ),
+                const SizedBox(width: 8),
+                OutlinedButton.icon(
+                  onPressed: widget.onView,
+                  icon: Icon(Icons.visibility, size: 16),
+                  label: Text('View'),
+                  style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.primaryBlue),
+                ),
+                const SizedBox(width: 8),
+                IconButton(
+                  onPressed: widget.onDelete,
+                  icon: Icon(Icons.delete_outline, size: 20),
+                  color: Colors.red,
+                  tooltip: 'Delete Mentee',
+                  style: IconButton.styleFrom(
+                      backgroundColor: Colors.red.shade50),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (!_isDesktopOrWeb) return card;
+
+    return MouseRegion(
+      onEnter: (event) => _showOverlayAt(event.position),
+      onExit: (_) => _scheduleHide(),
+      child: card,
+    );
   }
 }
