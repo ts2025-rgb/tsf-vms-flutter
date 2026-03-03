@@ -118,43 +118,57 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
 
           // Welcome Section
           SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Welcome Back! 👋',
-                    style: GoogleFonts.poppins(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textDark,
-                    ),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 960),
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Welcome Back! 👋',
+                        style: GoogleFonts.poppins(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textDark,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Select a module to get started',
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          color: AppColors.gray1,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Select a module to get started',
-                    style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      color: AppColors.gray1,
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
           ),
 
           // Grid Section
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            sliver: SliverGrid(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                mainAxisSpacing: 20,
-                crossAxisSpacing: 20,
-                childAspectRatio: 0.85,
-              ),
-              delegate: SliverChildListDelegate([
+          SliverToBoxAdapter(
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 960),
+                child: Builder(
+                  builder: (context) {
+                    final width = MediaQuery.of(context).size.width;
+                    final int columns = width >= 900 ? 3 : width >= 600 ? 2 : 2;
+                    final double aspectRatio = width >= 900 ? 1.25 : width >= 600 ? 1.1 : 0.85;
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: GridView.count(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        crossAxisCount: columns,
+                        mainAxisSpacing: 20,
+                        crossAxisSpacing: 20,
+                        childAspectRatio: aspectRatio,
+        children: [
                 _buildModuleCard(
                   context,
                   title: 'Notifications',
@@ -226,7 +240,12 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                     );
                   },
                 ),
-              ]),
+        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
             ),
           ),
 
