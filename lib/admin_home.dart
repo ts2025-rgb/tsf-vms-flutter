@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'admin_companionconnect.dart';
 import 'admin.dart';
 import 'config/app_colors.dart';
+import 'screens/admin/admin_notifications_screen.dart';
 
 class AdminHomeScreen extends StatefulWidget {
   const AdminHomeScreen({super.key});
@@ -88,6 +89,16 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
             actions: [
               IconButton(
                 icon: const Icon(
+                  Icons.notifications_outlined,
+                  color: Colors.white,
+                ),
+                onPressed: () {
+                  Navigator.pushNamed(context, '/admin/notifications');
+                },
+                tooltip: 'Notifications',
+              ),
+              IconButton(
+                icon: const Icon(
                   Icons.settings_suggest_rounded,
                   color: Colors.white,
                 ),
@@ -144,6 +155,30 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                 childAspectRatio: 0.85,
               ),
               delegate: SliverChildListDelegate([
+                _buildModuleCard(
+                  context,
+                  title: 'Notifications',
+                  subtitle: 'Send & Track',
+                  icon: Icons.notifications_rounded,
+                  color: const Color(0xFF7B68EE),
+                  gradient: const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Color(0xFF7B68EE),
+                      Color(0xFF9B88FF),
+                    ],
+                  ),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            const AdminNotificationsScreen(),
+                      ),
+                    );
+                  },
+                ),
                 _buildModuleCard(
                   context,
                   title: 'Companion\nConnect',

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'login_screen.dart';
 import 'home_screen.dart';
 import 'profile_screen.dart';
@@ -10,8 +11,11 @@ import 'screens/admin/volunteer_detail_screen.dart';
 import 'screens/admin/handover_form_screen.dart';
 import 'screens/admin/certificate_management_screen.dart';
 import 'screens/admin/ccp_admin_dashboard_screen.dart';
+import 'screens/admin/admin_notifications_screen.dart';
+import 'screens/volunteer/notifications_screen.dart';
 import 'models/volunteer_model.dart';
 import 'config/app_colors.dart';
+import 'providers/notification_provider.dart';
 
 void main() {
   runApp(const PY4PVMSApp());
@@ -19,6 +23,18 @@ void main() {
 
 class PY4PVMSApp extends StatelessWidget {
   const PY4PVMSApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider(
+      create: (_) => NotificationProvider(),
+      child: const _AppRouter(),
+    );
+  }
+}
+
+class _AppRouter extends StatelessWidget {
+  const _AppRouter();
 
   @override
   Widget build(BuildContext context) {
@@ -50,6 +66,8 @@ class PY4PVMSApp extends StatelessWidget {
         '/admin/vms/dashboard': (context) => const VMSDashboardScreen(),
         '/admin/ccp/dashboard': (context) => const CCPAdminDashboardScreen(),
         '/admin/vms/certificates': (context) => const CertificateManagementScreen(),
+        '/notifications': (context) => const NotificationsScreen(),
+        '/admin/notifications': (context) => const AdminNotificationsScreen(),
       },
       onGenerateRoute: (settings) {
         // Handle dynamic routes with parameters

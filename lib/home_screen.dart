@@ -3,9 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import 'companionconnect.dart';
 import 'config/api_config.dart';
 import 'config/app_colors.dart';
+import 'providers/notification_provider.dart';
+import 'widgets/notification_bell.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -27,6 +30,10 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     _loadUser();
     _fetchPrograms();
+    // Boot notification polling for the volunteer
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<NotificationProvider>().init();
+    });
   }
 
   Future<void> _fetchPrograms() async {
@@ -73,6 +80,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _logout() async {
+    context.read<NotificationProvider>().reset();
     await secureStorage.deleteAll();
     Navigator.pushReplacementNamed(context, "/login");
   }
@@ -524,6 +532,8 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
         actions: [
+          // Notification bell with unread badge
+          const NotificationBell(),
           // Profile section in top right
           GestureDetector(
             onTap: _navigateToProfile,
