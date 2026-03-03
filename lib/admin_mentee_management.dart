@@ -1600,6 +1600,43 @@ class _MenteeHoverCardState extends State<_MenteeHoverCard> {
   OverlayEntry? _overlayEntry;
   Timer? _hideTimer;
 
+  // Volunteer fetch state
+  bool _fetched = false;
+  bool _loadingVolunteer = false;
+  Map<String, dynamic>? _volunteerData;
+
+  String? get _volunteerId {
+    final a = widget.mentee['assignedTo'];
+    if (a == null) return null;
+    return a['_id']?.toString() ?? a['id']?.toString();
+  }
+
+  Future<void> _fetchVolunteerDetails() async {
+    final vid = _volunteerId;
+    if (vid == null || _fetched) return;
+    _fetched = true;
+    if (mounted) setState(() => _loadingVolunteer = true);
+    _overlayEntry?.markNeedsBuild();
+    try {
+      const storage = FlutterSecureStorage();
+      final token = await storage.read(key: 'adminToken');
+      final response = await http.get(
+        Uri.parse('${ApiConfig.apiUrl}/companion-connect/admin/volunteers/$vid/mentee'),
+        headers: {'Authorization': 'Bearer $token'},
+      );
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['success'] == true && mounted) {
+          _volunteerData = data['volunteer'] as Map<String, dynamic>?;
+        }
+      }
+    } catch (_) {}
+    if (mounted) {
+      setState(() => _loadingVolunteer = false);
+      _overlayEntry?.markNeedsBuild();
+    }
+  }
+
   bool get _isDesktopOrWeb {
     if (kIsWeb) return true;
     return defaultTargetPlatform == TargetPlatform.windows ||
@@ -1613,7 +1650,7 @@ class _MenteeHoverCardState extends State<_MenteeHoverCard> {
     if (_overlayEntry != null) return;
 
     const double popupWidth = 300;
-    const double popupMaxHeight = 460;
+    const double popupMaxHeight = 560;
     final screenSize = MediaQuery.of(context).size;
 
     double left = globalPosition.dx + 16;
@@ -1643,6 +1680,7 @@ class _MenteeHoverCardState extends State<_MenteeHoverCard> {
       ),
     );
     Overlay.of(context).insert(_overlayEntry!);
+    _fetchVolunteerDetails();
   }
 
   void _scheduleHide() {
@@ -1870,6 +1908,66 @@ class _MenteeHoverCardState extends State<_MenteeHoverCard> {
                 ),
               ),
             ]),
+            // ── Volunteer Section ────────────────────────────────────────────
+            if (isAssigned) ...[
+              const SizedBox(height: 10),
+              Divider(height: 1, color: Colors.grey.shade200),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Icon(Icons.volunteer_activism, size: 13,
+                      color: AppColors.primaryBlue),
+                  const SizedBox(width: 5),
+                  Text('Assigned Volunteer',
+                      style: GoogleFonts.poppins(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.primaryBlue)),
+                ],
+              ),
+              const SizedBox(height: 6),
+              if (_loadingVolunteer)
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AppColors.primaryBlue),
+                    ),
+                  ),
+                )
+              else if (_volunteerData != null) ...[
+                _popupRow(Icons.person_outline, 'Name',
+                    _volunteerData!['fullName'] ?? 'N/A'),
+                _popupRow(Icons.phone_outlined, 'Phone',
+                    _volunteerData!['phone'] ?? 'N/A'),
+                _popupRow(Icons.badge_outlined, 'Code',
+                    _volunteerData!['volunteerCode'] ?? 'N/A'),
+                if (_volunteerData!['dob'] != null)
+                  _popupRow(
+                    Icons.calendar_today_outlined,
+                    'DOB',
+                    _volunteerData!['dob'].toString().length >= 10
+                        ? _volunteerData!['dob'].toString().substring(0, 10)
+                        : _volunteerData!['dob'].toString(),
+                  ),
+                _popupRow(
+                  Icons.circle,
+                  'Status',
+                  (_volunteerData!['approvalStatus'] ??
+                          _volunteerData!['status'] ??
+                          'active')
+                      .toString()
+                      .toUpperCase(),
+                ),
+              ] else
+                Text('Volunteer details unavailable',
+                    style: GoogleFonts.poppins(
+                        fontSize: 11, color: Colors.grey.shade500)),
+            ],
           ],
         ),
       ),
