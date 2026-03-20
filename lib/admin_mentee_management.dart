@@ -28,12 +28,35 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
   String? _companionConnectProgramId;
   String? _companionConnectProgramMongoId;
   bool _loading = true;
-  String _filter = 'all'; // all, assigned, unassigned
+  String _filter = 'all'; // all, assigned, unassigned for mentees
+  String _volunteerFilter = 'all'; // all, assigned, available for volunteers
+  
+  // Search and filter variables
+  late TextEditingController _searchController;
+  String _searchQuery = '';
+  String _menteeSearchQuery = '';
+  String _volunteerFilterStatus = 'all'; // all, assigned, available
+  String _viewMode = 'mentees'; // mentees, volunteers
 
   @override
   void initState() {
     super.initState();
+    _searchController = TextEditingController();
+    _searchController.addListener(_onSearchChanged);
     _fetchData();
+  }
+
+  @override
+  void dispose() {
+    _searchController.removeListener(_onSearchChanged);
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _onSearchChanged() {
+    setState(() {
+      _searchQuery = _searchController.text.toLowerCase();
+    });
   }
 
   Future<void> _fetchData() async {
@@ -314,12 +337,109 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
   }
 
   List<dynamic> get _filteredMentees {
+    var filtered = _mentees;
+    
+    // Apply assignment filter
     if (_filter == 'assigned') {
-      return _mentees.where((m) => m['assignedTo'] != null).toList();
+      filtered = filtered.where((m) => m['assignedTo'] != null).toList();
     } else if (_filter == 'unassigned') {
-      return _mentees.where((m) => m['assignedTo'] == null).toList();
+      filtered = filtered.where((m) => m['assignedTo'] == null).toList();
     }
-    return _mentees;
+    
+    // Apply search filter
+    if (_searchQuery.isNotEmpty) {
+      filtered = filtered.where((mentee) {
+        final fullName = (mentee['fullName'] ?? '').toString().toLowerCase();
+        final email = (mentee['email'] ?? '').toString().toLowerCase();
+        final phone = (mentee['phone'] ?? '').toString().toLowerCase();
+        final pointOfContact = (mentee['pointOfContact'] ?? '').toString().toLowerCase();
+        final grade = (mentee['grade'] ?? '').toString().toLowerCase();
+        
+        return fullName.contains(_searchQuery) ||
+            email.contains(_searchQuery) ||
+            phone.contains(_searchQuery) ||
+            pointOfContact.contains(_searchQuery) ||
+            grade.contains(_searchQuery);
+      }).toList();
+    }
+    
+    return filtered;
+  }
+
+  List<dynamic> _getFilteredVolunteersList() {
+    var filtered = _volunteers;
+    
+    // Apply volunteer status filter (assigned/available)
+    if (_volunteerFilter == 'assigned') {
+      filtered = filtered.where((v) {
+        return _mentees.any((m) => 
+          m['assignedTo'] != null && 
+          m['assignedTo']['id'] == v['id']
+        );
+      }).toList();
+    } else if (_volunteerFilter == 'available') {
+      filtered = filtered.where((v) {
+        return !_mentees.any((m) => 
+          m['assignedTo'] != null && 
+          m['assignedTo']['id'] == v['id']
+        );
+      }).toList();
+    }
+    
+    // Apply search filter for volunteers
+    if (_searchQuery.isNotEmpty) {
+      filtered = filtered.where((volunteer) {
+        final fullName = (volunteer['fullName'] ?? '').toString().toLowerCase();
+        final email = (volunteer['email'] ?? '').toString().toLowerCase();
+        final phone = (volunteer['phone'] ?? '').toString().toLowerCase();
+        final currentLocation = (volunteer['currentLocation'] ?? '').toString().toLowerCase();
+        
+        return fullName.contains(_searchQuery) ||
+            email.contains(_searchQuery) ||
+            phone.contains(_searchQuery) ||
+            currentLocation.contains(_searchQuery);
+      }).toList();
+    }
+    
+    return filtered;
+  }
+
+  List<dynamic> get _filteredVolunteers {
+    var filtered = _volunteers;
+    
+    // Apply volunteer status filter
+    if (_volunteerFilterStatus == 'assigned') {
+      filtered = filtered.where((v) {
+        return _mentees.any((m) => 
+          m['assignedTo'] != null && 
+          m['assignedTo']['id'] == v['id']
+        );
+      }).toList();
+    } else if (_volunteerFilterStatus == 'available') {
+      filtered = filtered.where((v) {
+        return !_mentees.any((m) => 
+          m['assignedTo'] != null && 
+          m['assignedTo']['id'] == v['id']
+        );
+      }).toList();
+    }
+    
+    // Apply search filter for volunteers
+    if (_searchQuery.isNotEmpty) {
+      filtered = filtered.where((volunteer) {
+        final fullName = (volunteer['fullName'] ?? '').toString().toLowerCase();
+        final email = (volunteer['email'] ?? '').toString().toLowerCase();
+        final phone = (volunteer['phone'] ?? '').toString().toLowerCase();
+        final currentLocation = (volunteer['currentLocation'] ?? '').toString().toLowerCase();
+        
+        return fullName.contains(_searchQuery) ||
+            email.contains(_searchQuery) ||
+            phone.contains(_searchQuery) ||
+            currentLocation.contains(_searchQuery);
+      }).toList();
+    }
+    
+    return filtered;
   }
 
   @override
@@ -346,9 +466,175 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
           ? Center(child: CircularProgressIndicator(color: AppColors.primaryBlue))
           : Column(
               children: [
-                _buildFilterTabs(),
-                _buildStats(),
-                Expanded(child: _buildMenteeList()),
+                // View Mode Toggle
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() => _viewMode = 'mentees');
+                            _searchController.clear();
+                            _searchQuery = '';
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            decoration: BoxDecoration(
+                              gradient: _viewMode == 'mentees'
+                                  ? AppColors.primaryGradient
+                                  : null,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Column(
+                              children: [
+                                Icon(
+                                  Icons.people_outline,
+                                  color: _viewMode == 'mentees' ? Colors.white : AppColors.primaryBlue,
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Mentees',
+                                  style: GoogleFonts.poppins(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 12,
+                                    color: _viewMode == 'mentees' ? Colors.white : Colors.grey.shade700,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() => _viewMode = 'volunteers');
+                            _searchController.clear();
+                            _searchQuery = '';
+                            _filter = 'all';
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            decoration: BoxDecoration(
+                              gradient: _viewMode == 'volunteers'
+                                  ? AppColors.primaryGradient
+                                  : null,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Column(
+                              children: [
+                                Icon(
+                                  Icons.volunteer_activism_rounded,
+                                  color: _viewMode == 'volunteers' ? Colors.white : AppColors.primaryBlue,
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Volunteers',
+                                  style: GoogleFonts.poppins(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 12,
+                                    color: _viewMode == 'volunteers' ? Colors.white : Colors.grey.shade700,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Search Bar
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  color: Colors.white,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Search TextField
+                      TextField(
+                        controller: _searchController,
+                        decoration: InputDecoration(
+                          hintText: _viewMode == 'mentees'
+                              ? 'Search mentees by name, email, phone...'
+                              : 'Search volunteers by name, email, phone...',
+                          prefixIcon: Icon(Icons.search_rounded, color: AppColors.primaryBlue),
+                          suffixIcon: _searchQuery.isNotEmpty
+                              ? IconButton(
+                                  icon: Icon(Icons.clear_rounded, color: Colors.grey.shade400),
+                                  onPressed: () {
+                                    _searchController.clear();
+                                    setState(() => _searchQuery = '');
+                                  },
+                                )
+                              : null,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.grey.shade300),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.grey.shade300),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: AppColors.primaryBlue, width: 2),
+                          ),
+                          filled: true,
+                          fillColor: Colors.white,
+                        ),
+                      ),
+                      
+                      if (_searchQuery.isNotEmpty) ...[
+                        const SizedBox(height: 12),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryBlue.withOpacity(0.05),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            _viewMode == 'mentees'
+                                ? 'Found ${_filteredMentees.length} mentee${_filteredMentees.length != 1 ? 's' : ''}'
+                                : 'Found ${_getFilteredVolunteersList().length} volunteer${_getFilteredVolunteersList().length != 1 ? 's' : ''}',
+                            style: GoogleFonts.poppins(
+                              fontSize: 12,
+                              color: AppColors.primaryBlue,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                
+                if (_viewMode == 'mentees') ...[
+                  _buildFilterTabs(),
+                  _buildStats(),
+                ] else ...[
+                  _buildVolunteerFilterTabs(),
+                  _buildVolunteerStats(),
+                ],
+                
+                Expanded(
+                  child: _viewMode == 'mentees'
+                      ? _buildMenteeList()
+                      : _buildVolunteersList(),
+                ),
               ],
             ),
       floatingActionButton: FloatingActionButton.extended(
@@ -530,21 +816,6 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [AppColors.primaryBlue.withOpacity(0.1), AppColors.purpleGradientEnd.withOpacity(0.05)],
-        ),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.primaryBlue.withOpacity(0.3)),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _buildStatItem(Icons.people, 'Total Volunteers', totalCCVolunteers.toString()),
-          _buildStatItem(Icons.check_circle, 'Active Volunteers', activeCCVolunteers.toString()),
-          _buildStatItem(Icons.person_add, 'Available', availableCCVolunteers.toString()),
-        ],
-      ),
     );
   }
 
@@ -566,6 +837,92 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
           style: GoogleFonts.poppins(fontSize: 12, color: const Color.fromARGB(255, 0, 0, 0)),
         ),
       ],
+    );
+  }
+
+  Widget _buildVolunteerFilterTabs() {
+    final totalVolunteers = _volunteers.length;
+    final assignedCount = _volunteers.where((v) {
+      return _mentees.any((m) => 
+        m['assignedTo'] != null && 
+        m['assignedTo']['id'] == v['id']
+      );
+    }).length;
+    final availableCount = totalVolunteers - assignedCount;
+
+    return Container(
+      margin: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Expanded(child: _buildVolunteerFilterTab('All', 'all', totalVolunteers)),
+          Expanded(child: _buildVolunteerFilterTab('Assigned', 'assigned', assignedCount)),
+          Expanded(child: _buildVolunteerFilterTab('Available', 'available', availableCount)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildVolunteerFilterTab(String label, String value, int count) {
+    final isSelected = _volunteerFilter == value;
+    return GestureDetector(
+      onTap: () => setState(() => _volunteerFilter = value),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          gradient: isSelected
+              ? AppColors.primaryGradient
+              : null,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          children: [
+            Text(
+              label,
+              style: GoogleFonts.poppins(
+                fontWeight: FontWeight.w600,
+                color: isSelected ? Colors.white : Colors.grey.shade700,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              '$count',
+              style: GoogleFonts.poppins(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: isSelected ? Colors.white : AppColors.primaryBlue,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildVolunteerStats() {
+    final totalVolunteers = _volunteers.length;
+    final assignedVolunteers = _volunteers.where((v) {
+      return _mentees.any((m) => 
+        m['assignedTo'] != null && 
+        m['assignedTo']['id'] == v['id']
+      );
+    }).length;
+    final availableVolunteers = totalVolunteers - assignedVolunteers;
+    final menteeCount = _mentees.length;
+    
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.all(16),
     );
   }
 
@@ -603,6 +960,489 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
       onUnassign: () => _showUnassignDialog(mentee),
       onView: () => _showMenteeDetailsDialog(mentee),
       onDelete: () => _showDeleteMenteeDialog(mentee),
+    );
+  }
+
+  Widget _buildVolunteersList() {
+    final filteredList = _getFilteredVolunteersList();
+    
+    if (filteredList.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.volunteer_activism_rounded, size: 64, color: Colors.grey.shade400),
+            const SizedBox(height: 16),
+            Text(
+              'No volunteers found',
+              style: GoogleFonts.poppins(fontSize: 16, color: Colors.grey.shade600),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: filteredList.length,
+      itemBuilder: (context, index) {
+        final volunteer = filteredList[index];
+        
+        // Find assigned mentee
+        final assignedMentee = _mentees.firstWhere(
+          (m) => m['assignedTo'] != null && m['assignedTo']['id'] == volunteer['id'],
+          orElse: () => null,
+        );
+        
+        return _buildVolunteerCard(volunteer, assignedMentee);
+      },
+    );
+  }
+
+  Widget _buildVolunteerCard(Map<String, dynamic> volunteer, Map<String, dynamic>? assignedMentee) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () {},
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header: Volunteer Info
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Avatar
+                  Container(
+                    width: 56,
+                    height: 56,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppColors.primaryBlue.withOpacity(0.1),
+                    ),
+                    child: volunteer['photoUrl'] != null && volunteer['photoUrl'].toString().isNotEmpty
+                        ? ClipOval(
+                            child: Image.network(
+                              volunteer['photoUrl'],
+                              width: 56,
+                              height: 56,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) => Icon(
+                                Icons.person_rounded,
+                                size: 28,
+                                color: AppColors.primaryBlue,
+                              ),
+                            ),
+                          )
+                        : Icon(
+                            Icons.person_rounded,
+                            size: 28,
+                            color: AppColors.primaryBlue,
+                          ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          volunteer['fullName'] ?? 'Unknown',
+                          style: GoogleFonts.poppins(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textDark,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          volunteer['email'] ?? 'N/A',
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            color: AppColors.gray1,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        if (volunteer['currentLocation'] != null) ...[
+                          const SizedBox(height: 2),
+                          Row(
+                            children: [
+                              Icon(Icons.location_on_rounded, size: 12, color: AppColors.gray1),
+                              const SizedBox(width: 4),
+                              Expanded(
+                                child: Text(
+                                  volunteer['currentLocation'] ?? 'N/A',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 11,
+                                    color: AppColors.gray1,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  // Status Badge
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: assignedMentee != null
+                          ? Colors.green.withOpacity(0.1)
+                          : Colors.orange.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          assignedMentee != null ? Icons.check_circle : Icons.schedule,
+                          size: 14,
+                          color: assignedMentee != null ? Colors.green : Colors.orange,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          assignedMentee != null ? 'ASSIGNED' : 'AVAILABLE',
+                          style: GoogleFonts.poppins(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: assignedMentee != null ? Colors.green : Colors.orange,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              
+              // Assigned Mentee Info (if any)
+              if (assignedMentee != null)
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.green.withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.green.withOpacity(0.2)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.person_add_rounded, size: 16, color: Colors.green),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Assigned Mentee',
+                            style: GoogleFonts.poppins(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.green.shade700,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Container(
+                            width: 36,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.green.withOpacity(0.1),
+                            ),
+                            child: assignedMentee['photoUrl'] != null && assignedMentee['photoUrl'].toString().isNotEmpty
+                                ? ClipOval(
+                                    child: Image.network(
+                                      assignedMentee['photoUrl'],
+                                      width: 36,
+                                      height: 36,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stackTrace) => Icon(
+                                        Icons.person_rounded,
+                                        size: 18,
+                                        color: Colors.green,
+                                      ),
+                                    ),
+                                  )
+                                : Icon(
+                                    Icons.person_rounded,
+                                    size: 18,
+                                    color: Colors.green,
+                                  ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  assignedMentee['fullName'] ?? 'Unknown',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.textDark,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                Text(
+                                  assignedMentee['grade'] ?? 'N/A',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 11,
+                                    color: AppColors.gray1,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: () => _showUnassignDialog(assignedMentee),
+                            icon: Icon(Icons.close_rounded, size: 18, color: Colors.red),
+                            constraints: BoxConstraints.tight(const Size(32, 32)),
+                            style: IconButton.styleFrom(
+                              backgroundColor: Colors.red.withOpacity(0.1),
+                              padding: EdgeInsets.zero,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                )
+              else
+                Container(
+                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.orange.withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.orange.withOpacity(0.2)),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.info_outline_rounded, size: 16, color: Colors.orange),
+                      const SizedBox(width: 8),
+                      Text(
+                        'No mentee assigned',
+                        style: GoogleFonts.poppins(
+                          fontSize: 12,
+                          color: Colors.orange.shade700,
+                        ),
+                      ),
+                      const Spacer(),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          // Show mentee assignment dialog
+                          _showAssignVolunteerDialog(volunteer);
+                        },
+                        icon: Icon(Icons.add_rounded, size: 16),
+                        label: Text('Assign'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.orange,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Dialog to assign a mentee to a volunteer from the volunteers view
+  void _showAssignVolunteerDialog(Map<String, dynamic> volunteer) {
+    List<dynamic> availableMentees = _mentees.where((m) => m['assignedTo'] == null).toList();
+    
+    if (availableMentees.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('No unassigned mentees available'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        child: Container(
+          constraints: BoxConstraints(maxWidth: 500),
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Icon
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  gradient: AppColors.primaryGradient,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.person_add_rounded,
+                  size: 48,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 24),
+              
+              // Title
+              Text(
+                'Assign Mentee',
+                style: GoogleFonts.poppins(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey.shade900,
+                ),
+              ),
+              const SizedBox(height: 12),
+              
+              // Volunteer Name
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryBlue.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.volunteer_activism_rounded, size: 16, color: AppColors.primaryBlue),
+                    const SizedBox(width: 8),
+                    Text(
+                      volunteer['fullName'],
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primaryBlue,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              
+              // Description
+              Text(
+                'Select a mentee to assign:',
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+              const SizedBox(height: 16),
+              
+              // Mentees List
+              Container(
+                constraints: BoxConstraints(maxHeight: 300),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey.shade200),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: availableMentees.length,
+                  itemBuilder: (context, index) {
+                    final mentee = availableMentees[index];
+                    
+                    return Container(
+                      margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: ListTile(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        leading: CircleAvatar(
+                          backgroundColor: AppColors.primaryBlue.withOpacity(0.1),
+                          backgroundImage: mentee['photoUrl'] != null
+                              ? NetworkImage(mentee['photoUrl'])
+                              : null,
+                          child: mentee['photoUrl'] == null
+                              ? Icon(Icons.person, color: AppColors.primaryBlue)
+                              : null,
+                        ),
+                        title: Text(
+                          mentee['fullName'],
+                          style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+                        ),
+                        subtitle: Text(mentee['grade'] ?? 'N/A'),
+                        trailing: Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppColors.primaryBlue),
+                        onTap: () {
+                          Navigator.pop(context);
+                          _assignMentee(mentee['_id'], volunteer['id']);
+                        },
+                      ),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: 20),
+              
+              // Cancel Button
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey.shade200,
+                    foregroundColor: Colors.grey.shade700,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text('Cancel', style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -690,6 +1530,87 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
                 ),
               ),
               const SizedBox(height: 16),
+
+              // Volunteer Search and Filter
+              TextField(
+                decoration: InputDecoration(
+                  hintText: 'Search volunteers...',
+                  prefixIcon: Icon(Icons.search_rounded, color: AppColors.primaryBlue),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: Colors.grey.shade300),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: Colors.grey.shade300),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: AppColors.primaryBlue, width: 2),
+                  ),
+                  filled: true,
+                  fillColor: Colors.white,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                ),
+                onChanged: (value) {
+                  setState(() => _searchQuery = value.toLowerCase());
+                },
+              ),
+              const SizedBox(height: 12),
+
+              // Volunteer Filter Chips
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    FilterChip(
+                      label: Text('All (${_volunteers.length})'),
+                      selected: _volunteerFilterStatus == 'all',
+                      onSelected: (selected) {
+                        setState(() {
+                          _volunteerFilterStatus = selected ? 'all' : 'all';
+                        });
+                      },
+                      backgroundColor: Colors.white,
+                      selectedColor: AppColors.primaryBlue.withOpacity(0.2),
+                      side: BorderSide(
+                        color: _volunteerFilterStatus == 'all' ? AppColors.primaryBlue : Colors.grey.shade300,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    FilterChip(
+                      label: Text('Available'),
+                      selected: _volunteerFilterStatus == 'available',
+                      onSelected: (selected) {
+                        setState(() {
+                          _volunteerFilterStatus = selected ? 'available' : 'all';
+                        });
+                      },
+                      backgroundColor: Colors.white,
+                      selectedColor: Colors.green.withOpacity(0.2),
+                      side: BorderSide(
+                        color: _volunteerFilterStatus == 'available' ? Colors.green : Colors.grey.shade300,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    FilterChip(
+                      label: Text('Assigned'),
+                      selected: _volunteerFilterStatus == 'assigned',
+                      onSelected: (selected) {
+                        setState(() {
+                          _volunteerFilterStatus = selected ? 'assigned' : 'all';
+                        });
+                      },
+                      backgroundColor: Colors.white,
+                      selectedColor: Colors.orange.withOpacity(0.2),
+                      side: BorderSide(
+                        color: _volunteerFilterStatus == 'assigned' ? Colors.orange : Colors.grey.shade300,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
               
               // Volunteers List
               Container(
@@ -698,7 +1619,7 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
                   border: Border.all(color: Colors.grey.shade200),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: _volunteers.isEmpty
+                child: _filteredVolunteers.isEmpty
                     ? Padding(
                         padding: const EdgeInsets.all(32),
                         child: Column(
@@ -707,7 +1628,7 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
                             Icon(Icons.people_outline, size: 48, color: Colors.grey.shade300),
                             const SizedBox(height: 12),
                             Text(
-                              'No approved volunteers found',
+                              'No volunteers found',
                               style: GoogleFonts.poppins(
                                 color: Colors.grey.shade500,
                                 fontSize: 14,
@@ -718,9 +1639,9 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
                       )
                     : ListView.builder(
                         shrinkWrap: true,
-                        itemCount: _volunteers.length,
+                        itemCount: _filteredVolunteers.length,
                         itemBuilder: (context, index) {
-                          final volunteer = _volunteers[index];
+                          final volunteer = _filteredVolunteers[index];
                           final hasAssignedMentee = _mentees.any((m) => 
                             m['assignedTo'] != null && 
                             m['assignedTo']['id'] == volunteer['id']

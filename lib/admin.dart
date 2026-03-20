@@ -24,8 +24,13 @@ class _AdminScreenState extends State<AdminScreen>
   late TabController _tabController;
   List<dynamic> pendingVolunteers = [];
   List<dynamic> allVolunteers = [];
+  List<dynamic> filteredPendingVolunteers = [];
+  List<dynamic> filteredAllVolunteers = [];
   bool isLoading = false;
   String? adminToken;
+  late TextEditingController _searchController;
+  String _searchQuery = '';
+  String _statusFilter = 'all'; // all, pending, approved, rejected
 
   // Theme colors (using AppColors)
   static final primaryColor = AppColors.primaryBlue;
@@ -39,13 +44,60 @@ class _AdminScreenState extends State<AdminScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _searchController = TextEditingController();
+    _searchController.addListener(_onSearchChanged);
     _loadAdminData();
   }
 
   @override
   void dispose() {
     _tabController.dispose();
+    _searchController.removeListener(_onSearchChanged);
+    _searchController.dispose();
     super.dispose();
+  }
+
+  void _onSearchChanged() {
+    setState(() {
+      _searchQuery = _searchController.text.toLowerCase();
+      _applyFilters();
+    });
+  }
+
+  void _applyFilters() {
+    setState(() {
+      // Filter pending volunteers
+      filteredPendingVolunteers = pendingVolunteers.where((volunteer) {
+        return _matchesSearch(volunteer) && _matchesStatusFilter(volunteer);
+      }).toList();
+
+      // Filter all volunteers
+      filteredAllVolunteers = allVolunteers.where((volunteer) {
+        return _matchesSearch(volunteer) && _matchesStatusFilter(volunteer);
+      }).toList();
+    });
+  }
+
+  bool _matchesSearch(Map<String, dynamic> volunteer) {
+    if (_searchQuery.isEmpty) return true;
+
+    final fullName = (volunteer['fullName'] ?? '').toString().toLowerCase();
+    final email = (volunteer['email'] ?? '').toString().toLowerCase();
+    final phone = (volunteer['phone'] ?? '').toString().toLowerCase();
+    final location = (volunteer['currentLocation'] ?? '').toString().toLowerCase();
+    final organization = (volunteer['organizationName'] ?? '').toString().toLowerCase();
+
+    return fullName.contains(_searchQuery) ||
+        email.contains(_searchQuery) ||
+        phone.contains(_searchQuery) ||
+        location.contains(_searchQuery) ||
+        organization.contains(_searchQuery);
+  }
+
+  bool _matchesStatusFilter(Map<String, dynamic> volunteer) {
+    if (_statusFilter == 'all') return true;
+    return (volunteer['approvalStatus'] ?? 'pending').toString().toLowerCase() ==
+        _statusFilter.toLowerCase();
   }
 
   Future<void> _loadAdminData() async {
@@ -70,6 +122,7 @@ class _AdminScreenState extends State<AdminScreen>
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         setState(() => pendingVolunteers = data['volunteers'] ?? []);
+        _applyFilters();
       } else {
         _showError('Failed to fetch pending volunteers');
       }
@@ -92,6 +145,7 @@ class _AdminScreenState extends State<AdminScreen>
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         setState(() => allVolunteers = data['volunteers'] ?? []);
+        _applyFilters();
       } else {
         _showError('Failed to fetch volunteers');
       }
@@ -672,18 +726,22 @@ class _AdminScreenState extends State<AdminScreen>
       child:
           isLoading
               ? const Center(child: CircularProgressIndicator())
-              : pendingVolunteers.isEmpty
+              : filteredPendingVolunteers.isEmpty
               ? _buildEmptyState(
-                'No pending volunteers',
-                'All volunteer applications have been reviewed!',
+                _searchQuery.isNotEmpty
+                    ? 'No matching volunteers found'
+                    : 'No pending volunteers',
+                _searchQuery.isNotEmpty
+                    ? 'Try adjusting your search criteria'
+                    : 'All volunteer applications have been reviewed!',
                 Icons.task_alt_rounded,
               )
               : ListView.builder(
                 padding: const EdgeInsets.all(16),
-                itemCount: pendingVolunteers.length,
+                itemCount: filteredPendingVolunteers.length,
                 itemBuilder: (context, index) {
                   return _buildModernVolunteerCard(
-                    pendingVolunteers[index],
+                    filteredPendingVolunteers[index],
                     showActions: true,
                   );
                 },
@@ -696,17 +754,21 @@ class _AdminScreenState extends State<AdminScreen>
       onRefresh: _fetchAllVolunteers,
       color: primaryColor,
       child:
-          allVolunteers.isEmpty
+          filteredAllVolunteers.isEmpty
               ? _buildEmptyState(
-                'No volunteers found',
-                'Start by approving some volunteer applications!',
+                _searchQuery.isNotEmpty
+                    ? 'No matching volunteers found'
+                    : 'No volunteers found',
+                _searchQuery.isNotEmpty
+                    ? 'Try adjusting your search criteria'
+                    : 'Start by approving some volunteer applications!',
                 Icons.people_outline_rounded,
               )
               : ListView.builder(
                 padding: const EdgeInsets.all(16),
-                itemCount: allVolunteers.length,
+                itemCount: filteredAllVolunteers.length,
                 itemBuilder: (context, index) {
-                  return _buildModernVolunteerCard(allVolunteers[index]);
+                  return _buildModernVolunteerCard(filteredAllVolunteers[index]);
                 },
               ),
     );
@@ -2257,7 +2319,9 @@ class _AdminScreenState extends State<AdminScreen>
                   Expanded(
                     child: _buildStatCard(
                       'Pending Reviews',
-                      pendingVolunteers.length.toString(),
+                      _tabController.index == 0
+                          ? filteredPendingVolunteers.length.toString()
+                          : pendingVolunteers.length.toString(),
                       Icons.pending_actions_rounded,
                       Colors.orange,
                     ),
@@ -2266,11 +2330,189 @@ class _AdminScreenState extends State<AdminScreen>
                   Expanded(
                     child: _buildStatCard(
                       'Total Volunteers',
-                      allVolunteers.length.toString(),
+                      _tabController.index == 0
+                          ? filteredPendingVolunteers.length.toString()
+                          : filteredAllVolunteers.length.toString(),
                       Icons.people_rounded,
                       primaryColor,
                     ),
                   ),
+                ],
+              ),
+            ),
+          ),
+
+          // Search Bar
+          SliverToBoxAdapter(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              color: backgroundColor,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Search TextField
+                  TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      hintText: 'Search by name, email, phone, or location...',
+                      prefixIcon: Icon(Icons.search_rounded, color: textSecondary),
+                      suffixIcon: _searchQuery.isNotEmpty
+                          ? IconButton(
+                              icon: Icon(Icons.clear_rounded, color: textSecondary),
+                              onPressed: () {
+                                _searchController.clear();
+                                setState(() {
+                                  _searchQuery = '';
+                                  _applyFilters();
+                                });
+                              },
+                            )
+                          : null,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.grey[300]!),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.grey[300]!),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: primaryColor, width: 2),
+                      ),
+                      filled: true,
+                      fillColor: Colors.white,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Filter Chips
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        // All status filter
+                        FilterChip(
+                          label: Text('All Status'),
+                          selected: _statusFilter == 'all',
+                          onSelected: (selected) {
+                            setState(() {
+                              _statusFilter = selected ? 'all' : 'all';
+                              _applyFilters();
+                            });
+                          },
+                          backgroundColor: Colors.white,
+                          selectedColor: primaryColor.withOpacity(0.2),
+                          side: BorderSide(
+                            color: _statusFilter == 'all' ? primaryColor : Colors.grey[300]!,
+                          ),
+                          labelStyle: GoogleFonts.poppins(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: _statusFilter == 'all' ? primaryColor : textSecondary,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+
+                        // Pending filter
+                        FilterChip(
+                          label: Text('Pending'),
+                          selected: _statusFilter == 'pending',
+                          onSelected: (selected) {
+                            setState(() {
+                              _statusFilter = selected ? 'pending' : 'all';
+                              _applyFilters();
+                            });
+                          },
+                          backgroundColor: Colors.white,
+                          selectedColor: Colors.orange.withOpacity(0.2),
+                          side: BorderSide(
+                            color: _statusFilter == 'pending' ? Colors.orange : Colors.grey[300]!,
+                          ),
+                          labelStyle: GoogleFonts.poppins(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: _statusFilter == 'pending' ? Colors.orange : textSecondary,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+
+                        // Approved filter
+                        FilterChip(
+                          label: Text('Approved'),
+                          selected: _statusFilter == 'approved',
+                          onSelected: (selected) {
+                            setState(() {
+                              _statusFilter = selected ? 'approved' : 'all';
+                              _applyFilters();
+                            });
+                          },
+                          backgroundColor: Colors.white,
+                          selectedColor: Colors.green.withOpacity(0.2),
+                          side: BorderSide(
+                            color: _statusFilter == 'approved' ? Colors.green : Colors.grey[300]!,
+                          ),
+                          labelStyle: GoogleFonts.poppins(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: _statusFilter == 'approved' ? Colors.green : textSecondary,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+
+                        // Rejected filter
+                        FilterChip(
+                          label: Text('Rejected'),
+                          selected: _statusFilter == 'rejected',
+                          onSelected: (selected) {
+                            setState(() {
+                              _statusFilter = selected ? 'rejected' : 'all';
+                              _applyFilters();
+                            });
+                          },
+                          backgroundColor: Colors.white,
+                          selectedColor: Colors.red.withOpacity(0.2),
+                          side: BorderSide(
+                            color: _statusFilter == 'rejected' ? Colors.red : Colors.grey[300]!,
+                          ),
+                          labelStyle: GoogleFonts.poppins(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: _statusFilter == 'rejected' ? Colors.red : textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Search Results Info
+                  if (_searchQuery.isNotEmpty || _statusFilter != 'all') ...[
+                    const SizedBox(height: 12),
+                    Material(
+                      color: primaryColor.withOpacity(0.05),
+                      borderRadius: BorderRadius.circular(8),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        child: Row(
+                          children: [
+                            Icon(Icons.info_outline_rounded, size: 16, color: primaryColor),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'Found ${_tabController.index == 0 ? filteredPendingVolunteers.length : filteredAllVolunteers.length} result${_tabController.index == 0 ? filteredPendingVolunteers.length != 1 ? 's' : '' : filteredAllVolunteers.length != 1 ? 's' : ''}',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 12,
+                                  color: primaryColor,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
