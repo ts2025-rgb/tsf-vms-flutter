@@ -38,23 +38,25 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _fetchPrograms() async {
     try {
-      final response = await http.get(
-        Uri.parse('$baseUrl/programs'),
-      );
+      final response = await http.get(Uri.parse('$baseUrl/programs'));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data['success'] == true && data['programs'] != null) {
           setState(() {
             _availablePrograms = List<Map<String, dynamic>>.from(
-              (data['programs'] as List).map((p) => {
-                'id': p['id'],
-                'name': p['name'],
-                'description': p['description'] ?? '',
-                'order': p['order'] ?? 0,
-              })
+              (data['programs'] as List).map(
+                (p) => {
+                  'id': p['id'],
+                  'name': p['name'],
+                  'description': p['description'] ?? '',
+                  'order': p['order'] ?? 0,
+                },
+              ),
             );
-            _availablePrograms.sort((a, b) => (a['order'] as int).compareTo(b['order'] as int));
+            _availablePrograms.sort(
+              (a, b) => (a['order'] as int).compareTo(b['order'] as int),
+            );
             _loadingPrograms = false;
           });
         }
@@ -112,7 +114,10 @@ class _HomePageState extends State<HomePage> {
             end: Alignment.bottomRight,
           ),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.accentOrange.withOpacity(0.3), width: 2),
+          border: Border.all(
+            color: AppColors.accentOrange.withOpacity(0.3),
+            width: 2,
+          ),
           boxShadow: [
             BoxShadow(
               color: AppColors.accentOrange.withOpacity(0.1),
@@ -129,7 +134,11 @@ class _HomePageState extends State<HomePage> {
                 color: AppColors.accentOrange.withOpacity(0.2),
                 shape: BoxShape.circle,
               ),
-              child: Icon(Icons.hourglass_empty, color: AppColors.accentOrange, size: 32),
+              child: Icon(
+                Icons.hourglass_empty,
+                color: AppColors.accentOrange,
+                size: 32,
+              ),
             ),
             SizedBox(height: 16),
             Text(
@@ -219,7 +228,10 @@ class _HomePageState extends State<HomePage> {
               if (userData["volunteerCode"] != null) ...[
                 const SizedBox(height: 16),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(8),
@@ -252,12 +264,13 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildProgramsGrid() {
     // Get program IDs from userData
-    final List<dynamic> programIds = userData["interestedPrograms"] is List
-        ? userData["interestedPrograms"]
-        : (userData["interestedPrograms"] is String
-            ? (json.decode(userData["interestedPrograms"]) as List)
-            : []);
-    
+    final List<dynamic> programIds =
+        userData["interestedPrograms"] is List
+            ? userData["interestedPrograms"]
+            : (userData["interestedPrograms"] is String
+                ? (json.decode(userData["interestedPrograms"]) as List)
+                : []);
+
     if (programIds.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -273,7 +286,10 @@ class _HomePageState extends State<HomePage> {
               const SizedBox(height: 12),
               Text(
                 "Loading programs...",
-                style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey.shade600),
+                style: GoogleFonts.poppins(
+                  fontSize: 12,
+                  color: Colors.grey.shade600,
+                ),
               ),
             ],
           ),
@@ -282,9 +298,8 @@ class _HomePageState extends State<HomePage> {
     }
 
     // Map program IDs to program objects
-    final userPrograms = _availablePrograms
-        .where((p) => programIds.contains(p['id']))
-        .toList();
+    final userPrograms =
+        _availablePrograms.where((p) => programIds.contains(p['id'])).toList();
 
     if (userPrograms.isEmpty) {
       return const SizedBox.shrink();
@@ -324,7 +339,11 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ],
                   ),
-                  child: Icon(Icons.dashboard_customize, color: Colors.white, size: 22),
+                  child: Icon(
+                    Icons.dashboard_customize,
+                    color: Colors.white,
+                    size: 22,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Text(
@@ -371,7 +390,7 @@ class _HomePageState extends State<HomePage> {
               final programId = program['id'] as String;
               final programName = program['name'] as String;
               final programDescription = program['description'] as String;
-              
+
               return GestureDetector(
                 onTap: () {
                   // Navigate to program-specific page
@@ -379,15 +398,25 @@ class _HomePageState extends State<HomePage> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => CompanionConnectPage(programId: programId),
+                        builder:
+                            (context) =>
+                                CompanionConnectPage(programId: programId),
                       ),
                     );
+                  } else if (programName == "Neomami Hub") {
+                    Navigator.pushNamed(context, '/neomami-hub');
                   }
                 },
                 child: Tooltip(
-                  message: programDescription.isNotEmpty ? programDescription : programName,
+                  message:
+                      programDescription.isNotEmpty
+                          ? programDescription
+                          : programName,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 14,
+                    ),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
@@ -501,7 +530,11 @@ class _HomePageState extends State<HomePage> {
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [AppColors.primaryBlue, AppColors.secondaryBlue, AppColors.tertiaryBlue],
+              colors: [
+                AppColors.primaryBlue,
+                AppColors.secondaryBlue,
+                AppColors.tertiaryBlue,
+              ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -544,16 +577,22 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   CircleAvatar(
                     radius: 18,
-                    backgroundImage: userData["photoUrl"] != null 
-                        ? NetworkImage(userData["photoUrl"]) 
-                        : null,
+                    backgroundImage:
+                        userData["photoUrl"] != null
+                            ? NetworkImage(userData["photoUrl"])
+                            : null,
                     backgroundColor: Colors.grey[300],
-                    child: userData["photoUrl"] == null 
-                        ? Icon(Icons.person, color: Colors.grey[600], size: 20)
-                        : null,
+                    child:
+                        userData["photoUrl"] == null
+                            ? Icon(
+                              Icons.person,
+                              color: Colors.grey[600],
+                              size: 20,
+                            )
+                            : null,
                   ),
                   const SizedBox(width: 8),
-                  if (!isMobile) 
+                  if (!isMobile)
                     Text(
                       userData["fullName"] ?? "Profile",
                       style: GoogleFonts.poppins(
@@ -569,7 +608,7 @@ class _HomePageState extends State<HomePage> {
             icon: const Icon(Icons.logout),
             onPressed: _logout,
             tooltip: "Logout",
-          )
+          ),
         ],
       ),
       body: SingleChildScrollView(

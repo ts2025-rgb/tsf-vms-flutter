@@ -12,7 +12,9 @@ import 'screens/admin/handover_form_screen.dart';
 import 'screens/admin/certificate_management_screen.dart';
 import 'screens/admin/ccp_admin_dashboard_screen.dart';
 import 'screens/admin/admin_notifications_screen.dart';
+import 'screens/admin/neomami_admin_screen.dart';
 import 'screens/volunteer/notifications_screen.dart';
+import 'screens/volunteer/neomami_hub_screen.dart';
 import 'models/volunteer_model.dart';
 import 'config/app_colors.dart';
 import 'providers/notification_provider.dart';
@@ -43,15 +45,11 @@ class _AppRouter extends StatelessWidget {
       theme: ThemeData(
         primaryColor: AppColors.primaryBlue,
         scaffoldBackgroundColor: AppColors.backgroundLight1,
-        textTheme: Theme.of(context).textTheme.apply(
-              fontFamily: 'Poppins',
-            ),
+        textTheme: Theme.of(context).textTheme.apply(fontFamily: 'Poppins'),
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
           fillColor: Colors.white,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         ),
       ),
       debugShowCheckedModeBanner: false,
@@ -65,14 +63,17 @@ class _AppRouter extends StatelessWidget {
         '/admin/volunteers': (context) => const AdminScreen(),
         '/admin/vms/dashboard': (context) => const VMSDashboardScreen(),
         '/admin/ccp/dashboard': (context) => const CCPAdminDashboardScreen(),
-        '/admin/vms/certificates': (context) => const CertificateManagementScreen(),
+        '/admin/vms/certificates':
+            (context) => const CertificateManagementScreen(),
         '/notifications': (context) => const NotificationsScreen(),
         '/admin/notifications': (context) => const AdminNotificationsScreen(),
+        '/admin/neomami': (context) => const NeomamAdminScreen(),
+        '/neomami-hub': (context) => const NeomamHubScreen(),
       },
       onGenerateRoute: (settings) {
         // Handle dynamic routes with parameters
         final uri = Uri.parse(settings.name ?? '');
-        
+
         // /admin/vms/volunteer/:id
         if (uri.pathSegments.length == 4 &&
             uri.pathSegments[0] == 'admin' &&
@@ -81,13 +82,14 @@ class _AppRouter extends StatelessWidget {
           final volunteerId = uri.pathSegments[3];
           final volunteer = settings.arguments as Volunteer?;
           return MaterialPageRoute(
-            builder: (context) => VolunteerDetailScreen(
-              volunteerId: volunteerId,
-              initialVolunteer: volunteer,
-            ),
+            builder:
+                (context) => VolunteerDetailScreen(
+                  volunteerId: volunteerId,
+                  initialVolunteer: volunteer,
+                ),
           );
         }
-        
+
         // /admin/vms/handover/:id
         if (uri.pathSegments.length == 4 &&
             uri.pathSegments[0] == 'admin' &&
@@ -96,13 +98,14 @@ class _AppRouter extends StatelessWidget {
           final volunteerId = uri.pathSegments[3];
           final volunteer = settings.arguments as Volunteer?;
           return MaterialPageRoute(
-            builder: (context) => HandoverFormScreen(
-              volunteerId: volunteerId,
-              volunteer: volunteer,
-            ),
+            builder:
+                (context) => HandoverFormScreen(
+                  volunteerId: volunteerId,
+                  volunteer: volunteer,
+                ),
           );
         }
-        
+
         return null;
       },
     );

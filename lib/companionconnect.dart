@@ -11,7 +11,7 @@ import 'screens/volunteer_resources_screen.dart';
 
 class CompanionConnectPage extends StatefulWidget {
   final String programId;
-  
+
   const CompanionConnectPage({super.key, required this.programId});
 
   @override
@@ -21,31 +21,34 @@ class CompanionConnectPage extends StatefulWidget {
 class _CompanionConnectPageState extends State<CompanionConnectPage> {
   final String baseUrl = ApiConfig.apiUrl;
   final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
-  
+
   int _selectedTab = 0;
   Map<String, dynamic>? _menteeData;
   List<dynamic> _callNotes = [];
   bool _loadingMentee = true;
   bool _loadingNotes = false;
   bool _savingNote = false;
-  
+
   final TextEditingController _postCallNoteController = TextEditingController();
   final TextEditingController _queryController = TextEditingController();
   final TextEditingController _callDurationController = TextEditingController();
-  
+
   // Detailed Call Log Fields
-  final TextEditingController _assistanceRequestOtherDetailController = TextEditingController();
+  final TextEditingController _assistanceRequestOtherDetailController =
+      TextEditingController();
   final TextEditingController _otherTopicController = TextEditingController();
-  final TextEditingController _otherFocusAreaController = TextEditingController();
+  final TextEditingController _otherFocusAreaController =
+      TextEditingController();
   final TextEditingController _redFlagsController = TextEditingController();
-  final TextEditingController _volunteerNoteController = TextEditingController();
-  
+  final TextEditingController _volunteerNoteController =
+      TextEditingController();
+
   double _moodScore = 3.0;
   double _volunteerComfort = 3.0;
-  String _mentorHelpfulness = "Yes"; 
-  
+  String _mentorHelpfulness = "Yes";
+
   List<Map<String, dynamic>> _checklistItems = [];
-  
+
   List<Map<String, dynamic>> _getFocusAreasForCall(int callNumber) {
     if (callNumber <= 2) {
       return [
@@ -81,6 +84,34 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
         {'label': 'Skills/interests', 'isAchieved': false},
         {'label': 'Meaning-making', 'isAchieved': false},
       ];
+    } else if (callNumber <= 12) {
+      return [
+        {'label': 'Emotional check-in', 'isAchieved': false},
+        {'label': 'Personal growth', 'isAchieved': false},
+        {'label': 'Achievements', 'isAchieved': false},
+        {'label': 'Future plans', 'isAchieved': false},
+      ];
+    } else if (callNumber <= 14) {
+      return [
+        {'label': 'Emotional check-in', 'isAchieved': false},
+        {'label': 'Support systems', 'isAchieved': false},
+        {'label': 'Community', 'isAchieved': false},
+        {'label': 'Resources', 'isAchieved': false},
+      ];
+    } else if (callNumber <= 16) {
+      return [
+        {'label': 'Emotional check-in', 'isAchieved': false},
+        {'label': 'Independence', 'isAchieved': false},
+        {'label': 'Problem-solving', 'isAchieved': false},
+        {'label': 'Resilience', 'isAchieved': false},
+      ];
+    } else if (callNumber <= 18) {
+      return [
+        {'label': 'Emotional check-in', 'isAchieved': false},
+        {'label': 'Legacy', 'isAchieved': false},
+        {'label': 'Impact', 'isAchieved': false},
+        {'label': 'Vision', 'isAchieved': false},
+      ];
     } else {
       return [
         {'label': 'Emotional check-in', 'isAchieved': false},
@@ -90,11 +121,24 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
       ];
     }
   }
-  
-  final List<String> _availableTopics = ['Studies', 'Health', 'Family', 'Hobbies', 'Skills', 'Others'];
+
+  final List<String> _availableTopics = [
+    'Studies',
+    'Health',
+    'Family',
+    'Hobbies',
+    'Skills',
+    'Others',
+  ];
   final List<String> _selectedTopics = [];
-  
-  final List<String> _availableAssistanceOptions = ['Emotional Support', 'Safety Concern', 'Academic Support', 'Other Concern', 'Not required'];
+
+  final List<String> _availableAssistanceOptions = [
+    'Emotional Support',
+    'Safety Concern',
+    'Academic Support',
+    'Other Concern',
+    'Not required',
+  ];
   final List<String> _selectedAssistanceRequests = [];
 
   @override
@@ -102,7 +146,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
     super.initState();
     _fetchMentee();
   }
-  
+
   @override
   void dispose() {
     _postCallNoteController.dispose();
@@ -115,7 +159,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
     _volunteerNoteController.dispose();
     super.dispose();
   }
-  
+
   void _updateChecklistForCurrentCall() {
     final currentCell = _menteeData?['currentCell'] ?? 1;
     setState(() {
@@ -125,20 +169,20 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
 
   Future<void> _fetchMentee() async {
     setState(() => _loadingMentee = true);
-    
+
     try {
       final token = await secureStorage.read(key: "token");
-      
+
       print('🔑 Volunteer Token exists: ${token != null}');
       if (token != null) {
-        print('🔑 Token preview: ${token.substring(0, token.length > 20 ? 20 : token.length)}...');
+        print(
+          '🔑 Token preview: ${token.substring(0, token.length > 20 ? 20 : token.length)}...',
+        );
       }
-      
+
       final response = await http.get(
         Uri.parse('$baseUrl/companion-connect/mentee'),
-        headers: {
-          'Authorization': 'Bearer $token',
-        },
+        headers: {'Authorization': 'Bearer $token'},
       );
 
       print('📥 Mentee Response Status: ${response.statusCode}');
@@ -170,18 +214,16 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
 
   Future<void> _fetchCallNotes() async {
     if (_menteeData == null) return;
-    
+
     setState(() => _loadingNotes = true);
-    
+
     try {
       final token = await secureStorage.read(key: "token");
       final menteeId = _menteeData!['_id'];
-      
+
       final response = await http.get(
         Uri.parse('$baseUrl/companion-connect/notes/$menteeId'),
-        headers: {
-          'Authorization': 'Bearer $token',
-        },
+        headers: {'Authorization': 'Bearer $token'},
       );
 
       if (response.statusCode == 200) {
@@ -213,42 +255,52 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
     }
 
     setState(() => _savingNote = true);
-    
+
     try {
       final token = await secureStorage.read(key: "token");
       final menteeId = _menteeData!['_id'];
       final currentCell = _menteeData!['currentCell'] ?? 1;
-      
-      final hasAssistanceRequest = _selectedAssistanceRequests.isNotEmpty && 
-          !(_selectedAssistanceRequests.length == 1 && _selectedAssistanceRequests.contains('Not required'));
-      
+
+      final hasAssistanceRequest =
+          _selectedAssistanceRequests.isNotEmpty &&
+          !(_selectedAssistanceRequests.length == 1 &&
+              _selectedAssistanceRequests.contains('Not required'));
+
       // Update Other focus area label with custom text
-      final checklistToSend = _checklistItems.map((item) {
-        if (item['label'] == 'Other' && _otherFocusAreaController.text.trim().isNotEmpty) {
-          return {
-            'label': 'Other: ${_otherFocusAreaController.text.trim()}',
-            'isAchieved': item['isAchieved'],
-          };
-        }
-        return item;
-      }).toList();
-      
+      final checklistToSend =
+          _checklistItems.map((item) {
+            if (item['label'] == 'Other' &&
+                _otherFocusAreaController.text.trim().isNotEmpty) {
+              return {
+                'label': 'Other: ${_otherFocusAreaController.text.trim()}',
+                'isAchieved': item['isAchieved'],
+              };
+            }
+            return item;
+          }).toList();
+
       final bodyPayload = {
-          'menteeId': menteeId,
-          'note': _postCallNoteController.text.trim(),
-          'cellNumber': currentCell,
-          'callDuration': int.tryParse(_callDurationController.text) ?? 0,
-          'followUpRequired': hasAssistanceRequest,
-          'assistanceRequest': _selectedAssistanceRequests,
-          'assistanceRequestOtherDetail': _selectedAssistanceRequests.contains('Other Concern') ? _assistanceRequestOtherDetailController.text.trim() : '',
-          'moodScore': _moodScore,
-          'checklist': checklistToSend,
-          'topics': _selectedTopics,
-          'otherTopicDetail': _selectedTopics.contains('Others') ? _otherTopicController.text.trim() : '',
-          'mentorHelpfulness': _mentorHelpfulness,
-          'redFlags': _redFlagsController.text.trim(),
-          'volunteerComfort': _volunteerComfort,
-          'volunteerNote': _volunteerNoteController.text.trim(),
+        'menteeId': menteeId,
+        'note': _postCallNoteController.text.trim(),
+        'cellNumber': currentCell,
+        'callDuration': int.tryParse(_callDurationController.text) ?? 0,
+        'followUpRequired': hasAssistanceRequest,
+        'assistanceRequest': _selectedAssistanceRequests,
+        'assistanceRequestOtherDetail':
+            _selectedAssistanceRequests.contains('Other Concern')
+                ? _assistanceRequestOtherDetailController.text.trim()
+                : '',
+        'moodScore': _moodScore,
+        'checklist': checklistToSend,
+        'topics': _selectedTopics,
+        'otherTopicDetail':
+            _selectedTopics.contains('Others')
+                ? _otherTopicController.text.trim()
+                : '',
+        'mentorHelpfulness': _mentorHelpfulness,
+        'redFlags': _redFlagsController.text.trim(),
+        'volunteerComfort': _volunteerComfort,
+        'volunteerNote': _volunteerNoteController.text.trim(),
       };
 
       print("📤 SENDING NOTE PAYLOAD: ${json.encode(bodyPayload)}");
@@ -281,20 +333,20 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
           _redFlagsController.clear();
           _volunteerNoteController.clear();
           setState(() {
-             _moodScore = 3.0;
-             _volunteerComfort = 3.0;
-             _mentorHelpfulness = "Yes";
-             _selectedTopics.clear();
-             _selectedAssistanceRequests.clear();
-             _updateChecklistForCurrentCall(); // Reset checklist to fresh state
+            _moodScore = 3.0;
+            _volunteerComfort = 3.0;
+            _mentorHelpfulness = "Yes";
+            _selectedTopics.clear();
+            _selectedAssistanceRequests.clear();
+            _updateChecklistForCurrentCall(); // Reset checklist to fresh state
           });
           // Refresh notes
           await _fetchCallNotes();
-          
-          // Auto-advance to next call or mark complete for call 12
-          if (currentCell <= 12) {
+
+          // Auto-advance to next call or mark complete for call 20
+          if (currentCell <= 20) {
             await Future.delayed(Duration(milliseconds: 800));
-            if (currentCell < 12) {
+            if (currentCell < 20) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text("Moving to Call #${currentCell + 1}..."),
@@ -338,11 +390,11 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
       return;
     }
 
-    final phoneNumber = _menteeData!['phone'].toString().replaceAll(RegExp(r'[^0-9+]'), '');
-    final Uri launchUri = Uri(
-      scheme: 'tel',
-      path: phoneNumber,
+    final phoneNumber = _menteeData!['phone'].toString().replaceAll(
+      RegExp(r'[^0-9+]'),
+      '',
     );
+    final Uri launchUri = Uri(scheme: 'tel', path: phoneNumber);
 
     try {
       if (await canLaunchUrl(launchUri)) {
@@ -357,36 +409,30 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Error: $e"),
-          backgroundColor: Colors.red,
-        ),
+        SnackBar(content: Text("Error: $e"), backgroundColor: Colors.red),
       );
     }
   }
 
   Future<void> _advanceProgress() async {
     if (_menteeData == null) return;
-    
+
     final currentCell = _menteeData!['currentCell'] ?? 1;
-    
-    // For call 12, mark as complete and show celebration
-    if (currentCell >= 12) {
+
+    // For call 20, mark as complete and show celebration
+    if (currentCell >= 20) {
       try {
         final token = await secureStorage.read(key: "token");
         final menteeId = _menteeData!['_id'];
-        
-        // Mark call 12 as complete by setting to 13 (indicating all calls done)
+
+        // Mark call 20 as complete by setting to 21 (indicating all calls done)
         final response = await http.patch(
           Uri.parse('$baseUrl/companion-connect/progress'),
           headers: {
             'Authorization': 'Bearer $token',
             'Content-Type': 'application/json',
           },
-          body: json.encode({
-            'menteeId': menteeId,
-            'newCell': 13,
-          }),
+          body: json.encode({'menteeId': menteeId, 'newCell': 21}),
         );
 
         if (response.statusCode == 200) {
@@ -394,7 +440,9 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
           if (data['success'] == true) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text("🎉 Congratulations! You've completed all 12 calls with your mentee!"),
+                content: Text(
+                  "🎉 Congratulations! You've completed all 20 calls with your mentee!",
+                ),
                 backgroundColor: AppColors.accentGreen,
                 duration: Duration(seconds: 3),
               ),
@@ -410,21 +458,18 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
     }
 
     final newCell = currentCell + 1;
-    
+
     try {
       final token = await secureStorage.read(key: "token");
       final menteeId = _menteeData!['_id'];
-      
+
       final response = await http.patch(
         Uri.parse('$baseUrl/companion-connect/progress'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
         },
-        body: json.encode({
-          'menteeId': menteeId,
-          'newCell': newCell,
-        }),
+        body: json.encode({'menteeId': menteeId, 'newCell': newCell}),
       );
 
       if (response.statusCode == 200) {
@@ -432,7 +477,9 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
         if (data['success'] == true) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text("Call #$currentCell marked complete! Moving to Call #$newCell."),
+              content: Text(
+                "Call #$currentCell marked complete! Moving to Call #$newCell.",
+              ),
               backgroundColor: Colors.green,
             ),
           );
@@ -458,9 +505,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
       appBar: AppBar(
         elevation: 0,
         flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: AppColors.primaryGradient,
-          ),
+          decoration: BoxDecoration(gradient: AppColors.primaryGradient),
         ),
         foregroundColor: Colors.white,
         title: Row(
@@ -474,7 +519,10 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
               child: Icon(Icons.people, size: 24),
             ),
             const SizedBox(width: 12),
-            Text("Companion Connect", style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
+            Text(
+              "Companion Connect",
+              style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+            ),
           ],
         ),
         actions: [
@@ -486,19 +534,26 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
               child: CircleAvatar(
                 radius: 18,
                 backgroundColor: Colors.white.withOpacity(0.2),
-                child: _menteeData != null && _menteeData!['photoUrl'] != null && _menteeData!['photoUrl'].isNotEmpty
-                    ? ClipOval(
-                        child: Image.network(
-                          _menteeData!['photoUrl'],
-                          width: 36,
-                          height: 36,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Icon(Icons.person, size: 20, color: Colors.white);
-                          },
-                        ),
-                      )
-                    : Icon(Icons.person, size: 20, color: Colors.white),
+                child:
+                    _menteeData != null &&
+                            _menteeData!['photoUrl'] != null &&
+                            _menteeData!['photoUrl'].isNotEmpty
+                        ? ClipOval(
+                          child: Image.network(
+                            _menteeData!['photoUrl'],
+                            width: 36,
+                            height: 36,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Icon(
+                                Icons.person,
+                                size: 20,
+                                color: Colors.white,
+                              );
+                            },
+                          ),
+                        )
+                        : Icon(Icons.person, size: 20, color: Colors.white),
               ),
             ),
           ),
@@ -509,19 +564,18 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
           children: [
             // Mentee Info Card
             _buildMenteeInfoCard(),
-            
+
             // Progress Tracker
             _buildProgressTracker(),
-            
+
             // Focus Areas Guide
             _buildFocusAreasGuide(),
-            
+
             // Log Post Call Note
             _buildPostCallNoteSection(),
-            
+
             // Call History
             // Call History moved to bottom sheet
-            
             const SizedBox(height: 80), // Extra space for bottom action bar
           ],
         ),
@@ -633,7 +687,9 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
       return Container(
         margin: const EdgeInsets.all(16),
         padding: const EdgeInsets.all(40),
-        child: Center(child: CircularProgressIndicator(color: AppColors.primaryBlue)),
+        child: Center(
+          child: CircularProgressIndicator(color: AppColors.primaryBlue),
+        ),
       );
     }
 
@@ -667,9 +723,12 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
     final String phone = _menteeData!['phone'] ?? 'N/A';
     final String grade = _menteeData!['grade'] ?? 'N/A';
     final String pointOfContact = _menteeData!['pointOfContact'] ?? 'N/A';
-    final String assignedDate = _menteeData!['assignedAt'] != null
-        ? DateTime.parse(_menteeData!['assignedAt']).toString().substring(0, 10)
-        : 'N/A';
+    final String assignedDate =
+        _menteeData!['assignedAt'] != null
+            ? DateTime.parse(
+              _menteeData!['assignedAt'],
+            ).toString().substring(0, 10)
+            : 'N/A';
     final String photoUrl = _menteeData!['photoUrl'] ?? '';
 
     return Container(
@@ -694,19 +753,28 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
               CircleAvatar(
                 radius: 30,
                 backgroundColor: AppColors.primaryBlue.withOpacity(0.1),
-                child: photoUrl.isNotEmpty
-                    ? ClipOval(
-                        child: Image.network(
-                          photoUrl,
-                          width: 60,
-                          height: 60,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                             return Icon(Icons.person, color: AppColors.primaryBlue, size: 30);
-                          },
+                child:
+                    photoUrl.isNotEmpty
+                        ? ClipOval(
+                          child: Image.network(
+                            photoUrl,
+                            width: 60,
+                            height: 60,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Icon(
+                                Icons.person,
+                                color: AppColors.primaryBlue,
+                                size: 30,
+                              );
+                            },
+                          ),
+                        )
+                        : Icon(
+                          Icons.person,
+                          color: AppColors.primaryBlue,
+                          size: 30,
                         ),
-                      )
-                    : Icon(Icons.person, color: AppColors.primaryBlue, size: 30),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -738,10 +806,15 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
           const SizedBox(height: 12),
           _buildInfoRow(Icons.school_outlined, "Grade", grade),
           const SizedBox(height: 12),
-          _buildInfoRow(Icons.person_outline, "Point of Contact", pointOfContact),
+          _buildInfoRow(
+            Icons.person_outline,
+            "Point of Contact",
+            pointOfContact,
+          ),
           const SizedBox(height: 12),
           _buildInfoRow(Icons.calendar_today, "Assigned", assignedDate),
-          if (_menteeData!['notes'] != null && _menteeData!['notes'].toString().trim().isNotEmpty) ...[
+          if (_menteeData!['notes'] != null &&
+              _menteeData!['notes'].toString().trim().isNotEmpty) ...[
             const SizedBox(height: 12),
             _buildNotesRow(Icons.notes, "Notes", _menteeData!['notes']),
           ],
@@ -757,10 +830,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
         const SizedBox(width: 8),
         Text(
           "$label: ",
-          style: GoogleFonts.poppins(
-            fontSize: 13,
-            color: Colors.grey.shade600,
-          ),
+          style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade600),
         ),
         Expanded(
           child: Text(
@@ -817,7 +887,10 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
     if (_menteeData == null) return const SizedBox.shrink();
 
     final int currentCell = _menteeData!['currentCell'] ?? 1;
-    final int totalCalls = currentCell <= 12 ? (currentCell + 5 > 12 ? 12 : currentCell + 5) : 12; // Cap at 12 calls
+    final int totalCalls =
+        currentCell <= 20
+            ? (currentCell + 5 > 20 ? 20 : currentCell + 5)
+            : 20; // Cap at 20 calls
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
@@ -833,7 +906,10 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.primaryBlue.withOpacity(0.2), width: 2),
+        border: Border.all(
+          color: AppColors.primaryBlue.withOpacity(0.2),
+          width: 2,
+        ),
         boxShadow: [
           BoxShadow(
             color: AppColors.primaryBlue.withOpacity(0.1),
@@ -886,10 +962,16 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                         ),
                         SizedBox(width: 6),
                         Container(
-                          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
-                              colors: [AppColors.accentGreen, AppColors.accentGreen.withOpacity(0.7)],
+                              colors: [
+                                AppColors.accentGreen,
+                                AppColors.accentGreen.withOpacity(0.7),
+                              ],
                             ),
                             borderRadius: BorderRadius.circular(10),
                             boxShadow: [
@@ -921,7 +1003,11 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                     SizedBox(height: 4),
                     Row(
                       children: [
-                        Icon(Icons.bolt, color: AppColors.accentYellow, size: 14),
+                        Icon(
+                          Icons.bolt,
+                          color: AppColors.accentYellow,
+                          size: 14,
+                        ),
                         SizedBox(width: 4),
                         Text(
                           "${(currentCell - 1) * 100} XP",
@@ -1013,10 +1099,10 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
             ],
           ),
           SizedBox(height: 16),
+
           // Complete Quest Button removed - now integrated with report submission
-          
           const SizedBox(height: 24),
-          
+
           // Scrollable Adventure Map Trail
           Container(
             height: 200,
@@ -1035,10 +1121,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
             ),
             child: ScrollConfiguration(
               behavior: ScrollConfiguration.of(context).copyWith(
-                dragDevices: {
-                  PointerDeviceKind.touch,
-                  PointerDeviceKind.mouse,
-                },
+                dragDevices: {PointerDeviceKind.touch, PointerDeviceKind.mouse},
               ),
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
@@ -1050,7 +1133,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                   final isCurrent = callNumber == currentCell;
                   final isUpcoming = callNumber > currentCell;
                   final isMilestone = callNumber % 5 == 0;
-                  
+
                   return _buildStoryNode(
                     callNumber: callNumber,
                     isCompleted: isCompleted,
@@ -1063,7 +1146,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
               ),
             ),
           ),
-          
+
           const SizedBox(height: 16),
           // Achievements Row
           if (currentCell > 3)
@@ -1072,15 +1155,24 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
               margin: EdgeInsets.only(bottom: 12),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [AppColors.accentYellow.withOpacity(0.2), AppColors.accentOrange.withOpacity(0.15)],
+                  colors: [
+                    AppColors.accentYellow.withOpacity(0.2),
+                    AppColors.accentOrange.withOpacity(0.15),
+                  ],
                 ),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.accentOrange.withOpacity(0.3)),
+                border: Border.all(
+                  color: AppColors.accentOrange.withOpacity(0.3),
+                ),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.workspace_premium, color: AppColors.accentOrange, size: 20),
+                  Icon(
+                    Icons.workspace_premium,
+                    color: AppColors.accentOrange,
+                    size: 20,
+                  ),
                   SizedBox(width: 8),
                   Text(
                     "🏆 Achievement Unlocked: ",
@@ -1091,7 +1183,11 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                     ),
                   ),
                   Text(
-                    currentCell > 10 ? "Legendary Mentor!" : currentCell > 5 ? "Master Caller!" : "Rising Star!",
+                    currentCell > 10
+                        ? "Legendary Mentor!"
+                        : currentCell > 5
+                        ? "Master Caller!"
+                        : "Rising Star!",
                     style: GoogleFonts.poppins(
                       fontSize: 12,
                       fontWeight: FontWeight.w800,
@@ -1117,10 +1213,16 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
               padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [AppColors.primaryBlue.withOpacity(0.15), AppColors.secondaryBlue.withOpacity(0.1)],
+                  colors: [
+                    AppColors.primaryBlue.withOpacity(0.15),
+                    AppColors.secondaryBlue.withOpacity(0.1),
+                  ],
                 ),
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: AppColors.primaryBlue.withOpacity(0.3), width: 2),
+                border: Border.all(
+                  color: AppColors.primaryBlue.withOpacity(0.3),
+                  width: 2,
+                ),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -1159,7 +1261,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
     String rewardText;
     Color nodeColor;
     Color glowColor;
-    
+
     if (isCompleted) {
       emoji = "✅";
       rewardText = "+100 XP";
@@ -1223,10 +1325,13 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                 ),
               // Story Node with pulse animation
               GestureDetector(
-                onTap: (isCompleted || isCurrent) ? () {
-                  print("👆 Tapped on Call #$callNumber");
-                  _showCallDetails(callNumber);
-                } : null,
+                onTap:
+                    (isCompleted || isCurrent)
+                        ? () {
+                          print("👆 Tapped on Call #$callNumber");
+                          _showCallDetails(callNumber);
+                        }
+                        : null,
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
@@ -1252,23 +1357,29 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                       height: isMilestone ? 85 : 75,
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
-                          colors: isUpcoming
-                              ? [nodeColor, nodeColor]
-                              : [nodeColor, nodeColor.withOpacity(0.75)],
+                          colors:
+                              isUpcoming
+                                  ? [nodeColor, nodeColor]
+                                  : [nodeColor, nodeColor.withOpacity(0.75)],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: glowColor.withOpacity(isCurrent ? 0.6 : 0.25),
+                            color: glowColor.withOpacity(
+                              isCurrent ? 0.6 : 0.25,
+                            ),
                             blurRadius: isCurrent ? 20 : 10,
                             spreadRadius: isCurrent ? 4 : 2,
                             offset: Offset(0, isCurrent ? 6 : 3),
                           ),
                         ],
                         border: Border.all(
-                          color: isCurrent ? Colors.white : Colors.white.withOpacity(0.4),
+                          color:
+                              isCurrent
+                                  ? Colors.white
+                                  : Colors.white.withOpacity(0.4),
                           width: isCurrent ? 5 : 3,
                         ),
                       ),
@@ -1285,7 +1396,10 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                             style: GoogleFonts.poppins(
                               fontSize: isMilestone ? 16 : 14,
                               fontWeight: FontWeight.w900,
-                              color: isUpcoming ? Colors.white.withOpacity(0.6) : Colors.white,
+                              color:
+                                  isUpcoming
+                                      ? Colors.white.withOpacity(0.6)
+                                      : Colors.white,
                               shadows: [
                                 Shadow(
                                   color: Colors.black.withOpacity(0.3),
@@ -1303,12 +1417,22 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                       Positioned(
                         bottom: isMilestone ? -5 : -8,
                         child: Container(
-                          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
-                              colors: isCompleted
-                                  ? [AppColors.accentGreen, Colors.green.shade600]
-                                  : [AppColors.accentYellow, AppColors.accentOrange],
+                              colors:
+                                  isCompleted
+                                      ? [
+                                        AppColors.accentGreen,
+                                        Colors.green.shade600,
+                                      ]
+                                      : [
+                                        AppColors.accentYellow,
+                                        AppColors.accentOrange,
+                                      ],
                             ),
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(color: Colors.white, width: 2),
@@ -1340,23 +1464,36 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (isCompleted)
-                    Icon(Icons.check_circle, color: AppColors.accentGreen, size: 12),
+                    Icon(
+                      Icons.check_circle,
+                      color: AppColors.accentGreen,
+                      size: 12,
+                    ),
                   if (isCurrent)
-                    Icon(Icons.play_circle_filled, color: AppColors.primaryBlue, size: 12),
+                    Icon(
+                      Icons.play_circle_filled,
+                      color: AppColors.primaryBlue,
+                      size: 12,
+                    ),
                   if (isUpcoming)
                     Icon(Icons.lock, color: Colors.grey.shade500, size: 12),
                   SizedBox(width: 4),
                   Flexible(
                     child: Text(
-                      isCompleted ? "Victory!" : isCurrent ? "In Battle" : "Upcoming",
+                      isCompleted
+                          ? "Victory!"
+                          : isCurrent
+                          ? "In Battle"
+                          : "Upcoming",
                       textAlign: TextAlign.center,
                       overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.poppins(
                         fontSize: 11,
                         fontWeight: FontWeight.w800,
-                        color: isCompleted
-                            ? AppColors.accentGreen
-                            : isCurrent
+                        color:
+                            isCompleted
+                                ? AppColors.accentGreen
+                                : isCurrent
                                 ? AppColors.primaryBlue
                                 : Colors.grey.shade500,
                       ),
@@ -1383,18 +1520,25 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                     height: 6,
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        colors: isCompleted
-                            ? [AppColors.accentGreen, AppColors.accentGreen.withOpacity(0.6)]
-                            : [Colors.grey.shade300, Colors.grey.shade200],
+                        colors:
+                            isCompleted
+                                ? [
+                                  AppColors.accentGreen,
+                                  AppColors.accentGreen.withOpacity(0.6),
+                                ]
+                                : [Colors.grey.shade300, Colors.grey.shade200],
                       ),
                       borderRadius: BorderRadius.circular(3),
-                      boxShadow: isCompleted ? [
-                        BoxShadow(
-                          color: AppColors.accentGreen.withOpacity(0.3),
-                          blurRadius: 4,
-                          spreadRadius: 1,
-                        ),
-                      ] : null,
+                      boxShadow:
+                          isCompleted
+                              ? [
+                                BoxShadow(
+                                  color: AppColors.accentGreen.withOpacity(0.3),
+                                  blurRadius: 4,
+                                  spreadRadius: 1,
+                                ),
+                              ]
+                              : null,
                     ),
                   ),
                 ),
@@ -1463,9 +1607,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
           width: 14,
           height: 14,
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [color, color.withOpacity(0.7)],
-            ),
+            gradient: LinearGradient(colors: [color, color.withOpacity(0.7)]),
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
@@ -1497,19 +1639,18 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
           height: 60,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            gradient: isActive
-                ? AppColors.primaryGradient
-                : null,
+            gradient: isActive ? AppColors.primaryGradient : null,
             color: isActive ? null : Colors.grey.shade300,
-            boxShadow: isActive
-                ? [
-                    BoxShadow(
-                      color: AppColors.primaryBlue.withOpacity(0.3),
-                      blurRadius: 8,
-                      offset: Offset(0, 2),
-                    ),
-                  ]
-                : null,
+            boxShadow:
+                isActive
+                    ? [
+                      BoxShadow(
+                        color: AppColors.primaryBlue.withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: Offset(0, 2),
+                      ),
+                    ]
+                    : null,
           ),
           child: Center(
             child: Text(
@@ -1536,24 +1677,20 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
   }
 
   Widget _buildArrow() {
-    return Icon(
-      Icons.arrow_forward,
-      color: Colors.grey.shade400,
-      size: 20,
-    );
+    return Icon(Icons.arrow_forward, color: Colors.grey.shade400, size: 20);
   }
-  
+
   Widget _buildFocusAreasGuide() {
     if (_menteeData == null) return const SizedBox.shrink();
-    
+
     final currentCell = _menteeData!['currentCell'] ?? 1;
     final focusAreas = _getFocusAreasForCall(currentCell);
-    
+
     String phaseTitle;
     String phaseDescription;
     Color phaseColor;
     IconData phaseIcon;
-    
+
     if (currentCell <= 2) {
       phaseTitle = "Building Connection";
       phaseDescription = "Focus on creating a safe, comfortable space";
@@ -1585,16 +1722,13 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
       phaseColor = Colors.pink.shade400;
       phaseIcon = Icons.favorite;
     }
-    
+
     return Container(
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [
-            phaseColor.withOpacity(0.1),
-            phaseColor.withOpacity(0.05),
-          ],
+          colors: [phaseColor.withOpacity(0.1), phaseColor.withOpacity(0.05)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -1659,42 +1793,39 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
           Wrap(
             spacing: 8,
             runSpacing: 8,
-            children: focusAreas.map((area) {
-              return Container(
-                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: phaseColor.withOpacity(0.3)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 4,
-                      offset: Offset(0, 2),
+            children:
+                focusAreas.map((area) {
+                  return Container(
+                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: phaseColor.withOpacity(0.3)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 4,
+                          offset: Offset(0, 2),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.circle,
-                      size: 8,
-                      color: phaseColor,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.circle, size: 8, color: phaseColor),
+                        SizedBox(width: 6),
+                        Text(
+                          area['label'],
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.grey.shade800,
+                          ),
+                        ),
+                      ],
                     ),
-                    SizedBox(width: 6),
-                    Text(
-                      area['label'],
-                      style: GoogleFonts.poppins(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.grey.shade800,
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }).toList(),
+                  );
+                }).toList(),
           ),
           SizedBox(height: 12),
           Container(
@@ -1761,7 +1892,13 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
           const SizedBox(height: 16),
 
           // 1. Mood Score
-          Text("Mentee's Mood", style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 14)),
+          Text(
+            "Mentee's Mood",
+            style: GoogleFonts.poppins(
+              fontWeight: FontWeight.w600,
+              fontSize: 14,
+            ),
+          ),
           Row(
             children: [
               Expanded(
@@ -1781,21 +1918,48 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text("Bad", style: GoogleFonts.poppins(fontSize: 10, color: Colors.grey.shade600)),
-                          Text("Low", style: GoogleFonts.poppins(fontSize: 10, color: Colors.grey.shade600)),
-                          Text("Neutral", style: GoogleFonts.poppins(fontSize: 10, color: Colors.grey.shade600)),
-                          Text("Good", style: GoogleFonts.poppins(fontSize: 10, color: Colors.grey.shade600)),
-                          Text("Excited", style: GoogleFonts.poppins(fontSize: 10, color: Colors.grey.shade600)),
+                          Text(
+                            "Bad",
+                            style: GoogleFonts.poppins(
+                              fontSize: 10,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                          Text(
+                            "Low",
+                            style: GoogleFonts.poppins(
+                              fontSize: 10,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                          Text(
+                            "Neutral",
+                            style: GoogleFonts.poppins(
+                              fontSize: 10,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                          Text(
+                            "Good",
+                            style: GoogleFonts.poppins(
+                              fontSize: 10,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                          Text(
+                            "Excited",
+                            style: GoogleFonts.poppins(
+                              fontSize: 10,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
                         ],
                       ),
                     ),
                   ],
                 ),
               ),
-              Text(
-                _getMoodEmoji(_moodScore),
-                style: TextStyle(fontSize: 28),
-              ),
+              Text(_getMoodEmoji(_moodScore), style: TextStyle(fontSize: 28)),
             ],
           ),
           const SizedBox(height: 16),
@@ -1804,12 +1968,22 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
           Row(
             children: [
               Expanded(
-                child: Text("Which focus areas were covered?", style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 14)),
+                child: Text(
+                  "Which focus areas were covered?",
+                  style: GoogleFonts.poppins(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                ),
               ),
               const SizedBox(width: 6),
               Tooltip(
                 message: "Check the topics you discussed during this call",
-                child: Icon(Icons.info_outline, size: 18, color: AppColors.primaryBlue),
+                child: Icon(
+                  Icons.info_outline,
+                  size: 18,
+                  color: AppColors.primaryBlue,
+                ),
               ),
             ],
           ),
@@ -1823,25 +1997,28 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
               ),
             ),
           ..._checklistItems.map((item) {
-             return CheckboxListTile(
-                title: Text(item['label'] == 'Other' ? 'Other' : item['label'], style: GoogleFonts.poppins(fontSize: 13)),
-                value: item['isAchieved'],
-                activeColor: AppColors.primaryBlue,
-                dense: true,
-                contentPadding: EdgeInsets.zero,
-                controlAffinity: ListTileControlAffinity.leading,
-                onChanged: (v) {
-                  setState(() {
-                    if (item['label'] == 'Other' && v == false) {
-                      // If unchecking "Other", remove it from the list
-                      _checklistItems.removeWhere((i) => i['label'] == 'Other');
-                      _otherFocusAreaController.clear();
-                    } else {
-                      item['isAchieved'] = v;
-                    }
-                  });
-                },
-             );
+            return CheckboxListTile(
+              title: Text(
+                item['label'] == 'Other' ? 'Other' : item['label'],
+                style: GoogleFonts.poppins(fontSize: 13),
+              ),
+              value: item['isAchieved'],
+              activeColor: AppColors.primaryBlue,
+              dense: true,
+              contentPadding: EdgeInsets.zero,
+              controlAffinity: ListTileControlAffinity.leading,
+              onChanged: (v) {
+                setState(() {
+                  if (item['label'] == 'Other' && v == false) {
+                    // If unchecking "Other", remove it from the list
+                    _checklistItems.removeWhere((i) => i['label'] == 'Other');
+                    _otherFocusAreaController.clear();
+                  } else {
+                    item['isAchieved'] = v;
+                  }
+                });
+              },
+            );
           }).toList(),
           if (!_checklistItems.any((item) => item['label'] == 'Other'))
             CheckboxListTile(
@@ -1859,15 +2036,22 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                 }
               },
             ),
-          if (_checklistItems.any((item) => item['label'] == 'Other' && item['isAchieved'] == true)) ...[
+          if (_checklistItems.any(
+            (item) => item['label'] == 'Other' && item['isAchieved'] == true,
+          )) ...[
             const SizedBox(height: 8),
             TextField(
               controller: _otherFocusAreaController,
               decoration: InputDecoration(
                 hintText: "Specify other focus area...",
                 hintStyle: GoogleFonts.poppins(fontSize: 12),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
               ),
               style: GoogleFonts.poppins(fontSize: 13),
             ),
@@ -1875,139 +2059,205 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
           const SizedBox(height: 16),
 
           // 3. Topics
-          Text("Topics Covered", style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 14)),
+          Text(
+            "Topics Covered",
+            style: GoogleFonts.poppins(
+              fontWeight: FontWeight.w600,
+              fontSize: 14,
+            ),
+          ),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
             runSpacing: 8,
-            children: _availableTopics.map((topic) {
-              final isSelected = _selectedTopics.contains(topic);
-              return FilterChip(
-                label: Text(topic),
-                selected: isSelected,
-                selectedColor: AppColors.primaryBlue.withOpacity(0.2),
-                checkmarkColor: AppColors.primaryBlue,
-                labelStyle: GoogleFonts.poppins(
-                  fontSize: 12,
-                  color: isSelected ? AppColors.primaryBlue : Colors.black87,
-                ),
-                onSelected: (v) {
-                  setState(() {
-                    if (v) _selectedTopics.add(topic);
-                    else _selectedTopics.remove(topic);
-                  });
-                },
-              );
-            }).toList(),
+            children:
+                _availableTopics.map((topic) {
+                  final isSelected = _selectedTopics.contains(topic);
+                  return FilterChip(
+                    label: Text(topic),
+                    selected: isSelected,
+                    selectedColor: AppColors.primaryBlue.withOpacity(0.2),
+                    checkmarkColor: AppColors.primaryBlue,
+                    labelStyle: GoogleFonts.poppins(
+                      fontSize: 12,
+                      color:
+                          isSelected ? AppColors.primaryBlue : Colors.black87,
+                    ),
+                    onSelected: (v) {
+                      setState(() {
+                        if (v)
+                          _selectedTopics.add(topic);
+                        else
+                          _selectedTopics.remove(topic);
+                      });
+                    },
+                  );
+                }).toList(),
           ),
           if (_selectedTopics.contains('Others')) ...[
-             const SizedBox(height: 8),
-             TextField(
-               controller: _otherTopicController,
-               decoration: InputDecoration(
-                 hintText: "Specify other topics details...",
-                 hintStyle: GoogleFonts.poppins(fontSize: 12),
-                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                 contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-               ),
-               style: GoogleFonts.poppins(fontSize: 13),
-             ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _otherTopicController,
+              decoration: InputDecoration(
+                hintText: "Specify other topics details...",
+                hintStyle: GoogleFonts.poppins(fontSize: 12),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+              ),
+              style: GoogleFonts.poppins(fontSize: 13),
+            ),
           ],
           const SizedBox(height: 16),
 
           // 4. Observations (Main Note)
-          Text("Observations / Notes", style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 14)),
+          Text(
+            "Observations / Notes",
+            style: GoogleFonts.poppins(
+              fontWeight: FontWeight.w600,
+              fontSize: 14,
+            ),
+          ),
           const SizedBox(height: 8),
           TextField(
             controller: _postCallNoteController,
             maxLines: 4,
             style: GoogleFonts.poppins(fontSize: 13),
             decoration: InputDecoration(
-              hintText: "Brief notes on themes discussed or noteworthy moments. Avoid judgment or diagnosis.",
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              hintText:
+                  "Brief notes on themes discussed or noteworthy moments. Avoid judgment or diagnosis.",
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
               contentPadding: const EdgeInsets.all(12),
             ),
           ),
           const SizedBox(height: 16),
 
           // 5. Assistance Request
-          Text("Assistance Needed / Follow-up", style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 14)),
+          Text(
+            "Assistance Needed / Follow-up",
+            style: GoogleFonts.poppins(
+              fontWeight: FontWeight.w600,
+              fontSize: 14,
+            ),
+          ),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
             runSpacing: 8,
-            children: _availableAssistanceOptions.map((option) {
-              final isSelected = _selectedAssistanceRequests.contains(option);
-              return FilterChip(
-                label: Text(option),
-                selected: isSelected,
-                selectedColor: AppColors.primaryBlue.withOpacity(0.2),
-                checkmarkColor: AppColors.primaryBlue,
-                labelStyle: GoogleFonts.poppins(
-                  fontSize: 12,
-                  color: isSelected ? AppColors.primaryBlue : Colors.black87,
-                ),
-                onSelected: (v) {
-                  setState(() {
-                    if (v) {
-                      _selectedAssistanceRequests.add(option);
-                    } else {
-                      _selectedAssistanceRequests.remove(option);
-                    }
-                  });
-                },
-              );
-            }).toList(),
+            children:
+                _availableAssistanceOptions.map((option) {
+                  final isSelected = _selectedAssistanceRequests.contains(
+                    option,
+                  );
+                  return FilterChip(
+                    label: Text(option),
+                    selected: isSelected,
+                    selectedColor: AppColors.primaryBlue.withOpacity(0.2),
+                    checkmarkColor: AppColors.primaryBlue,
+                    labelStyle: GoogleFonts.poppins(
+                      fontSize: 12,
+                      color:
+                          isSelected ? AppColors.primaryBlue : Colors.black87,
+                    ),
+                    onSelected: (v) {
+                      setState(() {
+                        if (v) {
+                          _selectedAssistanceRequests.add(option);
+                        } else {
+                          _selectedAssistanceRequests.remove(option);
+                        }
+                      });
+                    },
+                  );
+                }).toList(),
           ),
           if (_selectedAssistanceRequests.contains('Other Concern')) ...[
-             const SizedBox(height: 8),
-             TextField(
-               controller: _assistanceRequestOtherDetailController,
-               decoration: InputDecoration(
-                 hintText: "Please specify other concern details...",
-                 hintStyle: GoogleFonts.poppins(fontSize: 12),
-                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                 contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-               ),
-               style: GoogleFonts.poppins(fontSize: 13),
-             ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _assistanceRequestOtherDetailController,
+              decoration: InputDecoration(
+                hintText: "Please specify other concern details...",
+                hintStyle: GoogleFonts.poppins(fontSize: 12),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+              ),
+              style: GoogleFonts.poppins(fontSize: 13),
+            ),
           ],
           const SizedBox(height: 16),
-          
+
           // 6. Mentor Helpfulness
-          Text("Did this conversation feel meaningful??", style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 14)),
-          Row(
-            children: ["Yes", "Neutral", "No"].map((opt) => 
-               Expanded(
-                 child: RadioListTile<String>(
-                   title: Text(opt, style: GoogleFonts.poppins(fontSize: 13)),
-                   value: opt,
-                   groupValue: _mentorHelpfulness,
-                   activeColor: AppColors.primaryBlue,
-                   contentPadding: EdgeInsets.zero,
-                   onChanged: (v) => setState(() => _mentorHelpfulness = v!),
-                 ),
-               )
-            ).toList(),
+          Text(
+            "Did this conversation feel meaningful??",
+            style: GoogleFonts.poppins(
+              fontWeight: FontWeight.w600,
+              fontSize: 14,
+            ),
           ),
-          
+          Row(
+            children:
+                ["Yes", "Neutral", "No"]
+                    .map(
+                      (opt) => Expanded(
+                        child: RadioListTile<String>(
+                          title: Text(
+                            opt,
+                            style: GoogleFonts.poppins(fontSize: 13),
+                          ),
+                          value: opt,
+                          groupValue: _mentorHelpfulness,
+                          activeColor: AppColors.primaryBlue,
+                          contentPadding: EdgeInsets.zero,
+                          onChanged:
+                              (v) => setState(() => _mentorHelpfulness = v!),
+                        ),
+                      ),
+                    )
+                    .toList(),
+          ),
+
           // 7. Red Flags
           const SizedBox(height: 8),
-          Text("Red Flags (Optional)", style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 14, color: Colors.red)),
+          Text(
+            "Red Flags (Optional)",
+            style: GoogleFonts.poppins(
+              fontWeight: FontWeight.w600,
+              fontSize: 14,
+              color: Colors.red,
+            ),
+          ),
           const SizedBox(height: 8),
           TextField(
             controller: _redFlagsController,
             maxLines: 4,
             style: GoogleFonts.poppins(fontSize: 13),
             decoration: InputDecoration(
-              hintText: "Use only if something felt concerning or unsafe.Briefly write what raised concern. DONT WRITE NA OR NONE.",
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.red.shade200)),
-              enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.red.shade200)),
+              hintText:
+                  "Use only if something felt concerning or unsafe.Briefly write what raised concern. DONT WRITE NA OR NONE.",
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Colors.red.shade200),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Colors.red.shade200),
+              ),
               contentPadding: const EdgeInsets.all(12),
             ),
           ),
           const SizedBox(height: 20),
-          
+
           // 8. Duration
           TextField(
             controller: _callDurationController,
@@ -2015,13 +2265,15 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
             style: GoogleFonts.poppins(fontSize: 13),
             decoration: InputDecoration(
               labelText: "Call Duration (minutes)",
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
               prefixIcon: Icon(Icons.timer, color: Colors.grey),
             ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // 9. Volunteer Comfort Check-in
           Container(
             padding: const EdgeInsets.all(16),
@@ -2035,18 +2287,29 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
               children: [
                 Row(
                   children: [
-                    Icon(Icons.favorite_outline, color: AppColors.primaryBlue, size: 20),
+                    Icon(
+                      Icons.favorite_outline,
+                      color: AppColors.primaryBlue,
+                      size: 20,
+                    ),
                     const SizedBox(width: 8),
                     Text(
                       "Your Comfort Check-in (Optional)",
-                      style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 14, color: AppColors.primaryBlue),
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                        color: AppColors.primaryBlue,
+                      ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 8),
                 Text(
                   "How comfortable did you feel during this call?",
-                  style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey.shade700),
+                  style: GoogleFonts.poppins(
+                    fontSize: 12,
+                    color: Colors.grey.shade700,
+                  ),
                 ),
                 const SizedBox(height: 12),
                 Column(
@@ -2065,9 +2328,27 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text("Uncomfortable", style: GoogleFonts.poppins(fontSize: 10, color: Colors.grey.shade600)),
-                          Text("Neutral", style: GoogleFonts.poppins(fontSize: 10, color: Colors.grey.shade600)),
-                          Text("Very Comfortable", style: GoogleFonts.poppins(fontSize: 10, color: Colors.grey.shade600)),
+                          Text(
+                            "Uncomfortable",
+                            style: GoogleFonts.poppins(
+                              fontSize: 10,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                          Text(
+                            "Neutral",
+                            style: GoogleFonts.poppins(
+                              fontSize: 10,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                          Text(
+                            "Very Comfortable",
+                            style: GoogleFonts.poppins(
+                              fontSize: 10,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -2076,7 +2357,11 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                 const SizedBox(height: 12),
                 Text(
                   "Personal Notes (For your reference only)",
-                  style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w500, color: Colors.grey.shade700),
+                  style: GoogleFonts.poppins(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.grey.shade700,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 TextField(
@@ -2085,9 +2370,15 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                   maxLength: 1000,
                   style: GoogleFonts.poppins(fontSize: 13),
                   decoration: InputDecoration(
-                    hintText: "Any personal reflections, challenges, or learnings from this call...",
-                    hintStyle: GoogleFonts.poppins(fontSize: 12, color: Colors.grey.shade400),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                    hintText:
+                        "Any personal reflections, challenges, or learnings from this call...",
+                    hintStyle: GoogleFonts.poppins(
+                      fontSize: 12,
+                      color: Colors.grey.shade400,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                     contentPadding: const EdgeInsets.all(12),
                     filled: true,
                     fillColor: Colors.white,
@@ -2096,7 +2387,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
               ],
             ),
           ),
-          
+
           const SizedBox(height: 24),
 
           // Submit Button
@@ -2106,16 +2397,39 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
               decoration: BoxDecoration(
                 gradient: AppColors.primaryGradient,
                 borderRadius: BorderRadius.circular(12),
-                boxShadow: [BoxShadow(color: AppColors.primaryBlue.withOpacity(0.3), blurRadius: 8, offset: Offset(0, 2))],
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primaryBlue.withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: Offset(0, 2),
+                  ),
+                ],
               ),
               child: ElevatedButton.icon(
-                onPressed: _savingNote || _menteeData == null ? null : _saveCallNote,
-                icon: _savingNote
-                    ? SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(Colors.white)))
-                    : Icon(Icons.save, color: Colors.white),
+                onPressed:
+                    _savingNote || _menteeData == null ? null : _saveCallNote,
+                icon:
+                    _savingNote
+                        ? SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
+                          ),
+                        )
+                        : Icon(Icons.save, color: Colors.white),
                 label: Text(
-                  _savingNote ? "Saving Report..." : "Complete Quest and Earn 100 XP",
-                  style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
+                  _savingNote
+                      ? "Saving Report..."
+                      : "Complete Quest and Earn 100 XP",
+                  style: GoogleFonts.poppins(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
                 ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.transparent,
@@ -2142,10 +2456,12 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
     if (_loadingNotes) {
       return Padding(
         padding: EdgeInsets.all(20),
-        child: Center(child: CircularProgressIndicator(color: AppColors.primaryBlue)),
+        child: Center(
+          child: CircularProgressIndicator(color: AppColors.primaryBlue),
+        ),
       );
     }
-    
+
     if (_callNotes.isEmpty) return SizedBox.shrink();
 
     return Container(
@@ -2173,12 +2489,13 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
   Widget _buildNoteCard(dynamic note) {
     final callNum = note['cellNumber'] != null ? "${note['cellNumber']}" : "?";
     final content = note['note'] ?? '';
-    
+
     String dateStr = "";
     if (note['createdAt'] != null) {
       try {
         final date = DateTime.parse(note['createdAt']);
-        dateStr = "${date.day}/${date.month} ${date.hour}:${date.minute.toString().padLeft(2, '0')}";
+        dateStr =
+            "${date.day}/${date.month} ${date.hour}:${date.minute.toString().padLeft(2, '0')}";
       } catch (e) {}
     }
 
@@ -2203,7 +2520,10 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                   Row(
                     children: [
                       Container(
-                        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.primaryBlue.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(20),
@@ -2219,15 +2539,21 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                       ),
                       SizedBox(width: 8),
                       if (note['callDuration'] != null)
-                      Text(
-                        "${note['callDuration']} mins",
-                        style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey.shade500),
-                      ),
+                        Text(
+                          "${note['callDuration']} mins",
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            color: Colors.grey.shade500,
+                          ),
+                        ),
                     ],
                   ),
                   Text(
                     dateStr,
-                    style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey.shade500),
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      color: Colors.grey.shade500,
+                    ),
                   ),
                 ],
               ),
@@ -2236,28 +2562,53 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                 content,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey.shade800),
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  color: Colors.grey.shade800,
+                ),
               ),
               SizedBox(height: 8),
-              if (note['redFlags'] != null && note['redFlags'].toString().isNotEmpty)
+              if (note['redFlags'] != null &&
+                  note['redFlags'].toString().isNotEmpty)
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(color: Colors.red.shade50, borderRadius: BorderRadius.circular(4)),
+                  decoration: BoxDecoration(
+                    color: Colors.red.shade50,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
                   child: Row(
-                     mainAxisSize: MainAxisSize.min,
-                     children: [
-                       Icon(Icons.flag, color: Colors.red, size: 12),
-                       SizedBox(width: 4),
-                       Text("Red Flags Reported", style: TextStyle(color: Colors.red, fontSize: 10, fontWeight: FontWeight.bold)),
-                     ],
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.flag, color: Colors.red, size: 12),
+                      SizedBox(width: 4),
+                      Text(
+                        "Red Flags Reported",
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               SizedBox(height: 8),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Text("View Details", style: GoogleFonts.poppins(fontSize: 12, color: AppColors.primaryBlue, fontWeight: FontWeight.w500)),
-                  Icon(Icons.arrow_forward_ios, size: 10, color: AppColors.primaryBlue),
+                  Text(
+                    "View Details",
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      color: AppColors.primaryBlue,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  Icon(
+                    Icons.arrow_forward_ios,
+                    size: 10,
+                    color: AppColors.primaryBlue,
+                  ),
                 ],
               ),
             ],
@@ -2288,113 +2639,237 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                 controller: scrollController,
                 children: [
                   Center(
-                    child: Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2))),
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade300,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
                   ),
                   SizedBox(height: 20),
-                  Text("Call #${note['cellNumber']} Details", style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.bold)),
+                  Text(
+                    "Call #${note['cellNumber']} Details",
+                    style: GoogleFonts.poppins(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   Divider(),
-                  
+
                   // Mood
                   if (note['moodScore'] != null) ...[
                     SizedBox(height: 10),
                     Row(
                       children: [
-                        Text("Mood: ", style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
-                        Text(_getMoodEmoji((note['moodScore'] is int ? (note['moodScore'] as int).toDouble() : note['moodScore']) ?? 3.0), style: TextStyle(fontSize: 24)),
+                        Text(
+                          "Mood: ",
+                          style: GoogleFonts.poppins(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        Text(
+                          _getMoodEmoji(
+                            (note['moodScore'] is int
+                                    ? (note['moodScore'] as int).toDouble()
+                                    : note['moodScore']) ??
+                                3.0,
+                          ),
+                          style: TextStyle(fontSize: 24),
+                        ),
                         SizedBox(width: 8),
-                        Text("(${note['moodScore']}/5)", style: GoogleFonts.poppins(color: Colors.grey)),
+                        Text(
+                          "(${note['moodScore']}/5)",
+                          style: GoogleFonts.poppins(color: Colors.grey),
+                        ),
                       ],
                     ),
                   ],
 
                   // Topics
-                  if (note['topics'] != null && (note['topics'] as List).isNotEmpty) ...[
+                  if (note['topics'] != null &&
+                      (note['topics'] as List).isNotEmpty) ...[
                     SizedBox(height: 16),
-                    Text("Topics Covered:", style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
+                    Text(
+                      "Topics Covered:",
+                      style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+                    ),
                     SizedBox(height: 8),
                     Wrap(
                       spacing: 8,
-                      children: (note['topics'] as List).map((t) => Chip(
-                        label: Text(t.toString(), style: GoogleFonts.poppins(fontSize: 12)),
-                        backgroundColor: AppColors.primaryBlue.withOpacity(0.1),
-                      )).toList(),
+                      children:
+                          (note['topics'] as List)
+                              .map(
+                                (t) => Chip(
+                                  label: Text(
+                                    t.toString(),
+                                    style: GoogleFonts.poppins(fontSize: 12),
+                                  ),
+                                  backgroundColor: AppColors.primaryBlue
+                                      .withOpacity(0.1),
+                                ),
+                              )
+                              .toList(),
                     ),
-                    if (note['otherTopicDetail'] != null && note['otherTopicDetail'].toString().isNotEmpty)
-                       Padding(
-                         padding: EdgeInsets.only(top: 4),
-                         child: Text("Other: ${note['otherTopicDetail']}", style: GoogleFonts.poppins(fontSize: 12, fontStyle: FontStyle.italic)),
-                       ),
+                    if (note['otherTopicDetail'] != null &&
+                        note['otherTopicDetail'].toString().isNotEmpty)
+                      Padding(
+                        padding: EdgeInsets.only(top: 4),
+                        child: Text(
+                          "Other: ${note['otherTopicDetail']}",
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                      ),
                   ],
 
                   // Checklist
-                  if (note['checklist'] != null && (note['checklist'] as List).isNotEmpty) ...[
+                  if (note['checklist'] != null &&
+                      (note['checklist'] as List).isNotEmpty) ...[
                     SizedBox(height: 16),
-                    Text("Discussion Checklist:", style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
-                    ... (note['checklist'] as List).map((item) {
-                       final achieved = item['isAchieved'] == true;
-                       return ListTile(
-                         visualDensity: VisualDensity.compact,
-                         leading: Icon(achieved ? Icons.check_circle : Icons.cancel_outlined, color: achieved ? Colors.green : Colors.grey, size: 20),
-                         title: Text(item['label'] ?? '', style: GoogleFonts.poppins(fontSize: 13, decoration: achieved ? null : TextDecoration.lineThrough, color: achieved ? Colors.black : Colors.grey)),
-                       );
+                    Text(
+                      "Discussion Checklist:",
+                      style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+                    ),
+                    ...(note['checklist'] as List).map((item) {
+                      final achieved = item['isAchieved'] == true;
+                      return ListTile(
+                        visualDensity: VisualDensity.compact,
+                        leading: Icon(
+                          achieved ? Icons.check_circle : Icons.cancel_outlined,
+                          color: achieved ? Colors.green : Colors.grey,
+                          size: 20,
+                        ),
+                        title: Text(
+                          item['label'] ?? '',
+                          style: GoogleFonts.poppins(
+                            fontSize: 13,
+                            decoration:
+                                achieved ? null : TextDecoration.lineThrough,
+                            color: achieved ? Colors.black : Colors.grey,
+                          ),
+                        ),
+                      );
                     }).toList(),
                   ],
 
                   // Observation
                   SizedBox(height: 16),
-                  Text("Observations:", style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
+                  Text(
+                    "Observations:",
+                    style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+                  ),
                   Container(
                     width: double.infinity,
                     margin: EdgeInsets.only(top: 8),
                     padding: EdgeInsets.all(12),
-                    decoration: BoxDecoration(color: Colors.grey.shade50, borderRadius: BorderRadius.circular(8)),
-                    child: Text(note['note'] ?? 'No observations.', style: GoogleFonts.poppins(fontSize: 14)),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade50,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      note['note'] ?? 'No observations.',
+                      style: GoogleFonts.poppins(fontSize: 14),
+                    ),
                   ),
 
                   // Assistance
-                  if (note['assistanceRequest'] != null && note['assistanceRequest'].toString().isNotEmpty) ...[
+                  if (note['assistanceRequest'] != null &&
+                      note['assistanceRequest'].toString().isNotEmpty) ...[
                     SizedBox(height: 16),
-                    Text("Assistance Requested:", style: GoogleFonts.poppins(fontWeight: FontWeight.w600, color: Colors.orange)),
+                    Text(
+                      "Assistance Requested:",
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.w600,
+                        color: Colors.orange,
+                      ),
+                    ),
                     Container(
                       margin: EdgeInsets.only(top: 8),
                       padding: EdgeInsets.all(12),
-                      decoration: BoxDecoration(color: Colors.orange.shade50, borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.orange.shade100)),
-                      child: Text(note['assistanceRequest'], style: GoogleFonts.poppins(fontSize: 13)),
+                      decoration: BoxDecoration(
+                        color: Colors.orange.shade50,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.orange.shade100),
+                      ),
+                      child: Text(
+                        note['assistanceRequest'],
+                        style: GoogleFonts.poppins(fontSize: 13),
+                      ),
                     ),
                   ],
 
                   // Red Flags
-                  if (note['redFlags'] != null && note['redFlags'].toString().isNotEmpty) ...[
+                  if (note['redFlags'] != null &&
+                      note['redFlags'].toString().isNotEmpty) ...[
                     SizedBox(height: 16),
-                    Text("RED FLAGS:", style: GoogleFonts.poppins(fontWeight: FontWeight.w600, color: Colors.red)),
+                    Text(
+                      "RED FLAGS:",
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.w600,
+                        color: Colors.red,
+                      ),
+                    ),
                     Container(
                       margin: EdgeInsets.only(top: 8),
                       padding: EdgeInsets.all(12),
-                      decoration: BoxDecoration(color: Colors.red.shade50, borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.red.shade100)),
-                      child: Text(note['redFlags'], style: GoogleFonts.poppins(fontSize: 13, color: Colors.red.shade900)),
+                      decoration: BoxDecoration(
+                        color: Colors.red.shade50,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.red.shade100),
+                      ),
+                      child: Text(
+                        note['redFlags'],
+                        style: GoogleFonts.poppins(
+                          fontSize: 13,
+                          color: Colors.red.shade900,
+                        ),
+                      ),
                     ),
                   ],
-                  
+
                   // Helpfulness
-                   if (note['mentorHelpfulness'] != null) ...[
-                     SizedBox(height: 16),
-                     Row(children: [
-                       Text("Was helpful? ", style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 13, color: Colors.grey)),
-                       Text(note['mentorHelpfulness'], style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
-                     ]),
-                   ],
-                   
-                   SizedBox(height: 30),
-                   SizedBox(width: double.infinity, child: OutlinedButton(onPressed: () => Navigator.pop(context), child: Text("Close"))),
+                  if (note['mentorHelpfulness'] != null) ...[
+                    SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Text(
+                          "Was helpful? ",
+                          style: GoogleFonts.poppins(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
+                            color: Colors.grey,
+                          ),
+                        ),
+                        Text(
+                          note['mentorHelpfulness'],
+                          style: GoogleFonts.poppins(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+
+                  SizedBox(height: 30),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text("Close"),
+                    ),
+                  ),
                 ],
               ),
             );
           },
         );
-      }
+      },
     );
   }
-
 
   void _showBottomSheet(int type) {
     if (type == 2) {
@@ -2402,9 +2877,10 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
         context: context,
         isScrollControlled: true,
         backgroundColor: Colors.transparent,
-        builder: (context) => VolunteerQuerySheet(
-          menteeId: _menteeData?['id'] ?? _menteeData?['_id'],
-        ),
+        builder:
+            (context) => VolunteerQuerySheet(
+              menteeId: _menteeData?['id'] ?? _menteeData?['_id'],
+            ),
       );
       return;
     }
@@ -2437,9 +2913,10 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
               ),
               // Content based on type
               Expanded(
-                child: type == 0
-                    ? _buildResourcesContent()
-                    : type == 3
+                child:
+                    type == 0
+                        ? _buildResourcesContent()
+                        : type == 3
                         ? _buildHistorySheetContent()
                         : _buildCallContent(),
               ),
@@ -2452,17 +2929,26 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
 
   Widget _buildHistorySheetContent() {
     if (_loadingNotes) {
-      return Center(child: CircularProgressIndicator(color: AppColors.primaryBlue));
+      return Center(
+        child: CircularProgressIndicator(color: AppColors.primaryBlue),
+      );
     }
-    
+
     if (_callNotes.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.history_toggle_off, size: 48, color: Colors.grey.shade300),
+            Icon(
+              Icons.history_toggle_off,
+              size: 48,
+              color: Colors.grey.shade300,
+            ),
             SizedBox(height: 16),
-            Text("No call history logs yet", style: GoogleFonts.poppins(color: Colors.grey)),
+            Text(
+              "No call history logs yet",
+              style: GoogleFonts.poppins(color: Colors.grey),
+            ),
           ],
         ),
       );
@@ -2473,10 +2959,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
       children: [
         Text(
           "Call History Logs",
-          style: GoogleFonts.poppins(
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
-          ),
+          style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 16),
         ..._callNotes.map((note) => _buildNoteCard(note)).toList(),
@@ -2487,13 +2970,15 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
   void _showCallDetails(int callNumber) {
     print("🔍 _showCallDetails called for Call #$callNumber");
     print("🔍 Total notes available: ${_callNotes.length}");
-    print("🔍 Call notes data: ${_callNotes.map((n) => 'Call #${n['cellNumber']}').join(', ')}");
-    
+    print(
+      "🔍 Call notes data: ${_callNotes.map((n) => 'Call #${n['cellNumber']}').join(', ')}",
+    );
+
     final callNote = _callNotes.firstWhere(
       (note) => note['cellNumber'] == callNumber,
       orElse: () => null,
     );
-    
+
     if (callNote == null) {
       print("❌ No call note found for Call #$callNumber");
       ScaffoldMessenger.of(context).showSnackBar(
@@ -2504,9 +2989,9 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
       );
       return;
     }
-    
+
     print("✅ Found call note for Call #$callNumber: ${callNote.keys.toList()}");
-    
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -2522,7 +3007,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
       },
     );
   }
-  
+
   Widget _buildReadOnlyField(String label, String value) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -2544,15 +3029,12 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
             borderRadius: BorderRadius.circular(8),
             border: Border.all(color: Colors.grey.shade300),
           ),
-          child: Text(
-            value,
-            style: GoogleFonts.poppins(fontSize: 14),
-          ),
+          child: Text(value, style: GoogleFonts.poppins(fontSize: 14)),
         ),
       ],
     );
   }
-  
+
   Widget _buildReadOnlySection(String title, Widget content) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -2570,7 +3052,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
       ],
     );
   }
-  
+
   String _formatDate(String? dateStr) {
     if (dateStr == null) return 'N/A';
     try {
@@ -2583,7 +3065,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
 
   void _showMenteeProfile() {
     if (_menteeData == null) return;
-    
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -2598,77 +3080,141 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-               Container(width: 40, height: 4, margin: EdgeInsets.only(bottom: 20), decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2))),
-               GestureDetector(
-                 onTap: () {
-                    if (_menteeData!['photoUrl'] != null && _menteeData!['photoUrl'].toString().isNotEmpty) {
-                       showDialog(
-                         context: context, 
-                         builder: (context) => Dialog(
-                           backgroundColor: Colors.transparent,
-                           child: InteractiveViewer(
-                             panEnabled: true, 
-                             boundaryMargin: EdgeInsets.all(20),
-                             minScale: 0.5,
-                             maxScale: 4, 
-                             child: ClipRRect(borderRadius: BorderRadius.circular(12), child: Image.network(_menteeData!['photoUrl']))
-                           ),
-                         ),
-                       );
-                    }
-                 },
-                 child: CircleAvatar(
-                   radius: 50,
-                   backgroundColor: AppColors.primaryBlue.withOpacity(0.1),
-                   child: _menteeData!['photoUrl'] != null && _menteeData!['photoUrl'].toString().isNotEmpty 
-                      ? ClipOval(
-                          child: Image.network(
-                            _menteeData!['photoUrl'],
-                            width: 100,
-                            height: 100,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                               return Icon(Icons.person, size: 50, color: AppColors.primaryBlue);
-                            },
+              Container(
+                width: 40,
+                height: 4,
+                margin: EdgeInsets.only(bottom: 20),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              GestureDetector(
+                onTap: () {
+                  if (_menteeData!['photoUrl'] != null &&
+                      _menteeData!['photoUrl'].toString().isNotEmpty) {
+                    showDialog(
+                      context: context,
+                      builder:
+                          (context) => Dialog(
+                            backgroundColor: Colors.transparent,
+                            child: InteractiveViewer(
+                              panEnabled: true,
+                              boundaryMargin: EdgeInsets.all(20),
+                              minScale: 0.5,
+                              maxScale: 4,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Image.network(_menteeData!['photoUrl']),
+                              ),
+                            ),
                           ),
-                        ) 
-                      : Icon(Icons.person, size: 50, color: AppColors.primaryBlue),
-                 ),
-               ),
-               SizedBox(height: 16),
-               Text("${_menteeData!['fullName']}", style: GoogleFonts.poppins(fontSize: 22, fontWeight: FontWeight.bold)),
-               Container(
-                 margin: EdgeInsets.symmetric(vertical: 4),
-                 padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                 decoration: BoxDecoration(color: Colors.green.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
-                 child: Text("Active Mentee", style: GoogleFonts.poppins(fontSize: 12, color: Colors.green, fontWeight: FontWeight.w500)),
-               ),
-               SizedBox(height: 24),
-               _buildProfileDetailRow(Icons.cake, "Age / Gender", "${_menteeData!['age']} years • ${_menteeData!['gender'] ?? 'N/A'}"),
-               _buildProfileDetailRow(Icons.school_outlined, "Grade", "${_menteeData!['grade'] ?? 'N/A'}"),
-               _buildProfileDetailRow(Icons.person_outline, "Point of Contact", "${_menteeData!['pointOfContact'] ?? 'N/A'}"),
-               _buildProfileDetailRow(Icons.school, "Program", "${_menteeData!['program']?['name'] ?? 'N/A'}"),
-               _buildProfileDetailRow(Icons.calendar_today, "Assigned On", "${_menteeData!['assignedAt']?.substring(0,10) ?? 'N/A'}"),
-                 
-               SizedBox(height: 24),
-               SizedBox(
-                 width: double.infinity, 
-                 child: ElevatedButton(
-                   onPressed: () => Navigator.pop(context), 
-                   style: ElevatedButton.styleFrom(
-                     backgroundColor: Colors.grey.shade100,
-                     foregroundColor: Colors.black87,
-                     elevation: 0,
-                     padding: EdgeInsets.symmetric(vertical: 16),
-                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))
-                   ),
-                   child: Text("Close Profile", style: GoogleFonts.poppins(fontWeight: FontWeight.w600))
-                 )
-               ),
+                    );
+                  }
+                },
+                child: CircleAvatar(
+                  radius: 50,
+                  backgroundColor: AppColors.primaryBlue.withOpacity(0.1),
+                  child:
+                      _menteeData!['photoUrl'] != null &&
+                              _menteeData!['photoUrl'].toString().isNotEmpty
+                          ? ClipOval(
+                            child: Image.network(
+                              _menteeData!['photoUrl'],
+                              width: 100,
+                              height: 100,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Icon(
+                                  Icons.person,
+                                  size: 50,
+                                  color: AppColors.primaryBlue,
+                                );
+                              },
+                            ),
+                          )
+                          : Icon(
+                            Icons.person,
+                            size: 50,
+                            color: AppColors.primaryBlue,
+                          ),
+                ),
+              ),
+              SizedBox(height: 16),
+              Text(
+                "${_menteeData!['fullName']}",
+                style: GoogleFonts.poppins(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Container(
+                margin: EdgeInsets.symmetric(vertical: 4),
+                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.green.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  "Active Mentee",
+                  style: GoogleFonts.poppins(
+                    fontSize: 12,
+                    color: Colors.green,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              SizedBox(height: 24),
+              _buildProfileDetailRow(
+                Icons.cake,
+                "Age / Gender",
+                "${_menteeData!['age']} years • ${_menteeData!['gender'] ?? 'N/A'}",
+              ),
+              _buildProfileDetailRow(
+                Icons.school_outlined,
+                "Grade",
+                "${_menteeData!['grade'] ?? 'N/A'}",
+              ),
+              _buildProfileDetailRow(
+                Icons.person_outline,
+                "Point of Contact",
+                "${_menteeData!['pointOfContact'] ?? 'N/A'}",
+              ),
+              _buildProfileDetailRow(
+                Icons.school,
+                "Program",
+                "${_menteeData!['program']?['name'] ?? 'N/A'}",
+              ),
+              _buildProfileDetailRow(
+                Icons.calendar_today,
+                "Assigned On",
+                "${_menteeData!['assignedAt']?.substring(0, 10) ?? 'N/A'}",
+              ),
+
+              SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey.shade100,
+                    foregroundColor: Colors.black87,
+                    elevation: 0,
+                    padding: EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(
+                    "Close Profile",
+                    style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ),
             ],
           ),
         );
-      }
+      },
     );
   }
 
@@ -2677,20 +3223,36 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: Row(
         children: [
-           Container(
-             padding: EdgeInsets.all(10),
-             decoration: BoxDecoration(color: AppColors.primaryBlue.withOpacity(0.05), borderRadius: BorderRadius.circular(10)),
-             child: Icon(icon, color: AppColors.primaryBlue, size: 20)
-           ),
-           SizedBox(width: 16),
-           Expanded(
-             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(label, style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey)),
-                Text(value, style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w500, color: Colors.black87)),
-             ]),
-           )
+          Container(
+            padding: EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: AppColors.primaryBlue.withOpacity(0.05),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, color: AppColors.primaryBlue, size: 20),
+          ),
+          SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey),
+                ),
+                Text(
+                  value,
+                  style: GoogleFonts.poppins(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black87,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
-      )
+      ),
     );
   }
 
@@ -2700,49 +3262,76 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
       children: [
         Text(
           "Learning Materials",
-          style: GoogleFonts.poppins(
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
-          ),
+          style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 16),
         _buildResourceItem(
-          "Ethical Code of Conduct", 
-          "PDF • Google Drive", 
-          Icons.gavel, 
+          "Ethical Code of Conduct",
+          "PDF • Google Drive",
+          Icons.gavel,
           Colors.blue.shade700,
-          url: "https://drive.google.com/file/d/1Xuu7iIUtExIQxPI_HJexbhlSWUx44l4q/view?usp=sharing"
+          url:
+              "https://drive.google.com/file/d/1Xuu7iIUtExIQxPI_HJexbhlSWUx44l4q/view?usp=sharing",
         ),
-        _buildResourceItem("Introduction to Mentoring", "PDF • 2.5 MB", Icons.picture_as_pdf, Colors.red),
-        _buildResourceItem("Communication Skills", "Video • 15 min", Icons.video_library, Colors.purple),
-        _buildResourceItem("Active Listening Guide", "PDF • 1.8 MB", Icons.picture_as_pdf, Colors.red),
-        _buildResourceItem("Conflict Resolution", "Video • 20 min", Icons.video_library, Colors.purple),
+        _buildResourceItem(
+          "Introduction to Mentoring",
+          "PDF • 2.5 MB",
+          Icons.picture_as_pdf,
+          Colors.red,
+        ),
+        _buildResourceItem(
+          "Communication Skills",
+          "Video • 15 min",
+          Icons.video_library,
+          Colors.purple,
+        ),
+        _buildResourceItem(
+          "Active Listening Guide",
+          "PDF • 1.8 MB",
+          Icons.picture_as_pdf,
+          Colors.red,
+        ),
+        _buildResourceItem(
+          "Conflict Resolution",
+          "Video • 20 min",
+          Icons.video_library,
+          Colors.purple,
+        ),
       ],
     );
   }
 
-  Widget _buildResourceItem(String title, String subtitle, IconData icon, Color color, {String? url}) {
+  Widget _buildResourceItem(
+    String title,
+    String subtitle,
+    IconData icon,
+    Color color, {
+    String? url,
+  }) {
     return InkWell(
-      onTap: url != null ? () async {
-        try {
-          final uri = Uri.parse(url);
-          if (await canLaunchUrl(uri)) {
-            await launchUrl(uri, mode: LaunchMode.externalApplication);
-          } else {
-            if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Could not open resource')),
-              );
-            }
-          }
-        } catch (e) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Error opening resource: $e')),
-            );
-          }
-        }
-      } : null,
+      onTap:
+          url != null
+              ? () async {
+                try {
+                  final uri = Uri.parse(url);
+                  if (await canLaunchUrl(uri)) {
+                    await launchUrl(uri, mode: LaunchMode.externalApplication);
+                  } else {
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Could not open resource')),
+                      );
+                    }
+                  }
+                } catch (e) {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Error opening resource: $e')),
+                    );
+                  }
+                }
+              }
+              : null,
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
@@ -2783,7 +3372,10 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                 ],
               ),
             ),
-            Icon(url != null ? Icons.open_in_new : Icons.download, color: color),
+            Icon(
+              url != null ? Icons.open_in_new : Icons.download,
+              color: color,
+            ),
           ],
         ),
       ),
@@ -2808,7 +3400,10 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [AppColors.primaryBlue.withOpacity(0.1), AppColors.purpleGradientEnd.withOpacity(0.05)],
+                colors: [
+                  AppColors.primaryBlue.withOpacity(0.1),
+                  AppColors.purpleGradientEnd.withOpacity(0.05),
+                ],
               ),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: AppColors.primaryBlue.withOpacity(0.3)),
@@ -2845,11 +3440,18 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                 const SizedBox(height: 12),
                 Row(
                   children: [
-                    Icon(Icons.calendar_today, size: 16, color: Colors.grey.shade600),
+                    Icon(
+                      Icons.calendar_today,
+                      size: 16,
+                      color: Colors.grey.shade600,
+                    ),
                     const SizedBox(width: 8),
                     Text(
                       "Jan 15, 2026 • 3:00 PM",
-                      style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey.shade600),
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
+                        color: Colors.grey.shade600,
+                      ),
                     ),
                   ],
                 ),
@@ -2860,11 +3462,16 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                       child: ElevatedButton.icon(
                         onPressed: () {},
                         icon: Icon(Icons.call, color: Colors.white),
-                        label: Text("Call Now", style: GoogleFonts.poppins(color: Colors.white)),
+                        label: Text(
+                          "Call Now",
+                          style: GoogleFonts.poppins(color: Colors.white),
+                        ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green,
                           padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
                         ),
                       ),
                     ),
@@ -2872,12 +3479,22 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                     Expanded(
                       child: OutlinedButton.icon(
                         onPressed: () {},
-                        icon: Icon(Icons.videocam, color: AppColors.primaryBlue),
-                        label: Text("Video Call", style: GoogleFonts.poppins(color: AppColors.primaryBlue)),
+                        icon: Icon(
+                          Icons.videocam,
+                          color: AppColors.primaryBlue,
+                        ),
+                        label: Text(
+                          "Video Call",
+                          style: GoogleFonts.poppins(
+                            color: AppColors.primaryBlue,
+                          ),
+                        ),
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           side: BorderSide(color: AppColors.primaryBlue),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
                         ),
                       ),
                     ),
@@ -2891,11 +3508,12 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
     );
   }
 
-  bool _isSubmittingQuery = false; // Kept for safety if referenced elsewhere, though likely unused now
+  bool _isSubmittingQuery =
+      false; // Kept for safety if referenced elsewhere, though likely unused now
 
   // Old method placeholder to prevent build errors if referenced (though we checked)
   Widget _buildQueryContent() {
-    return SizedBox.shrink(); 
+    return SizedBox.shrink();
   }
 }
 
@@ -2911,7 +3529,7 @@ class _VolunteerQuerySheetState extends State<VolunteerQuerySheet> {
   final TextEditingController _queryController = TextEditingController();
   final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
   final String baseUrl = ApiConfig.apiUrl;
-  
+
   bool _isSubmitting = false;
   bool _isLoadingHistory = true;
   List<dynamic> _history = [];
@@ -2961,21 +3579,24 @@ class _VolunteerQuerySheetState extends State<VolunteerQuerySheet> {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
         },
-        body: json.encode({
-          'query': queryText,
-          'menteeId': widget.menteeId,
-        }),
+        body: json.encode({'query': queryText, 'menteeId': widget.menteeId}),
       );
 
       if (response.statusCode == 201 || response.statusCode == 200) {
         _queryController.clear();
         _fetchHistory(); // Refresh history
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Query submitted!"), backgroundColor: Colors.green),
+          SnackBar(
+            content: Text("Query submitted!"),
+            backgroundColor: Colors.green,
+          ),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Failed to submit"), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text("Failed to submit"),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     } catch (e) {
@@ -3009,7 +3630,10 @@ class _VolunteerQuerySheetState extends State<VolunteerQuerySheet> {
             children: [
               Text(
                 "Support & Queries",
-                style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.w600),
+                style: GoogleFonts.poppins(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
               IconButton(
                 icon: Icon(Icons.close),
@@ -3018,102 +3642,133 @@ class _VolunteerQuerySheetState extends State<VolunteerQuerySheet> {
             ],
           ),
           const SizedBox(height: 16),
-          
+
           Expanded(
-            child: _isLoadingHistory
-                ? Center(child: CircularProgressIndicator(color: AppColors.primaryBlue))
-                : _history.isEmpty
+            child:
+                _isLoadingHistory
                     ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.history, size: 48, color: Colors.grey.shade300),
-                            SizedBox(height: 12),
-                            Text(
-                              "No past queries",
-                              style: GoogleFonts.poppins(color: Colors.grey),
-                            ),
-                          ],
-                        ),
-                      )
+                      child: CircularProgressIndicator(
+                        color: AppColors.primaryBlue,
+                      ),
+                    )
+                    : _history.isEmpty
+                    ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.history,
+                            size: 48,
+                            color: Colors.grey.shade300,
+                          ),
+                          SizedBox(height: 12),
+                          Text(
+                            "No past queries",
+                            style: GoogleFonts.poppins(color: Colors.grey),
+                          ),
+                        ],
+                      ),
+                    )
                     : ListView.builder(
-                        itemCount: _history.length,
-                        itemBuilder: (context, index) {
-                          final query = _history[index];
-                          final isReplied = query['status'] == 'replied';
-                          return Container(
-                            margin: EdgeInsets.only(bottom: 12),
-                            padding: EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: Colors.grey.shade50,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: Colors.grey.shade200),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      _formatDate(query['createdAt']),
-                                      style: GoogleFonts.poppins(fontSize: 11, color: Colors.grey),
+                      itemCount: _history.length,
+                      itemBuilder: (context, index) {
+                        final query = _history[index];
+                        final isReplied = query['status'] == 'replied';
+                        return Container(
+                          margin: EdgeInsets.only(bottom: 12),
+                          padding: EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade50,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.grey.shade200),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    _formatDate(query['createdAt']),
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 11,
+                                      color: Colors.grey,
                                     ),
-                                    Container(
-                                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                      decoration: BoxDecoration(
-                                        color: isReplied ? Colors.green.withOpacity(0.1) : Colors.orange.withOpacity(0.1),
-                                        borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  Container(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color:
+                                          isReplied
+                                              ? Colors.green.withOpacity(0.1)
+                                              : Colors.orange.withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(
+                                      isReplied ? "Replied" : "Pending",
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w500,
+                                        color:
+                                            isReplied
+                                                ? Colors.green
+                                                : Colors.orange,
                                       ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 8),
+                              Text(
+                                query['query'] ?? '',
+                                style: GoogleFonts.poppins(
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              if (isReplied && query['reply'] != null) ...[
+                                Divider(height: 16),
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Icon(
+                                      Icons.reply,
+                                      size: 14,
+                                      color: AppColors.primaryBlue,
+                                    ),
+                                    SizedBox(width: 8),
+                                    Expanded(
                                       child: Text(
-                                        isReplied ? "Replied" : "Pending",
+                                        query['reply'],
                                         style: GoogleFonts.poppins(
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.w500,
-                                          color: isReplied ? Colors.green : Colors.orange,
+                                          fontSize: 13,
+                                          color: Colors.grey.shade700,
                                         ),
                                       ),
                                     ),
                                   ],
                                 ),
-                                SizedBox(height: 8),
-                                Text(
-                                  query['query'] ?? '',
-                                  style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
-                                ),
-                                if (isReplied && query['reply'] != null) ...[
-                                  Divider(height: 16),
-                                  Row(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Icon(Icons.reply, size: 14, color: AppColors.primaryBlue),
-                                      SizedBox(width: 8),
-                                      Expanded(
-                                        child: Text(
-                                          query['reply'],
-                                          style: GoogleFonts.poppins(
-                                            fontSize: 13,
-                                            color: Colors.grey.shade700,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
                               ],
-                            ),
-                          );
-                        },
-                      ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
           ),
-          
+
           const SizedBox(height: 16),
           Divider(),
           const SizedBox(height: 16),
-          
+
           Text(
             "New Query",
-            style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600),
+            style: GoogleFonts.poppins(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           const SizedBox(height: 8),
           TextField(
@@ -3121,7 +3776,9 @@ class _VolunteerQuerySheetState extends State<VolunteerQuerySheet> {
             maxLines: 3,
             decoration: InputDecoration(
               hintText: "Type your message...",
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
               contentPadding: EdgeInsets.all(12),
             ),
           ),
@@ -3133,11 +3790,24 @@ class _VolunteerQuerySheetState extends State<VolunteerQuerySheet> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryBlue,
                 padding: EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
-              child: _isSubmitting
-                  ? SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                  : Text("Submit Query", style: GoogleFonts.poppins(color: Colors.white)),
+              child:
+                  _isSubmitting
+                      ? SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                      : Text(
+                        "Submit Query",
+                        style: GoogleFonts.poppins(color: Colors.white),
+                      ),
             ),
           ),
         ],
@@ -3166,10 +3836,15 @@ class EditableCallDetailsSheet extends StatefulWidget {
   final Map<String, dynamic> callNote;
   final VoidCallback onSave;
 
-  const EditableCallDetailsSheet({Key? key, required this.callNote, required this.onSave}) : super(key: key);
+  const EditableCallDetailsSheet({
+    Key? key,
+    required this.callNote,
+    required this.onSave,
+  }) : super(key: key);
 
   @override
-  State<EditableCallDetailsSheet> createState() => _EditableCallDetailsSheetState();
+  State<EditableCallDetailsSheet> createState() =>
+      _EditableCallDetailsSheetState();
 }
 
 class _EditableCallDetailsSheetState extends State<EditableCallDetailsSheet> {
@@ -3192,8 +3867,21 @@ class _EditableCallDetailsSheetState extends State<EditableCallDetailsSheet> {
   List<String> _selectedTopics = [];
   List<String> _selectedAssistanceRequests = [];
 
-  final List<String> _availableTopics = ['Studies', 'Health', 'Family', 'Hobbies', 'Skills', 'Others'];
-  final List<String> _availableAssistanceOptions = ['Emotional Support', 'Safety Concern', 'Academic Support', 'Other Concern', 'Not required'];
+  final List<String> _availableTopics = [
+    'Studies',
+    'Health',
+    'Family',
+    'Hobbies',
+    'Skills',
+    'Others',
+  ];
+  final List<String> _availableAssistanceOptions = [
+    'Emotional Support',
+    'Safety Concern',
+    'Academic Support',
+    'Other Concern',
+    'Not required',
+  ];
 
   bool _isSaving = false;
 
@@ -3204,21 +3892,47 @@ class _EditableCallDetailsSheetState extends State<EditableCallDetailsSheet> {
   }
 
   void _initializeFields() {
-    _noteController = TextEditingController(text: widget.callNote['note'] ?? '');
-    _callDurationController = TextEditingController(text: (widget.callNote['callDuration'] ?? 0).toString());
-    _otherTopicController = TextEditingController(text: widget.callNote['otherTopicDetail'] ?? '');
-    _assistanceRequestOtherDetailController = TextEditingController(text: widget.callNote['assistanceRequestOtherDetail'] ?? '');
-    _redFlagsController = TextEditingController(text: widget.callNote['redFlags'] ?? '');
-    _volunteerNoteController = TextEditingController(text: widget.callNote['volunteerNote'] ?? '');
-    _otherFocusAreaController = TextEditingController(text: widget.callNote['otherFocusAreaDetail'] ?? '');
+    _noteController = TextEditingController(
+      text: widget.callNote['note'] ?? '',
+    );
+    _callDurationController = TextEditingController(
+      text: (widget.callNote['callDuration'] ?? 0).toString(),
+    );
+    _otherTopicController = TextEditingController(
+      text: widget.callNote['otherTopicDetail'] ?? '',
+    );
+    _assistanceRequestOtherDetailController = TextEditingController(
+      text: widget.callNote['assistanceRequestOtherDetail'] ?? '',
+    );
+    _redFlagsController = TextEditingController(
+      text: widget.callNote['redFlags'] ?? '',
+    );
+    _volunteerNoteController = TextEditingController(
+      text: widget.callNote['volunteerNote'] ?? '',
+    );
+    _otherFocusAreaController = TextEditingController(
+      text: widget.callNote['otherFocusAreaDetail'] ?? '',
+    );
 
     _moodScore = (widget.callNote['moodScore'] ?? 3.0).toDouble();
     _volunteerComfort = (widget.callNote['volunteerComfort'] ?? 3.0).toDouble();
     _mentorHelpfulness = widget.callNote['mentorHelpfulness'] ?? "Yes";
 
-    _checklistItems = (widget.callNote['checklist'] as List<dynamic>?)?.map((item) => Map<String, dynamic>.from(item)).toList() ?? [];
-    _selectedTopics = (widget.callNote['topics'] as List<dynamic>?)?.map((t) => t.toString()).toList() ?? [];
-    _selectedAssistanceRequests = (widget.callNote['assistanceRequest'] as List<dynamic>?)?.map((r) => r.toString()).toList() ?? [];
+    _checklistItems =
+        (widget.callNote['checklist'] as List<dynamic>?)
+            ?.map((item) => Map<String, dynamic>.from(item))
+            .toList() ??
+        [];
+    _selectedTopics =
+        (widget.callNote['topics'] as List<dynamic>?)
+            ?.map((t) => t.toString())
+            .toList() ??
+        [];
+    _selectedAssistanceRequests =
+        (widget.callNote['assistanceRequest'] as List<dynamic>?)
+            ?.map((r) => r.toString())
+            .toList() ??
+        [];
   }
 
   @override
@@ -3250,19 +3964,27 @@ class _EditableCallDetailsSheetState extends State<EditableCallDetailsSheet> {
       final token = await secureStorage.read(key: "token");
       final noteId = widget.callNote['_id'];
 
-      final hasAssistanceRequest = _selectedAssistanceRequests.isNotEmpty &&
-          !(_selectedAssistanceRequests.length == 1 && _selectedAssistanceRequests.contains('Not required'));
+      final hasAssistanceRequest =
+          _selectedAssistanceRequests.isNotEmpty &&
+          !(_selectedAssistanceRequests.length == 1 &&
+              _selectedAssistanceRequests.contains('Not required'));
 
       final bodyPayload = {
         'note': _noteController.text.trim(),
         'callDuration': int.tryParse(_callDurationController.text) ?? 0,
         'followUpRequired': hasAssistanceRequest,
         'assistanceRequest': _selectedAssistanceRequests,
-        'assistanceRequestOtherDetail': _selectedAssistanceRequests.contains('Other Concern') ? _assistanceRequestOtherDetailController.text.trim() : '',
+        'assistanceRequestOtherDetail':
+            _selectedAssistanceRequests.contains('Other Concern')
+                ? _assistanceRequestOtherDetailController.text.trim()
+                : '',
         'moodScore': _moodScore,
         'checklist': _checklistItems,
         'topics': _selectedTopics,
-        'otherTopicDetail': _selectedTopics.contains('Others') ? _otherTopicController.text.trim() : '',
+        'otherTopicDetail':
+            _selectedTopics.contains('Others')
+                ? _otherTopicController.text.trim()
+                : '',
         'otherFocusAreaDetail': _otherFocusAreaController.text.trim(),
         'mentorHelpfulness': _mentorHelpfulness,
         'redFlags': _redFlagsController.text.trim(),
@@ -3325,10 +4047,7 @@ class _EditableCallDetailsSheetState extends State<EditableCallDetailsSheet> {
       children: [
         Text(
           label,
-          style: GoogleFonts.poppins(
-            fontSize: 13,
-            color: Colors.grey.shade600,
-          ),
+          style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade600),
         ),
         SizedBox(height: 6),
         Container(
@@ -3339,10 +4058,7 @@ class _EditableCallDetailsSheetState extends State<EditableCallDetailsSheet> {
             borderRadius: BorderRadius.circular(8),
             border: Border.all(color: Colors.grey.shade300),
           ),
-          child: Text(
-            value,
-            style: GoogleFonts.poppins(fontSize: 14),
-          ),
+          child: Text(value, style: GoogleFonts.poppins(fontSize: 14)),
         ),
       ],
     );
@@ -3425,13 +4141,25 @@ class _EditableCallDetailsSheetState extends State<EditableCallDetailsSheet> {
                   padding: EdgeInsets.all(20),
                   children: [
                     // Date (read-only)
-                    _buildReadOnlyField("Date", _formatDate(widget.callNote['createdAt'])),
+                    _buildReadOnlyField(
+                      "Date",
+                      _formatDate(widget.callNote['createdAt']),
+                    ),
                     SizedBox(height: 16),
                     // Cell Number (read-only)
-                    _buildReadOnlyField("Call Number", widget.callNote['cellNumber'].toString()),
+                    _buildReadOnlyField(
+                      "Call Number",
+                      widget.callNote['cellNumber'].toString(),
+                    ),
                     SizedBox(height: 16),
                     // Call Duration
-                    Text("Call Duration (minutes)", style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 14)),
+                    Text(
+                      "Call Duration (minutes)",
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
                     SizedBox(height: 8),
                     TextField(
                       controller: _callDurationController,
@@ -3443,7 +4171,13 @@ class _EditableCallDetailsSheetState extends State<EditableCallDetailsSheet> {
                     ),
                     SizedBox(height: 16),
                     // Mood Score
-                    Text("Mentee's Mood", style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 14)),
+                    Text(
+                      "Mentee's Mood",
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
                     Row(
                       children: [
                         Expanded(
@@ -3452,41 +4186,66 @@ class _EditableCallDetailsSheetState extends State<EditableCallDetailsSheet> {
                             min: 1.0,
                             max: 5.0,
                             divisions: 4,
-                            onChanged: (value) => setState(() => _moodScore = value),
+                            onChanged:
+                                (value) => setState(() => _moodScore = value),
                           ),
                         ),
-                        Text("${_moodScore.toStringAsFixed(1)} ${_getMoodEmoji(_moodScore)}"),
+                        Text(
+                          "${_moodScore.toStringAsFixed(1)} ${_getMoodEmoji(_moodScore)}",
+                        ),
                       ],
                     ),
                     SizedBox(height: 16),
                     // Checklist
-                    Text("Focus Areas Covered", style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 14)),
+                    Text(
+                      "Focus Areas Covered",
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
                     SizedBox(height: 8),
-                    ..._checklistItems.map((item) => CheckboxListTile(
-                      title: Text(item['label'] ?? ''),
-                      value: item['isAchieved'] ?? false,
-                      onChanged: (value) => setState(() => item['isAchieved'] = value ?? false),
-                    )),
+                    ..._checklistItems.map(
+                      (item) => CheckboxListTile(
+                        title: Text(item['label'] ?? ''),
+                        value: item['isAchieved'] ?? false,
+                        onChanged:
+                            (value) => setState(
+                              () => item['isAchieved'] = value ?? false,
+                            ),
+                      ),
+                    ),
                     SizedBox(height: 16),
                     // Topics
-                    Text("Topics Covered", style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 14)),
+                    Text(
+                      "Topics Covered",
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
                     SizedBox(height: 8),
                     Wrap(
                       spacing: 8,
                       runSpacing: 8,
-                      children: _availableTopics.map((topic) => FilterChip(
-                        label: Text(topic),
-                        selected: _selectedTopics.contains(topic),
-                        onSelected: (selected) {
-                          setState(() {
-                            if (selected) {
-                              _selectedTopics.add(topic);
-                            } else {
-                              _selectedTopics.remove(topic);
-                            }
-                          });
-                        },
-                      )).toList(),
+                      children:
+                          _availableTopics
+                              .map(
+                                (topic) => FilterChip(
+                                  label: Text(topic),
+                                  selected: _selectedTopics.contains(topic),
+                                  onSelected: (selected) {
+                                    setState(() {
+                                      if (selected) {
+                                        _selectedTopics.add(topic);
+                                      } else {
+                                        _selectedTopics.remove(topic);
+                                      }
+                                    });
+                                  },
+                                ),
+                              )
+                              .toList(),
                     ),
                     if (_selectedTopics.contains('Others')) ...[
                       SizedBox(height: 8),
@@ -3500,7 +4259,13 @@ class _EditableCallDetailsSheetState extends State<EditableCallDetailsSheet> {
                     ],
                     SizedBox(height: 16),
                     // Observations / Notes
-                    Text("Observations / Notes", style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 14)),
+                    Text(
+                      "Observations / Notes",
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
                     SizedBox(height: 8),
                     TextField(
                       controller: _noteController,
@@ -3512,26 +4277,42 @@ class _EditableCallDetailsSheetState extends State<EditableCallDetailsSheet> {
                     ),
                     SizedBox(height: 16),
                     // Assistance Request
-                    Text("Assistance Needed / Follow-up", style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 14)),
+                    Text(
+                      "Assistance Needed / Follow-up",
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
                     SizedBox(height: 8),
                     Wrap(
                       spacing: 8,
                       runSpacing: 8,
-                      children: _availableAssistanceOptions.map((option) => FilterChip(
-                        label: Text(option),
-                        selected: _selectedAssistanceRequests.contains(option),
-                        onSelected: (selected) {
-                          setState(() {
-                            if (selected) {
-                              _selectedAssistanceRequests.add(option);
-                            } else {
-                              _selectedAssistanceRequests.remove(option);
-                            }
-                          });
-                        },
-                      )).toList(),
+                      children:
+                          _availableAssistanceOptions
+                              .map(
+                                (option) => FilterChip(
+                                  label: Text(option),
+                                  selected: _selectedAssistanceRequests
+                                      .contains(option),
+                                  onSelected: (selected) {
+                                    setState(() {
+                                      if (selected) {
+                                        _selectedAssistanceRequests.add(option);
+                                      } else {
+                                        _selectedAssistanceRequests.remove(
+                                          option,
+                                        );
+                                      }
+                                    });
+                                  },
+                                ),
+                              )
+                              .toList(),
                     ),
-                    if (_selectedAssistanceRequests.contains('Other Concern')) ...[
+                    if (_selectedAssistanceRequests.contains(
+                      'Other Concern',
+                    )) ...[
                       SizedBox(height: 8),
                       TextField(
                         controller: _assistanceRequestOtherDetailController,
@@ -3543,20 +4324,41 @@ class _EditableCallDetailsSheetState extends State<EditableCallDetailsSheet> {
                     ],
                     SizedBox(height: 16),
                     // Mentor Helpfulness
-                    Text("Did this conversation feel meaningful?", style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 14)),
+                    Text(
+                      "Did this conversation feel meaningful?",
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
                     Row(
-                      children: ["Yes", "Neutral", "No"].map((option) => Expanded(
-                        child: RadioListTile<String>(
-                          title: Text(option),
-                          value: option,
-                          groupValue: _mentorHelpfulness,
-                          onChanged: (value) => setState(() => _mentorHelpfulness = value!),
-                        ),
-                      )).toList(),
+                      children:
+                          ["Yes", "Neutral", "No"]
+                              .map(
+                                (option) => Expanded(
+                                  child: RadioListTile<String>(
+                                    title: Text(option),
+                                    value: option,
+                                    groupValue: _mentorHelpfulness,
+                                    onChanged:
+                                        (value) => setState(
+                                          () => _mentorHelpfulness = value!,
+                                        ),
+                                  ),
+                                ),
+                              )
+                              .toList(),
                     ),
                     SizedBox(height: 16),
                     // Red Flags
-                    Text("Red Flags (Optional)", style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 14, color: Colors.red)),
+                    Text(
+                      "Red Flags (Optional)",
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                        color: Colors.red,
+                      ),
+                    ),
                     SizedBox(height: 8),
                     TextField(
                       controller: _redFlagsController,
@@ -3568,7 +4370,13 @@ class _EditableCallDetailsSheetState extends State<EditableCallDetailsSheet> {
                     ),
                     SizedBox(height: 16),
                     // Volunteer Comfort
-                    Text("Your Comfort Level", style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 14)),
+                    Text(
+                      "Your Comfort Level",
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
                     Row(
                       children: [
                         Expanded(
@@ -3577,7 +4385,9 @@ class _EditableCallDetailsSheetState extends State<EditableCallDetailsSheet> {
                             min: 1.0,
                             max: 5.0,
                             divisions: 4,
-                            onChanged: (value) => setState(() => _volunteerComfort = value),
+                            onChanged:
+                                (value) =>
+                                    setState(() => _volunteerComfort = value),
                           ),
                         ),
                         Text("${_volunteerComfort.toStringAsFixed(1)}/5"),
@@ -3585,7 +4395,13 @@ class _EditableCallDetailsSheetState extends State<EditableCallDetailsSheet> {
                     ),
                     SizedBox(height: 16),
                     // Volunteer Note
-                    Text("Your Personal Notes", style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 14)),
+                    Text(
+                      "Your Personal Notes",
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
                     SizedBox(height: 8),
                     TextField(
                       controller: _volunteerNoteController,
@@ -3601,7 +4417,8 @@ class _EditableCallDetailsSheetState extends State<EditableCallDetailsSheet> {
                       children: [
                         Expanded(
                           child: OutlinedButton(
-                            onPressed: _isSaving ? null : () => Navigator.pop(context),
+                            onPressed:
+                                _isSaving ? null : () => Navigator.pop(context),
                             child: Text("Cancel"),
                           ),
                         ),
@@ -3612,9 +4429,19 @@ class _EditableCallDetailsSheetState extends State<EditableCallDetailsSheet> {
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.primaryBlue,
                             ),
-                            child: _isSaving
-                                ? SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white))
-                                : Text("Save Changes", style: TextStyle(color: Colors.white)),
+                            child:
+                                _isSaving
+                                    ? SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                    : Text(
+                                      "Save Changes",
+                                      style: TextStyle(color: Colors.white),
+                                    ),
                           ),
                         ),
                       ],
@@ -3664,10 +4491,11 @@ class _JourneyPathPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 4
-      ..strokeCap = StrokeCap.round;
+    final paint =
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 4
+          ..strokeCap = StrokeCap.round;
 
     final path = Path();
     final nodeSpacing = 115.0; // Spacing between nodes
@@ -3679,14 +4507,15 @@ class _JourneyPathPainter extends CustomPainter {
     for (int i = 0; i < totalNodes; i++) {
       final x = startX + (i * nodeSpacing);
       final y = centerY + (i % 2 == 0 ? -waveAmplitude : waveAmplitude);
-      
+
       if (i == 0) {
         path.moveTo(x, y);
       } else {
         final prevX = startX + ((i - 1) * nodeSpacing);
-        final prevY = centerY + ((i - 1) % 2 == 0 ? -waveAmplitude : waveAmplitude);
+        final prevY =
+            centerY + ((i - 1) % 2 == 0 ? -waveAmplitude : waveAmplitude);
         final controlX = (prevX + x) / 2;
-        
+
         path.quadraticBezierTo(controlX, centerY, x, y);
       }
     }
@@ -3695,19 +4524,20 @@ class _JourneyPathPainter extends CustomPainter {
     if (currentNode > 1) {
       paint.color = completedColor.withOpacity(0.3);
       paint.strokeWidth = 6;
-      
+
       final completedPath = Path();
       for (int i = 0; i < currentNode; i++) {
         final x = startX + (i * nodeSpacing);
         final y = centerY + (i % 2 == 0 ? -waveAmplitude : waveAmplitude);
-        
+
         if (i == 0) {
           completedPath.moveTo(x, y);
         } else {
           final prevX = startX + ((i - 1) * nodeSpacing);
-          final prevY = centerY + ((i - 1) % 2 == 0 ? -waveAmplitude : waveAmplitude);
+          final prevY =
+              centerY + ((i - 1) % 2 == 0 ? -waveAmplitude : waveAmplitude);
           final controlX = (prevX + x) / 2;
-          
+
           completedPath.quadraticBezierTo(controlX, centerY, x, y);
         }
       }
@@ -3720,17 +4550,17 @@ class _JourneyPathPainter extends CustomPainter {
     canvas.drawPath(path, paint);
 
     // Draw decorative dots along the path
-    final dotPaint = Paint()
-      ..style = PaintingStyle.fill;
-      
+    final dotPaint = Paint()..style = PaintingStyle.fill;
+
     for (int i = 0; i < totalNodes - 1; i++) {
       final x = startX + (i * nodeSpacing) + (nodeSpacing / 2);
       final y = centerY;
-      
-      dotPaint.color = i < currentNode - 1
-          ? completedColor.withOpacity(0.4)
-          : Colors.grey.withOpacity(0.2);
-      
+
+      dotPaint.color =
+          i < currentNode - 1
+              ? completedColor.withOpacity(0.4)
+              : Colors.grey.withOpacity(0.2);
+
       canvas.drawCircle(Offset(x, y), 3, dotPaint);
     }
   }
