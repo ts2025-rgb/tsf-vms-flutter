@@ -6,6 +6,7 @@ import 'admin.dart';
 import 'config/app_colors.dart';
 import 'screens/admin/admin_notifications_screen.dart';
 import 'screens/admin/neomami_admin_screen.dart';
+import 'screens/admin/heartbeat_admin_page.dart';
 
 class AdminHomeScreen extends StatefulWidget {
   const AdminHomeScreen({super.key});
@@ -243,6 +244,30 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => const AdminScreen(),
+                                ),
+                              );
+                            },
+                          ),
+                          _buildModuleCard(
+                            context,
+                            title: 'Heartbeat',
+                            subtitle: 'Volunteer Hours',
+                            icon: Icons.favorite_rounded,
+                            color: AppColors.tertiaryBlue,
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                AppColors.tertiaryBlue,
+                                AppColors.secondaryBlue,
+                              ],
+                            ),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder:
+                                      (context) => const HeartbeatAdminPage(),
                                 ),
                               );
                             },

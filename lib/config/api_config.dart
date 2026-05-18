@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 /// Set [kIsDebug] to true for development (ngrok), false for production (Koyeb)
 class ApiConfig {
   // Toggle this flag to switch between debug and production
-  static const bool kIsDebug = true; // Set to false for production
+  static const bool kIsDebug = false; // Set to false for production
 
   // Base URLs
   static const String _debugBaseUrl =

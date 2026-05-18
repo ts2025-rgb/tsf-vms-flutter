@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'companionconnect.dart';
+import 'screens/heartbeat_page.dart';
 import 'config/api_config.dart';
 import 'config/app_colors.dart';
 import 'providers/notification_provider.dart';
@@ -401,6 +402,15 @@ class _HomePageState extends State<HomePage> {
                         builder:
                             (context) =>
                                 CompanionConnectPage(programId: programId),
+                      ),
+                    );
+                  } else if (programName == "Heartbeat" ||
+                      programName == "Heartbeat Helpers") {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder:
+                            (context) => HeartbeatPage(programId: programId),
                       ),
                     );
                   } else if (programName == "Neomami Hub") {
