@@ -250,7 +250,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                           ),
                           _buildModuleCard(
                             context,
-                            title: 'Heartbeat',
+                            title: 'Heartbeat Helpers',
                             subtitle: 'Volunteer Hours',
                             icon: Icons.favorite_rounded,
                             color: AppColors.tertiaryBlue,

@@ -1279,7 +1279,7 @@ class _HeartbeatAdminPageState extends State<HeartbeatAdminPage>
       backgroundColor: AppColors.backgroundLight1,
       appBar: AppBar(
         title: Text(
-          'Heartbeat Admin',
+          'Heartbeat Helpers',
           style: GoogleFonts.poppins(
             color: Colors.white,
             fontWeight: FontWeight.w700,
