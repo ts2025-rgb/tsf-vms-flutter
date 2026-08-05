@@ -1,29 +1,30 @@
-name: Deploy Flutter Web to Cloudflare Workers
+name: Build and Deploy Flutter Web to Cloudflare
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Set up Flutter SDK
+      - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
 
-      - name: Install Flutter Dependencies
-        run: flutter pub get
+      - name: Build Web
+        run: |
+          flutter pub get
+          flutter build web --release
 
-      - name: Build Web Target
-        run: flutter build web --release
-
-      - name: Deploy Assets to Cloudflare Workers
+      - name: Deploy to Cloudflare Workers
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          command: deploy --assets=build/web
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy --assets=./build/web
