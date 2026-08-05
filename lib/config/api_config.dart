@@ -10,7 +10,7 @@ class ApiConfig {
   static const String _debugBaseUrl =
       "https://shrew-concrete-cobra.ngrok-free.app";
   static const String _productionBaseUrl =
-      "https://tsf-backend-2enr.onrender.com";
+      "https://tsf-backend-production.up.railway.app";
 
   // Current base URL based on debug flag
   static String get baseUrl => kIsDebug ? _debugBaseUrl : _productionBaseUrl;
@@ -20,5 +20,5 @@ class ApiConfig {
 
   // Environment name for logging/display
   static String get environmentName =>
-      kIsDebug ? "Development (ngrok)" : "Production (Render)";
+      kIsDebug ? "Development (ngrok)" : "Production (Railway)";
 }
