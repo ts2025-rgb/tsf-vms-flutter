@@ -1,5 +1,5 @@
 name = "tsf-vms-flutter"
-compatibility_date = "2024-09-23"
+compatibility_date = "2026-08-06"
 
 # Tell Wrangler to host the compiled Flutter web assets without requiring a Worker script
 assets = { directory = "./build/web" }
