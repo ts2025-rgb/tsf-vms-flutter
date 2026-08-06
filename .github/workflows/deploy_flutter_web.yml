@@ -21,7 +21,13 @@ jobs:
 
       - run: flutter pub get
 
-      - run: flutter build web --release
+      - name: Ensure web support and build
+        run: |
+          flutter channel stable
+          flutter config --enable-web
+          flutter precache --web
+          flutter pub get
+          flutter build web --release
 
       - uses: peaceiris/actions-gh-pages@v3
         with:
