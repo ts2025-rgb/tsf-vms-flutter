@@ -1,8 +1,8 @@
 name = "tsf-vms-flutter"
 compatibility_date = "2026-08-06"
 
-# Tell Wrangler to host the compiled Flutter web assets without requiring a Worker script
-assets = { directory = "./build/web" }
+# We use `wrangler pages publish build/web` in CI to publish static assets.
+# Remove `assets` here to avoid Wrangler validating the directory before CI builds it.
 
 [observability]
 enabled = false

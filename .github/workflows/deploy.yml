@@ -19,8 +19,19 @@ jobs:
 
       - name: Build Web
         run: |
+          # Ensure web support is enabled and web artifacts are precached
+          flutter channel stable
+          flutter config --enable-web
+          flutter precache --web
           flutter pub get
           flutter build web --release
+
+      - name: Verify build output
+        run: |
+          echo "Listing build directory"
+          ls -la build || true
+          echo "Listing build/web directory"
+          ls -la build/web || (echo 'build/web missing' && exit 1)
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
