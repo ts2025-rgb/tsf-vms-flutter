@@ -21,8 +21,9 @@ jobs:
       - name: Build Web
         run: flutter build web --release
 
-      - name: Deploy to Cloudflare Workers / Pages
+      - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          command: deploy --assets=build/web
+          # Use Pages publish to deploy static site in build/web. Replace project-name if different.
+          command: pages publish build/web --project-name tsf-vms-flutter
