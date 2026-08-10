@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -11,7 +12,7 @@ import 'config/api_config.dart';
 import 'config/app_colors.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({Key? key}) : super(key: key);
+  const LoginPage({super.key});
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -46,22 +47,41 @@ class _LoginPageState extends State<LoginPage> {
         body: json.encode({"email": email}),
       );
 
-      final data = json.decode(res.body);
-      if (res.statusCode == 200 && data["success"]) {
+      // Safely parse response body only if present
+      Map<String, dynamic>? data;
+      if (res.body != null && res.body.isNotEmpty) {
+        try {
+          data = json.decode(res.body) as Map<String, dynamic>;
+        } catch (_) {
+          data = null;
+        }
+      }
+
+      if (res.statusCode == 200 && data != null && data["success"] == true) {
         setState(() => _otpSent = true);
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text("OTP sent to your email", style: GoogleFonts.poppins()),
           backgroundColor: AppColors.accentGreen,
         ));
       } else {
+        final msg = data != null ? (data["message"] ?? "Failed to send OTP") : 'Failed to send OTP (status ${res.statusCode})';
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(data["message"] ?? "Failed to send OTP", style: GoogleFonts.poppins()),
+          content: Text(msg, style: GoogleFonts.poppins()),
           backgroundColor: Colors.red,
         ));
       }
-    } catch (_) {
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        debugPrint('Send OTP failed: $e');
+        debugPrint('$stackTrace');
+      }
+
+      final message = kIsWeb
+          ? 'Network error. On web this often means the backend blocked the request (CORS). Ensure the API allows this origin or use a proxy.'
+          : 'Network error. Check your connection and try again.';
+
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text("Network error. Try again.", style: GoogleFonts.poppins()),
+        content: Text(message, style: GoogleFonts.poppins()),
         backgroundColor: Colors.red,
       ));
     }
@@ -89,8 +109,16 @@ class _LoginPageState extends State<LoginPage> {
         body: json.encode({"email": email, "otp": otp}),
       );
 
-      final data = json.decode(res.body);
-      if (res.statusCode == 200 && data["success"]) {
+      Map<String, dynamic>? data;
+      if (res.body != null && res.body.isNotEmpty) {
+        try {
+          data = json.decode(res.body) as Map<String, dynamic>;
+        } catch (_) {
+          data = null;
+        }
+      }
+
+      if (res.statusCode == 200 && data != null && data["success"] == true) {
         // Save token separately for API calls
         await secureStorage.write(key: "token", value: data["token"]);
         
@@ -109,13 +137,22 @@ class _LoginPageState extends State<LoginPage> {
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(data["message"] ?? "OTP verification failed", style: GoogleFonts.poppins()),
+          content: Text(data != null ? (data["message"] ?? "OTP verification failed") : 'OTP verification failed (status ${res.statusCode})', style: GoogleFonts.poppins()),
           backgroundColor: Colors.red,
         ));
       }
-    } catch (_) {
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        debugPrint('Verify OTP failed: $e');
+        debugPrint('$stackTrace');
+      }
+
+      final message = kIsWeb
+          ? 'Network/server error. On web this may be CORS-related. Ensure the API allows requests from this origin.'
+          : 'Server error. Try again.';
+
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text("Server error. Try again.", style: GoogleFonts.poppins()),
+        content: Text(message, style: GoogleFonts.poppins()),
         backgroundColor: Colors.red,
       ));
     }
@@ -203,7 +240,7 @@ class _LoginPageState extends State<LoginPage> {
                           borderRadius: BorderRadius.circular(12),
                           boxShadow: [
                             BoxShadow(
-                              color: AppColors.primaryBlue.withOpacity(0.3),
+                              color: AppColors.primaryBlue.withValues(alpha: 0.3),
                               blurRadius: 8,
                               offset: Offset(0, 4),
                             ),
@@ -243,7 +280,7 @@ class _LoginPageState extends State<LoginPage> {
                           borderRadius: BorderRadius.circular(12),
                           boxShadow: [
                             BoxShadow(
-                              color: AppColors.accentGreen.withOpacity(0.3),
+                              color: AppColors.accentGreen.withValues(alpha: 0.3),
                               blurRadius: 8,
                               offset: Offset(0, 4),
                             ),
