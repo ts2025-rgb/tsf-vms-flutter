@@ -1,0 +1,39 @@
+name: CI Build and Deploy to Cloudflare Pages
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Install dependencies
+        run: |
+          flutter channel stable
+          flutter config --enable-web
+          flutter precache --web
+          flutter pub get
+
+      - name: Build Flutter Web
+        run: flutter build web --release
+
+      - name: Verify build output
+        run: |
+          echo "Listing build/web directory"
+          ls -la build/web || (echo 'build/web missing' && exit 1)
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          command: pages deploy build/web --project-name tsf-vms-flutter --branch main --commit-dirty=true
