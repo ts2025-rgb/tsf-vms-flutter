@@ -275,11 +275,11 @@ class _LoginPageState extends State<LoginPage> {
                   const SizedBox(height: 20),
                   
                   // Registration link
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    spacing: 6,
                     children: [
                       Text("Don't have an account?", style: GoogleFonts.poppins(fontSize: 14)),
-                      const SizedBox(width: 6),
                       GestureDetector(
                         onTap: () {
                           Navigator.push(context, MaterialPageRoute(builder: (_) => const RegisterPage()));
