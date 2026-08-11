@@ -1,5 +1,6 @@
-name = "tsf-vms-flutter"
-compatibility_date = "2024-09-23"
+# wrangler.toml
+name = 'tsf-vms-flutter-01'
+compatibility_date = "2026-08-06"
 
 # We use `wrangler pages publish build/web` in CI to publish static assets.
 # Remove `assets` here to avoid Wrangler validating the directory before CI builds it.
