@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 
 /// API Configuration
 /// Set [kIsDebug] to true for development (ngrok), false for production (Koyeb)
@@ -10,13 +9,13 @@ class ApiConfig {
   static const String _debugBaseUrl =
       "https://shrew-concrete-cobra.ngrok-free.app";
   static const String _productionBaseUrl =
-      "api.py4p.org";
+      "https://api.py4p.org";
 
   // Current base URL based on debug flag
   static String get baseUrl => kIsDebug ? _debugBaseUrl : _productionBaseUrl;
 
-  // API endpoint (adds /api to base URL)
-  static String get apiUrl => "$baseUrl/api";
+    // API endpoint (adds /api to base URL)
+    static String get apiUrl => "$baseUrl/api";
 
   // Environment name for logging/display
   static String get environmentName =>
