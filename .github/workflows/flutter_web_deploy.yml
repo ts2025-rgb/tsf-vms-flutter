@@ -23,7 +23,7 @@ jobs:
       run: flutter pub get
     
     - name: Build web
-      run: flutter build web --release --no-tree-shake-icons
+      run: flutter build web --release --no-tree-shake-icons --base-href="/tsf-vms-flutter/"
     
     - name: Deploy to GitHub Pages
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
