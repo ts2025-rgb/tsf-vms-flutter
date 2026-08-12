@@ -63,7 +63,7 @@ class CCPControlsScreen extends StatelessWidget {
               subtitle: 'Assign and manage mentees for volunteers',
               icon: Icons.people_rounded,
               color: primaryColor,
-              gradientColors: [primaryColor, primaryColor.withOpacity(0.7)],
+              gradientColors: [primaryColor, primaryColor.withValues(alpha: 0.7)],
               onTap: () {
                 Navigator.push(
                   context,
@@ -81,7 +81,7 @@ class CCPControlsScreen extends StatelessWidget {
               subtitle: 'Review and respond to volunteer queries',
               icon: Icons.forum_rounded,
               color: secondaryColor,
-              gradientColors: [secondaryColor, secondaryColor.withOpacity(0.7)],
+              gradientColors: [secondaryColor, secondaryColor.withValues(alpha: 0.7)],
               onTap: () {
                 Navigator.push(
                   context,
@@ -190,7 +190,7 @@ class CCPControlsScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: color.withOpacity(0.3),
+            color: color.withValues(alpha: 0.3),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -217,7 +217,7 @@ class CCPControlsScreen extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
+                      color: Colors.white.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Icon(icon, color: Colors.white, size: 32),
@@ -240,7 +240,7 @@ class CCPControlsScreen extends StatelessWidget {
                           subtitle,
                           style: GoogleFonts.poppins(
                             fontSize: 13,
-                            color: Colors.white.withOpacity(0.9),
+                            color: Colors.white.withValues(alpha: 0.9),
                           ),
                         ),
                       ],
@@ -248,7 +248,7 @@ class CCPControlsScreen extends StatelessWidget {
                   ),
                   Icon(
                     Icons.arrow_forward_ios_rounded,
-                    color: Colors.white.withOpacity(0.8),
+                    color: Colors.white.withValues(alpha: 0.8),
                     size: 20,
                   ),
                 ],
@@ -272,7 +272,7 @@ class CCPControlsScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -283,7 +283,7 @@ class CCPControlsScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(icon, color: color, size: 28),

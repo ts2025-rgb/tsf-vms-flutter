@@ -106,7 +106,7 @@ class _AdminQueryManagementPageState extends State<AdminQueryManagementPage> wit
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withValues(alpha: 0.1),
                   blurRadius: 20,
                   offset: const Offset(0, 10),
                 ),
@@ -227,7 +227,7 @@ class _AdminQueryManagementPageState extends State<AdminQueryManagementPage> wit
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withValues(alpha: 0.1),
                   blurRadius: 20,
                   offset: const Offset(0, 10),
                 ),
@@ -420,7 +420,7 @@ class _AdminQueryManagementPageState extends State<AdminQueryManagementPage> wit
             borderRadius: BorderRadius.circular(24),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.black.withValues(alpha: 0.1),
                 blurRadius: 20,
                 offset: const Offset(0, 10),
               ),
@@ -456,7 +456,7 @@ class _AdminQueryManagementPageState extends State<AdminQueryManagementPage> wit
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   decoration: BoxDecoration(
-                    color: AppColors.primaryBlue.withOpacity(0.1),
+                    color: AppColors.primaryBlue.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
@@ -629,7 +629,7 @@ class _AdminQueryManagementPageState extends State<AdminQueryManagementPage> wit
               borderRadius: BorderRadius.circular(24),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withValues(alpha: 0.1),
                   blurRadius: 20,
                   offset: const Offset(0, 10),
                 ),
@@ -704,7 +704,7 @@ class _AdminQueryManagementPageState extends State<AdminQueryManagementPage> wit
                 ),
                 const SizedBox(height: 8),
                 DropdownButtonFormField<String>(
-                  value: selectedStatus,
+                  initialValue: selectedStatus,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                     contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -818,7 +818,7 @@ class _AdminQueryManagementPageState extends State<AdminQueryManagementPage> wit
             borderRadius: BorderRadius.circular(24),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.black.withValues(alpha: 0.1),
                 blurRadius: 20,
                 offset: const Offset(0, 10),
               ),
@@ -1132,10 +1132,10 @@ class _QueryHoverCardState extends State<_QueryHoverCard> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.primaryBlue.withOpacity(0.18)),
+        border: Border.all(color: AppColors.primaryBlue.withValues(alpha: 0.18)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.14),
+            color: Colors.black.withValues(alpha: 0.14),
             blurRadius: 24,
             offset: const Offset(0, 8),
           ),
@@ -1150,7 +1150,7 @@ class _QueryHoverCardState extends State<_QueryHoverCard> {
             children: [
               CircleAvatar(
                 radius: 20,
-                backgroundColor: AppColors.primaryBlue.withOpacity(0.12),
+                backgroundColor: AppColors.primaryBlue.withValues(alpha: 0.12),
                 child: Text(
                   (q['volunteerName'] ?? 'V')[0].toUpperCase(),
                   style: GoogleFonts.poppins(
@@ -1172,8 +1172,8 @@ class _QueryHoverCardState extends State<_QueryHoverCard> {
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
                   color: isPending
-                      ? Colors.orange.withOpacity(0.12)
-                      : Colors.green.withOpacity(0.12),
+                      ? Colors.orange.withValues(alpha: 0.12)
+                      : Colors.green.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
@@ -1225,12 +1225,12 @@ class _QueryHoverCardState extends State<_QueryHoverCard> {
                   const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
               decoration: BoxDecoration(
                 color: mentee != null
-                    ? AppColors.accentGreen.withOpacity(0.08)
+                    ? AppColors.accentGreen.withValues(alpha: 0.08)
                     : Colors.grey.shade100,
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
                   color: mentee != null
-                      ? AppColors.accentGreen.withOpacity(0.35)
+                      ? AppColors.accentGreen.withValues(alpha: 0.35)
                       : Colors.grey.shade300,
                 ),
               ),
@@ -1316,12 +1316,12 @@ class _QueryHoverCardState extends State<_QueryHoverCard> {
       padding: const EdgeInsets.only(top: 3),
       child: Row(
         children: [
-          Icon(icon, size: 11, color: AppColors.accentGreen.withOpacity(0.7)),
+          Icon(icon, size: 11, color: AppColors.accentGreen.withValues(alpha: 0.7)),
           const SizedBox(width: 5),
           Text('$label: ',
               style: GoogleFonts.poppins(
                   fontSize: 10,
-                  color: AppColors.accentGreen.withOpacity(0.8))),
+                  color: AppColors.accentGreen.withValues(alpha: 0.8))),
           Expanded(
             child: Text(value,
                 style: GoogleFonts.poppins(
@@ -1354,7 +1354,7 @@ class _QueryHoverCardState extends State<_QueryHoverCard> {
               children: [
                 CircleAvatar(
                   radius: 16,
-                  backgroundColor: AppColors.primaryBlue.withOpacity(0.1),
+                  backgroundColor: AppColors.primaryBlue.withValues(alpha: 0.1),
                   child: Text(
                     (q['volunteerName'] ?? 'V')[0].toUpperCase(),
                     style: GoogleFonts.poppins(
@@ -1387,8 +1387,8 @@ class _QueryHoverCardState extends State<_QueryHoverCard> {
                       horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: isPending
-                        ? Colors.orange.withOpacity(0.1)
-                        : Colors.green.withOpacity(0.1),
+                        ? Colors.orange.withValues(alpha: 0.1)
+                        : Colors.green.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(

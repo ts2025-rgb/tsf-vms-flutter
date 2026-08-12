@@ -165,7 +165,7 @@ class _NeomamHubScreenState extends State<NeomamHubScreen> {
                         Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
+                            color: Colors.white.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: const Icon(
@@ -346,7 +346,7 @@ class _NeomamHubScreenState extends State<NeomamHubScreen> {
             Icon(
               Icons.error_outline,
               size: 64,
-              color: Colors.red.withOpacity(0.5),
+              color: Colors.red.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
             Text(
@@ -392,7 +392,7 @@ class _NeomamHubScreenState extends State<NeomamHubScreen> {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: AppColors.accentGreen.withOpacity(0.1),
+                color: AppColors.accentGreen.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -480,7 +480,7 @@ class _EntryCard extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: AppColors.primaryBlue.withOpacity(0.2),
+            color: AppColors.primaryBlue.withValues(alpha: 0.2),
             width: 1,
           ),
         ),
@@ -493,8 +493,8 @@ class _EntryCard extends StatelessWidget {
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    AppColors.primaryBlue.withOpacity(0.08),
-                    AppColors.secondaryBlue.withOpacity(0.04),
+                    AppColors.primaryBlue.withValues(alpha: 0.08),
+                    AppColors.secondaryBlue.withValues(alpha: 0.04),
                   ],
                 ),
               ),
@@ -523,7 +523,7 @@ class _EntryCard extends StatelessWidget {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.accentGreen.withOpacity(0.2),
+                          color: AppColors.accentGreen.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
@@ -828,7 +828,7 @@ class _CreateEntryDialogState extends State<_CreateEntryDialog> {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
+                      color: Colors.white.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Icon(Icons.add, color: Colors.white, size: 24),
@@ -899,7 +899,7 @@ class _CreateEntryDialogState extends State<_CreateEntryDialog> {
               decoration: BoxDecoration(
                 border: Border(
                   top: BorderSide(
-                    color: AppColors.primaryBlue.withOpacity(0.1),
+                    color: AppColors.primaryBlue.withValues(alpha: 0.1),
                     width: 1,
                   ),
                 ),
@@ -996,17 +996,17 @@ class _CreateEntryDialogState extends State<_CreateEntryDialog> {
               color: Colors.grey.shade400,
             ),
             filled: true,
-            fillColor: AppColors.primaryBlue.withOpacity(0.05),
+            fillColor: AppColors.primaryBlue.withValues(alpha: 0.05),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(
-                color: AppColors.primaryBlue.withOpacity(0.2),
+                color: AppColors.primaryBlue.withValues(alpha: 0.2),
               ),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(
-                color: AppColors.primaryBlue.withOpacity(0.2),
+                color: AppColors.primaryBlue.withValues(alpha: 0.2),
               ),
             ),
             focusedBorder: OutlineInputBorder(
@@ -1138,7 +1138,7 @@ class _EditEntryDialogState extends State<_EditEntryDialog> {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
+                      color: Colors.white.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Icon(
@@ -1213,7 +1213,7 @@ class _EditEntryDialogState extends State<_EditEntryDialog> {
               decoration: BoxDecoration(
                 border: Border(
                   top: BorderSide(
-                    color: AppColors.primaryBlue.withOpacity(0.1),
+                    color: AppColors.primaryBlue.withValues(alpha: 0.1),
                     width: 1,
                   ),
                 ),
@@ -1309,17 +1309,17 @@ class _EditEntryDialogState extends State<_EditEntryDialog> {
               color: Colors.grey.shade400,
             ),
             filled: true,
-            fillColor: AppColors.primaryBlue.withOpacity(0.05),
+            fillColor: AppColors.primaryBlue.withValues(alpha: 0.05),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(
-                color: AppColors.primaryBlue.withOpacity(0.2),
+                color: AppColors.primaryBlue.withValues(alpha: 0.2),
               ),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(
-                color: AppColors.primaryBlue.withOpacity(0.2),
+                color: AppColors.primaryBlue.withValues(alpha: 0.2),
               ),
             ),
             focusedBorder: OutlineInputBorder(

@@ -1,5 +1,6 @@
 /// Model for enhanced VMS dashboard metrics including call tracking,
 /// mood, self-esteem, and gamification features
+library;
 
 /// Time filter options for metrics
 enum MetricsTimeFilter {

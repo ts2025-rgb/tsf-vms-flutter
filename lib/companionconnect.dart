@@ -22,7 +22,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
   final String baseUrl = ApiConfig.apiUrl;
   final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
 
-  int _selectedTab = 0;
+  final int _selectedTab = 0;
   Map<String, dynamic>? _menteeData;
   List<dynamic> _callNotes = [];
   bool _loadingMentee = true;
@@ -513,7 +513,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.white.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(Icons.people, size: 24),
@@ -533,7 +533,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
               borderRadius: BorderRadius.circular(20),
               child: CircleAvatar(
                 radius: 18,
-                backgroundColor: Colors.white.withOpacity(0.2),
+                backgroundColor: Colors.white.withValues(alpha: 0.2),
                 child:
                     _menteeData != null &&
                             _menteeData!['photoUrl'] != null &&
@@ -590,7 +590,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: Offset(0, -2),
           ),
@@ -657,9 +657,9 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
         child: Container(
           padding: EdgeInsets.symmetric(vertical: 12, horizontal: 8),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: color.withOpacity(0.3)),
+            border: Border.all(color: color.withValues(alpha: 0.3)),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -739,7 +739,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: Offset(0, 2),
           ),
@@ -752,7 +752,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
             children: [
               CircleAvatar(
                 radius: 30,
-                backgroundColor: AppColors.primaryBlue.withOpacity(0.1),
+                backgroundColor: AppColors.primaryBlue.withValues(alpha: 0.1),
                 child:
                     photoUrl.isNotEmpty
                         ? ClipOval(
@@ -898,21 +898,21 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            AppColors.primaryBlue.withOpacity(0.08),
-            AppColors.accentGreen.withOpacity(0.06),
-            AppColors.accentYellow.withOpacity(0.04),
+            AppColors.primaryBlue.withValues(alpha: 0.08),
+            AppColors.accentGreen.withValues(alpha: 0.06),
+            AppColors.accentYellow.withValues(alpha: 0.04),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: AppColors.primaryBlue.withOpacity(0.2),
+          color: AppColors.primaryBlue.withValues(alpha: 0.2),
           width: 2,
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primaryBlue.withOpacity(0.1),
+            color: AppColors.primaryBlue.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: Offset(0, 4),
           ),
@@ -933,7 +933,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.primaryBlue.withOpacity(0.3),
+                      color: AppColors.primaryBlue.withValues(alpha: 0.3),
                       blurRadius: 8,
                       spreadRadius: 1,
                     ),
@@ -970,13 +970,13 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                             gradient: LinearGradient(
                               colors: [
                                 AppColors.accentGreen,
-                                AppColors.accentGreen.withOpacity(0.7),
+                                AppColors.accentGreen.withValues(alpha: 0.7),
                               ],
                             ),
                             borderRadius: BorderRadius.circular(10),
                             boxShadow: [
                               BoxShadow(
-                                color: AppColors.accentGreen.withOpacity(0.3),
+                                color: AppColors.accentGreen.withValues(alpha: 0.3),
                                 blurRadius: 4,
                                 spreadRadius: 1,
                               ),
@@ -1086,7 +1086,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                         borderRadius: BorderRadius.circular(10),
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.primaryBlue.withOpacity(0.4),
+                            color: AppColors.primaryBlue.withValues(alpha: 0.4),
                             blurRadius: 6,
                             spreadRadius: 1,
                           ),
@@ -1109,15 +1109,15 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  Colors.blue.shade50.withOpacity(0.5),
-                  Colors.green.shade50.withOpacity(0.5),
-                  Colors.amber.shade50.withOpacity(0.3),
+                  Colors.blue.shade50.withValues(alpha: 0.5),
+                  Colors.green.shade50.withValues(alpha: 0.5),
+                  Colors.amber.shade50.withValues(alpha: 0.3),
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppColors.primaryBlue.withOpacity(0.2)),
+              border: Border.all(color: AppColors.primaryBlue.withValues(alpha: 0.2)),
             ),
             child: ScrollConfiguration(
               behavior: ScrollConfiguration.of(context).copyWith(
@@ -1156,13 +1156,13 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    AppColors.accentYellow.withOpacity(0.2),
-                    AppColors.accentOrange.withOpacity(0.15),
+                    AppColors.accentYellow.withValues(alpha: 0.2),
+                    AppColors.accentOrange.withValues(alpha: 0.15),
                   ],
                 ),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: AppColors.accentOrange.withOpacity(0.3),
+                  color: AppColors.accentOrange.withValues(alpha: 0.3),
                 ),
               ),
               child: Row(
@@ -1214,13 +1214,13 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    AppColors.primaryBlue.withOpacity(0.15),
-                    AppColors.secondaryBlue.withOpacity(0.1),
+                    AppColors.primaryBlue.withValues(alpha: 0.15),
+                    AppColors.secondaryBlue.withValues(alpha: 0.1),
                   ],
                 ),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: AppColors.primaryBlue.withOpacity(0.3),
+                  color: AppColors.primaryBlue.withValues(alpha: 0.3),
                   width: 2,
                 ),
               ),
@@ -1300,7 +1300,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.accentOrange.withOpacity(0.4),
+                        color: AppColors.accentOrange.withValues(alpha: 0.4),
                         blurRadius: 8,
                         spreadRadius: 2,
                       ),
@@ -1344,9 +1344,9 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                           shape: BoxShape.circle,
                           gradient: RadialGradient(
                             colors: [
-                              glowColor.withOpacity(0.4),
-                              glowColor.withOpacity(0.2),
-                              glowColor.withOpacity(0.0),
+                              glowColor.withValues(alpha: 0.4),
+                              glowColor.withValues(alpha: 0.2),
+                              glowColor.withValues(alpha: 0.0),
                             ],
                           ),
                         ),
@@ -1360,15 +1360,15 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                           colors:
                               isUpcoming
                                   ? [nodeColor, nodeColor]
-                                  : [nodeColor, nodeColor.withOpacity(0.75)],
+                                  : [nodeColor, nodeColor.withValues(alpha: 0.75)],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: glowColor.withOpacity(
-                              isCurrent ? 0.6 : 0.25,
+                            color: glowColor.withValues(
+                              alpha: isCurrent ? 0.6 : 0.25,
                             ),
                             blurRadius: isCurrent ? 20 : 10,
                             spreadRadius: isCurrent ? 4 : 2,
@@ -1379,7 +1379,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                           color:
                               isCurrent
                                   ? Colors.white
-                                  : Colors.white.withOpacity(0.4),
+                                  : Colors.white.withValues(alpha: 0.4),
                           width: isCurrent ? 5 : 3,
                         ),
                       ),
@@ -1398,11 +1398,11 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                               fontWeight: FontWeight.w900,
                               color:
                                   isUpcoming
-                                      ? Colors.white.withOpacity(0.6)
+                                      ? Colors.white.withValues(alpha: 0.6)
                                       : Colors.white,
                               shadows: [
                                 Shadow(
-                                  color: Colors.black.withOpacity(0.3),
+                                  color: Colors.black.withValues(alpha: 0.3),
                                   offset: Offset(1, 1),
                                   blurRadius: 2,
                                 ),
@@ -1438,7 +1438,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                             border: Border.all(color: Colors.white, width: 2),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.2),
+                                color: Colors.black.withValues(alpha: 0.2),
                                 blurRadius: 4,
                                 offset: Offset(0, 2),
                               ),
@@ -1506,7 +1506,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
         ),
         // Animated connecting trail (scrolls with nodes!)
         if (!isLast)
-          Container(
+          SizedBox(
             width: 45,
             height: 80,
             child: Stack(
@@ -1524,7 +1524,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                             isCompleted
                                 ? [
                                   AppColors.accentGreen,
-                                  AppColors.accentGreen.withOpacity(0.6),
+                                  AppColors.accentGreen.withValues(alpha: 0.6),
                                 ]
                                 : [Colors.grey.shade300, Colors.grey.shade200],
                       ),
@@ -1533,7 +1533,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                           isCompleted
                               ? [
                                 BoxShadow(
-                                  color: AppColors.accentGreen.withOpacity(0.3),
+                                  color: AppColors.accentGreen.withValues(alpha: 0.3),
                                   blurRadius: 4,
                                   spreadRadius: 1,
                                 ),
@@ -1554,7 +1554,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
+                          color: Colors.black.withValues(alpha: 0.1),
                           blurRadius: 2,
                         ),
                       ],
@@ -1572,7 +1572,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
+                          color: Colors.black.withValues(alpha: 0.1),
                           blurRadius: 2,
                         ),
                       ],
@@ -1607,11 +1607,11 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
           width: 14,
           height: 14,
           decoration: BoxDecoration(
-            gradient: LinearGradient(colors: [color, color.withOpacity(0.7)]),
+            gradient: LinearGradient(colors: [color, color.withValues(alpha: 0.7)]),
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
-                color: color.withOpacity(0.3),
+                color: color.withValues(alpha: 0.3),
                 blurRadius: 4,
                 spreadRadius: 1,
               ),
@@ -1645,7 +1645,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                 isActive
                     ? [
                       BoxShadow(
-                        color: AppColors.primaryBlue.withOpacity(0.3),
+                        color: AppColors.primaryBlue.withValues(alpha: 0.3),
                         blurRadius: 8,
                         offset: Offset(0, 2),
                       ),
@@ -1728,12 +1728,12 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [phaseColor.withOpacity(0.1), phaseColor.withOpacity(0.05)],
+          colors: [phaseColor.withValues(alpha: 0.1), phaseColor.withValues(alpha: 0.05)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: phaseColor.withOpacity(0.3), width: 2),
+        border: Border.all(color: phaseColor.withValues(alpha: 0.3), width: 2),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1747,7 +1747,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
-                      color: phaseColor.withOpacity(0.3),
+                      color: phaseColor.withValues(alpha: 0.3),
                       blurRadius: 8,
                       offset: Offset(0, 2),
                     ),
@@ -1800,10 +1800,10 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: phaseColor.withOpacity(0.3)),
+                      border: Border.all(color: phaseColor.withValues(alpha: 0.3)),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
+                          color: Colors.black.withValues(alpha: 0.05),
                           blurRadius: 4,
                           offset: Offset(0, 2),
                         ),
@@ -1865,7 +1865,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: Offset(0, 2),
           ),
@@ -2019,7 +2019,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                 });
               },
             );
-          }).toList(),
+          }),
           if (!_checklistItems.any((item) => item['label'] == 'Other'))
             CheckboxListTile(
               title: Text('Other', style: GoogleFonts.poppins(fontSize: 13)),
@@ -2076,7 +2076,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                   return FilterChip(
                     label: Text(topic),
                     selected: isSelected,
-                    selectedColor: AppColors.primaryBlue.withOpacity(0.2),
+                    selectedColor: AppColors.primaryBlue.withValues(alpha: 0.2),
                     checkmarkColor: AppColors.primaryBlue,
                     labelStyle: GoogleFonts.poppins(
                       fontSize: 12,
@@ -2085,10 +2085,11 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                     ),
                     onSelected: (v) {
                       setState(() {
-                        if (v)
+                        if (v) {
                           _selectedTopics.add(topic);
-                        else
+                        } else {
                           _selectedTopics.remove(topic);
+                        }
                       });
                     },
                   );
@@ -2158,7 +2159,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                   return FilterChip(
                     label: Text(option),
                     selected: isSelected,
-                    selectedColor: AppColors.primaryBlue.withOpacity(0.2),
+                    selectedColor: AppColors.primaryBlue.withValues(alpha: 0.2),
                     checkmarkColor: AppColors.primaryBlue,
                     labelStyle: GoogleFonts.poppins(
                       fontSize: 12,
@@ -2278,9 +2279,9 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: AppColors.primaryBlue.withOpacity(0.05),
+              color: AppColors.primaryBlue.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.primaryBlue.withOpacity(0.2)),
+              border: Border.all(color: AppColors.primaryBlue.withValues(alpha: 0.2)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -2399,7 +2400,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.primaryBlue.withOpacity(0.3),
+                    color: AppColors.primaryBlue.withValues(alpha: 0.3),
                     blurRadius: 8,
                     offset: Offset(0, 2),
                   ),
@@ -2480,7 +2481,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
               ),
             ),
           ),
-          ..._callNotes.map((note) => _buildNoteCard(note)).toList(),
+          ..._callNotes.map((note) => _buildNoteCard(note)),
         ],
       ),
     );
@@ -2525,7 +2526,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.primaryBlue.withOpacity(0.1),
+                          color: AppColors.primaryBlue.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
@@ -2707,7 +2708,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                                     style: GoogleFonts.poppins(fontSize: 12),
                                   ),
                                   backgroundColor: AppColors.primaryBlue
-                                      .withOpacity(0.1),
+                                      .withValues(alpha: 0.1),
                                 ),
                               )
                               .toList(),
@@ -2753,7 +2754,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                           ),
                         ),
                       );
-                    }).toList(),
+                    }),
                   ],
 
                   // Observation
@@ -2962,7 +2963,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
           style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 16),
-        ..._callNotes.map((note) => _buildNoteCard(note)).toList(),
+        ..._callNotes.map((note) => _buildNoteCard(note)),
       ],
     );
   }
@@ -3114,7 +3115,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                 },
                 child: CircleAvatar(
                   radius: 50,
-                  backgroundColor: AppColors.primaryBlue.withOpacity(0.1),
+                  backgroundColor: AppColors.primaryBlue.withValues(alpha: 0.1),
                   child:
                       _menteeData!['photoUrl'] != null &&
                               _menteeData!['photoUrl'].toString().isNotEmpty
@@ -3152,7 +3153,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
                 margin: EdgeInsets.symmetric(vertical: 4),
                 padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.green.withOpacity(0.1),
+                  color: Colors.green.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -3226,7 +3227,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
           Container(
             padding: EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: AppColors.primaryBlue.withOpacity(0.05),
+              color: AppColors.primaryBlue.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, color: AppColors.primaryBlue, size: 20),
@@ -3336,16 +3337,16 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+          color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: color.withOpacity(0.3)),
+          border: Border.all(color: color.withValues(alpha: 0.3)),
         ),
         child: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.2),
+                color: color.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(icon, color: color),
@@ -3401,12 +3402,12 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  AppColors.primaryBlue.withOpacity(0.1),
-                  AppColors.purpleGradientEnd.withOpacity(0.05),
+                  AppColors.primaryBlue.withValues(alpha: 0.1),
+                  AppColors.purpleGradientEnd.withValues(alpha: 0.05),
                 ],
               ),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.primaryBlue.withOpacity(0.3)),
+              border: Border.all(color: AppColors.primaryBlue.withValues(alpha: 0.3)),
             ),
             child: Column(
               children: [
@@ -3508,7 +3509,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
     );
   }
 
-  bool _isSubmittingQuery =
+  final bool _isSubmittingQuery =
       false; // Kept for safety if referenced elsewhere, though likely unused now
 
   // Old method placeholder to prevent build errors if referenced (though we checked)
@@ -3519,7 +3520,7 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
 
 class VolunteerQuerySheet extends StatefulWidget {
   final String? menteeId;
-  const VolunteerQuerySheet({Key? key, this.menteeId}) : super(key: key);
+  const VolunteerQuerySheet({super.key, this.menteeId});
 
   @override
   State<VolunteerQuerySheet> createState() => _VolunteerQuerySheetState();
@@ -3704,8 +3705,8 @@ class _VolunteerQuerySheetState extends State<VolunteerQuerySheet> {
                                     decoration: BoxDecoration(
                                       color:
                                           isReplied
-                                              ? Colors.green.withOpacity(0.1)
-                                              : Colors.orange.withOpacity(0.1),
+                                              ? Colors.green.withValues(alpha: 0.1)
+                                              : Colors.orange.withValues(alpha: 0.1),
                                       borderRadius: BorderRadius.circular(4),
                                     ),
                                     child: Text(
@@ -3837,10 +3838,10 @@ class EditableCallDetailsSheet extends StatefulWidget {
   final VoidCallback onSave;
 
   const EditableCallDetailsSheet({
-    Key? key,
+    super.key,
     required this.callNote,
     required this.onSave,
-  }) : super(key: key);
+  });
 
   @override
   State<EditableCallDetailsSheet> createState() =>
@@ -4522,7 +4523,7 @@ class _JourneyPathPainter extends CustomPainter {
 
     // Draw completed path (green)
     if (currentNode > 1) {
-      paint.color = completedColor.withOpacity(0.3);
+      paint.color = completedColor.withValues(alpha: 0.3);
       paint.strokeWidth = 6;
 
       final completedPath = Path();
@@ -4545,7 +4546,7 @@ class _JourneyPathPainter extends CustomPainter {
     }
 
     // Draw upcoming path (lighter)
-    paint.color = Colors.grey.withOpacity(0.15);
+    paint.color = Colors.grey.withValues(alpha: 0.15);
     paint.strokeWidth = 4;
     canvas.drawPath(path, paint);
 
@@ -4558,8 +4559,8 @@ class _JourneyPathPainter extends CustomPainter {
 
       dotPaint.color =
           i < currentNode - 1
-              ? completedColor.withOpacity(0.4)
-              : Colors.grey.withOpacity(0.2);
+              ? completedColor.withValues(alpha: 0.4)
+              : Colors.grey.withValues(alpha: 0.2);
 
       canvas.drawCircle(Offset(x, y), 3, dotPaint);
     }

@@ -118,8 +118,8 @@ class _HeartbeatPageState extends State<HeartbeatPage> {
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppColors.primaryBlue,
-        child: Icon(Icons.add, color: Colors.white),
         onPressed: _openCreateDialog,
+        child: Icon(Icons.add, color: Colors.white),
       ),
       body:
           _loading

@@ -250,7 +250,7 @@ class MetricCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: color.withOpacity(0.1),
+                      color: color.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Icon(icon, color: color, size: 24),
@@ -314,7 +314,7 @@ class MetricCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: trendColor.withOpacity(0.1),
+        color: trendColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -361,7 +361,7 @@ class TimeFilterChips extends StatelessWidget {
                   selected: isSelected,
                   onSelected: (_) => onFilterChanged(filter),
                   backgroundColor: Colors.grey[100],
-                  selectedColor: AppColors.primaryBlue.withOpacity(0.2),
+                  selectedColor: AppColors.primaryBlue.withValues(alpha: 0.2),
                   checkmarkColor: AppColors.primaryBlue,
                   labelStyle: GoogleFonts.poppins(
                     fontSize: 12,

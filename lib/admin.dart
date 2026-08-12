@@ -225,7 +225,7 @@ class _AdminScreenState extends State<AdminScreen>
               borderRadius: BorderRadius.circular(24),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withValues(alpha: 0.1),
                   blurRadius: 20,
                   offset: const Offset(0, 10),
                 ),
@@ -408,7 +408,7 @@ class _AdminScreenState extends State<AdminScreen>
                           borderRadius: BorderRadius.circular(12),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.red.shade400.withOpacity(0.3),
+                              color: Colors.red.shade400.withValues(alpha: 0.3),
                               blurRadius: 8,
                               offset: const Offset(0, 4),
                             ),
@@ -487,7 +487,7 @@ class _AdminScreenState extends State<AdminScreen>
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withValues(alpha: 0.1),
                   blurRadius: 20,
                   offset: const Offset(0, 10),
                 ),
@@ -580,7 +580,7 @@ class _AdminScreenState extends State<AdminScreen>
       barrierDismissible: false,
       builder:
           (context) => Container(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.3),
             child: Center(
               child: Container(
                 padding: const EdgeInsets.all(24),
@@ -675,7 +675,7 @@ class _AdminScreenState extends State<AdminScreen>
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
@@ -690,7 +690,7 @@ class _AdminScreenState extends State<AdminScreen>
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
+                  color: color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(icon, color: color, size: 24),
@@ -818,7 +818,7 @@ class _AdminScreenState extends State<AdminScreen>
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withValues(alpha: 0.08),
             blurRadius: 15,
             offset: const Offset(0, 8),
           ),
@@ -852,7 +852,7 @@ class _AdminScreenState extends State<AdminScreen>
                             ),
                             child: CircleAvatar(
                               radius: 32,
-                              backgroundColor: primaryColor.withOpacity(0.1),
+                              backgroundColor: primaryColor.withValues(alpha: 0.1),
                               child:
                                   volunteer['photoUrl'] != null &&
                                           volunteer['photoUrl']
@@ -967,7 +967,7 @@ class _AdminScreenState extends State<AdminScreen>
                                 decoration: BoxDecoration(
                                   color: _getStatusColor(
                                     volunteer['approvalStatus'],
-                                  ).withOpacity(0.1),
+                                  ).withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Text(
@@ -1026,7 +1026,7 @@ class _AdminScreenState extends State<AdminScreen>
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: primaryColor.withOpacity(0.1),
+                        color: primaryColor.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
@@ -1135,12 +1135,12 @@ class _AdminScreenState extends State<AdminScreen>
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [color, color.withOpacity(0.8)],
+                colors: [color, color.withValues(alpha: 0.8)],
               ),
               borderRadius: BorderRadius.circular(10),
               boxShadow: [
                 BoxShadow(
-                  color: color.withOpacity(0.3),
+                  color: color.withValues(alpha: 0.3),
                   blurRadius: 3,
                   offset: const Offset(0, 1),
                 ),
@@ -1169,7 +1169,7 @@ class _AdminScreenState extends State<AdminScreen>
                         Shadow(
                           offset: const Offset(0, 0.5),
                           blurRadius: 1,
-                          color: Colors.black.withOpacity(0.4),
+                          color: Colors.black.withValues(alpha: 0.4),
                         ),
                       ],
                     ),
@@ -1179,7 +1179,7 @@ class _AdminScreenState extends State<AdminScreen>
               ],
             ),
           );
-        }).toList(),
+        }),
         if (hasMore)
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -1190,7 +1190,7 @@ class _AdminScreenState extends State<AdminScreen>
               borderRadius: BorderRadius.circular(10),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.grey.withOpacity(0.3),
+                  color: Colors.grey.withValues(alpha: 0.3),
                   blurRadius: 3,
                   offset: const Offset(0, 1),
                 ),
@@ -1245,14 +1245,14 @@ class _AdminScreenState extends State<AdminScreen>
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [color, color.withOpacity(0.8)],
+                colors: [color, color.withValues(alpha: 0.8)],
               ),
               borderRadius: BorderRadius.circular(
                 6,
               ), // More rectangular for roles
               boxShadow: [
                 BoxShadow(
-                  color: color.withOpacity(0.3),
+                  color: color.withValues(alpha: 0.3),
                   blurRadius: 3,
                   offset: const Offset(0, 1),
                 ),
@@ -1281,7 +1281,7 @@ class _AdminScreenState extends State<AdminScreen>
                         Shadow(
                           offset: const Offset(0, 0.5),
                           blurRadius: 1,
-                          color: Colors.black.withOpacity(0.4),
+                          color: Colors.black.withValues(alpha: 0.4),
                         ),
                       ],
                     ),
@@ -1291,7 +1291,7 @@ class _AdminScreenState extends State<AdminScreen>
               ],
             ),
           );
-        }).toList(),
+        }),
         if (hasMore)
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -1302,7 +1302,7 @@ class _AdminScreenState extends State<AdminScreen>
               borderRadius: BorderRadius.circular(6),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.grey.withOpacity(0.3),
+                  color: Colors.grey.withValues(alpha: 0.3),
                   blurRadius: 3,
                   offset: const Offset(0, 1),
                 ),
@@ -1387,8 +1387,8 @@ class _AdminScreenState extends State<AdminScreen>
                                                 volunteer['photoUrl'],
                                               )
                                               : null,
-                                      backgroundColor: primaryColor.withOpacity(
-                                        0.1,
+                                      backgroundColor: primaryColor.withValues(
+                                        alpha: 0.1,
                                       ),
                                       child:
                                           volunteer['photoUrl'] == null
@@ -1450,7 +1450,7 @@ class _AdminScreenState extends State<AdminScreen>
                                           decoration: BoxDecoration(
                                             color: _getStatusColor(
                                               volunteer['approvalStatus'],
-                                            ).withOpacity(0.1),
+                                            ).withValues(alpha: 0.1),
                                             borderRadius: BorderRadius.circular(
                                               20,
                                             ),
@@ -1781,7 +1781,7 @@ class _AdminScreenState extends State<AdminScreen>
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: primaryColor.withOpacity(0.1),
+              color: primaryColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(icon, color: primaryColor, size: 20),
@@ -1901,7 +1901,7 @@ class _AdminScreenState extends State<AdminScreen>
         border: Border.all(color: Colors.grey[200]!),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -1977,12 +1977,12 @@ class _AdminScreenState extends State<AdminScreen>
                       gradient: LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
-                        colors: [color, color.withOpacity(0.8)],
+                        colors: [color, color.withValues(alpha: 0.8)],
                       ),
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
-                          color: color.withOpacity(0.4),
+                          color: color.withValues(alpha: 0.4),
                           blurRadius: 6,
                           offset: const Offset(0, 3),
                         ),
@@ -1995,7 +1995,7 @@ class _AdminScreenState extends State<AdminScreen>
                           width: 6,
                           height: 6,
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.9),
+                            color: Colors.white.withValues(alpha: 0.9),
                             shape: BoxShape.circle,
                           ),
                         ),
@@ -2011,7 +2011,7 @@ class _AdminScreenState extends State<AdminScreen>
                                 Shadow(
                                   offset: const Offset(0, 1),
                                   blurRadius: 2,
-                                  color: Colors.black.withOpacity(0.3),
+                                  color: Colors.black.withValues(alpha: 0.3),
                                 ),
                               ],
                             ),
@@ -2068,9 +2068,9 @@ class _AdminScreenState extends State<AdminScreen>
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: primaryColor.withOpacity(0.05),
+        color: primaryColor.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: primaryColor.withOpacity(0.1)),
+        border: Border.all(color: primaryColor.withValues(alpha: 0.1)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -2114,7 +2114,7 @@ class _AdminScreenState extends State<AdminScreen>
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: primaryColor.withOpacity(0.1),
+                  color: primaryColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(Icons.image_rounded, color: primaryColor, size: 20),
@@ -2172,7 +2172,7 @@ class _AdminScreenState extends State<AdminScreen>
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: primaryColor.withOpacity(0.1),
+              color: primaryColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(
@@ -2277,7 +2277,7 @@ class _AdminScreenState extends State<AdminScreen>
                         height: 200,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: Colors.white.withOpacity(0.1),
+                          color: Colors.white.withValues(alpha: 0.1),
                         ),
                       ),
                     ),
@@ -2289,7 +2289,7 @@ class _AdminScreenState extends State<AdminScreen>
                         height: 100,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: Colors.white.withOpacity(0.1),
+                          color: Colors.white.withValues(alpha: 0.1),
                         ),
                       ),
                     ),
@@ -2403,7 +2403,7 @@ class _AdminScreenState extends State<AdminScreen>
                             });
                           },
                           backgroundColor: Colors.white,
-                          selectedColor: primaryColor.withOpacity(0.2),
+                          selectedColor: primaryColor.withValues(alpha: 0.2),
                           side: BorderSide(
                             color: _statusFilter == 'all' ? primaryColor : Colors.grey[300]!,
                           ),
@@ -2426,7 +2426,7 @@ class _AdminScreenState extends State<AdminScreen>
                             });
                           },
                           backgroundColor: Colors.white,
-                          selectedColor: Colors.orange.withOpacity(0.2),
+                          selectedColor: Colors.orange.withValues(alpha: 0.2),
                           side: BorderSide(
                             color: _statusFilter == 'pending' ? Colors.orange : Colors.grey[300]!,
                           ),
@@ -2449,7 +2449,7 @@ class _AdminScreenState extends State<AdminScreen>
                             });
                           },
                           backgroundColor: Colors.white,
-                          selectedColor: Colors.green.withOpacity(0.2),
+                          selectedColor: Colors.green.withValues(alpha: 0.2),
                           side: BorderSide(
                             color: _statusFilter == 'approved' ? Colors.green : Colors.grey[300]!,
                           ),
@@ -2472,7 +2472,7 @@ class _AdminScreenState extends State<AdminScreen>
                             });
                           },
                           backgroundColor: Colors.white,
-                          selectedColor: Colors.red.withOpacity(0.2),
+                          selectedColor: Colors.red.withValues(alpha: 0.2),
                           side: BorderSide(
                             color: _statusFilter == 'rejected' ? Colors.red : Colors.grey[300]!,
                           ),
@@ -2490,7 +2490,7 @@ class _AdminScreenState extends State<AdminScreen>
                   if (_searchQuery.isNotEmpty || _statusFilter != 'all') ...[
                     const SizedBox(height: 12),
                     Material(
-                      color: primaryColor.withOpacity(0.05),
+                      color: primaryColor.withValues(alpha: 0.05),
                       borderRadius: BorderRadius.circular(8),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),

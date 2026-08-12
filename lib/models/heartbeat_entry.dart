@@ -21,7 +21,7 @@ class HeartbeatEntry {
               ? json['hoursVolunteered']
               : int.tryParse('${json['hoursVolunteered']}') ?? 0,
       activityType: json['activityType'] ?? json['activity'] ?? '',
-      activityDetail: json['activityDetails'] ?? json['activityDetail'] ?? null,
+      activityDetail: json['activityDetails'] ?? json['activityDetail'],
       createdAt:
           DateTime.tryParse(
             json['createdAt'] ?? json['createdAt']?.toString() ?? '',

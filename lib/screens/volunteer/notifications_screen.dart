@@ -263,17 +263,17 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         duration: const Duration(milliseconds: 250),
         margin: const EdgeInsets.symmetric(vertical: 2),
         decoration: BoxDecoration(
-          color: n.isRead ? Colors.white : typeColor.withOpacity(0.04),
+          color: n.isRead ? Colors.white : typeColor.withValues(alpha: 0.04),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: n.isRead
                 ? Colors.grey.shade200
-                : typeColor.withOpacity(0.4),
+                : typeColor.withValues(alpha: 0.4),
             width: 1.2,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: Colors.black.withValues(alpha: 0.04),
               blurRadius: 6,
               offset: const Offset(0, 2),
             ),
@@ -304,7 +304,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: typeColor.withOpacity(0.12),
+                          color: typeColor.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Icon(n.type.icon,
@@ -365,7 +365,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                                       horizontal: 8, vertical: 2),
                                   decoration: BoxDecoration(
                                     color:
-                                        typeColor.withOpacity(0.12),
+                                        typeColor.withValues(alpha: 0.12),
                                     borderRadius:
                                         BorderRadius.circular(8),
                                   ),

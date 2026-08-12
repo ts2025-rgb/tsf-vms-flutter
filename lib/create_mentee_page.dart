@@ -193,7 +193,7 @@ class _CreateMenteePageState extends State<CreateMenteePage> {
                   width: 120,
                   height: 120,
                   decoration: BoxDecoration(
-                    color: AppColors.primaryBlue.withOpacity(0.1),
+                    color: AppColors.primaryBlue.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                     border: Border.all(color: AppColors.primaryBlue, width: 2),
                   ),
@@ -275,7 +275,7 @@ class _CreateMenteePageState extends State<CreateMenteePage> {
 
             // Gender
             DropdownButtonFormField<String>(
-              value: _gender,
+              initialValue: _gender,
               decoration: InputDecoration(
                 labelText: 'Gender *',
                 prefixIcon: Icon(Icons.wc, color: AppColors.primaryBlue),
@@ -395,7 +395,7 @@ class _CreateMenteePageState extends State<CreateMenteePage> {
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.primaryBlue.withOpacity(0.3),
+                    color: AppColors.primaryBlue.withValues(alpha: 0.3),
                     blurRadius: 8,
                     offset: Offset(0, 4),
                   ),

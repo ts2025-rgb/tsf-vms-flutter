@@ -1,21 +1,8 @@
-# wrangler.toml
-name = 'tsf-vms-flutter-01'
-compatibility_date = "2026-08-06"
+name = "tsf-vms-flutter"
+compatibility_date = "2024-09-23"
+pages_build_output_dir = "build/web"
+functions = "./functions"
 
 # We use `wrangler pages publish build/web` in CI to publish static assets.
 # Remove `assets` here to avoid Wrangler validating the directory before CI builds it.
 
-[observability]
-enabled = false
-head_sampling_rate = 1
-
-[observability.logs]
-enabled = true
-head_sampling_rate = 1
-persist = true
-invocation_logs = true
-
-[observability.traces]
-enabled = false
-persist = true
-head_sampling_rate = 1

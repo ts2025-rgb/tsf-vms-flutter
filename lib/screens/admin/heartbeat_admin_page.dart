@@ -331,7 +331,7 @@ class _HeartbeatAdminPageState extends State<HeartbeatAdminPage>
                             vertical: 5,
                           ),
                           decoration: BoxDecoration(
-                            color: AppColors.accentGreen.withOpacity(0.14),
+                            color: AppColors.accentGreen.withValues(alpha: 0.14),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
@@ -383,7 +383,7 @@ class _HeartbeatAdminPageState extends State<HeartbeatAdminPage>
     final detailController = TextEditingController(
       text: _displayDetails(entry),
     );
-    final messenger = ScaffoldMessenger.of(this.context);
+    final messenger = ScaffoldMessenger.of(context);
 
     await showDialog<void>(
       context: context,
@@ -402,7 +402,7 @@ class _HeartbeatAdminPageState extends State<HeartbeatAdminPage>
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.08),
+                  color: Colors.black.withValues(alpha: 0.08),
                   blurRadius: 24,
                   offset: const Offset(0, 10),
                 ),
@@ -459,7 +459,7 @@ class _HeartbeatAdminPageState extends State<HeartbeatAdminPage>
                     ),
                     const SizedBox(height: 12),
                     DropdownButtonFormField<String>(
-                      value: activity,
+                      initialValue: activity,
                       items:
                           const [
                                 'Awareness',
@@ -742,14 +742,14 @@ class _HeartbeatAdminPageState extends State<HeartbeatAdminPage>
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            AppColors.primaryBlue.withOpacity(0.08),
-            AppColors.secondaryBlue.withOpacity(0.06),
+            AppColors.primaryBlue.withValues(alpha: 0.08),
+            AppColors.secondaryBlue.withValues(alpha: 0.06),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.primaryBlue.withOpacity(0.15)),
+        border: Border.all(color: AppColors.primaryBlue.withValues(alpha: 0.15)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -810,7 +810,7 @@ class _HeartbeatAdminPageState extends State<HeartbeatAdminPage>
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide(
-                  color: AppColors.primaryBlue.withOpacity(0.18),
+                  color: AppColors.primaryBlue.withValues(alpha: 0.18),
                 ),
               ),
               focusedBorder: OutlineInputBorder(
@@ -826,7 +826,7 @@ class _HeartbeatAdminPageState extends State<HeartbeatAdminPage>
             builder: (context, constraints) {
               final isWide = constraints.maxWidth > 700;
               final activityField = DropdownButtonFormField<String>(
-                value: _selectedActivities[tabIndex],
+                initialValue: _selectedActivities[tabIndex],
                 items: _buildDropdownItems(
                   activityValues,
                   emptyLabel: 'Activity',
@@ -848,7 +848,7 @@ class _HeartbeatAdminPageState extends State<HeartbeatAdminPage>
               );
 
               final hoursField = DropdownButtonFormField<String>(
-                value: _selectedHours[tabIndex],
+                initialValue: _selectedHours[tabIndex],
                 items: _buildDropdownItems(hourValues, emptyLabel: 'Hours'),
                 onChanged: (value) {
                   setState(() => _selectedHours[tabIndex] = value ?? 'All');
@@ -900,15 +900,15 @@ class _HeartbeatAdminPageState extends State<HeartbeatAdminPage>
       margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [AppColors.primaryBlue.withOpacity(0.06), Colors.white],
+          colors: [AppColors.primaryBlue.withValues(alpha: 0.06), Colors.white],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.primaryBlue.withOpacity(0.12)),
+        border: Border.all(color: AppColors.primaryBlue.withValues(alpha: 0.12)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 18,
             offset: const Offset(0, 6),
           ),
@@ -954,7 +954,7 @@ class _HeartbeatAdminPageState extends State<HeartbeatAdminPage>
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.accentGreen.withOpacity(0.14),
+                          color: AppColors.accentGreen.withValues(alpha: 0.14),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
@@ -1085,7 +1085,7 @@ class _HeartbeatAdminPageState extends State<HeartbeatAdminPage>
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.primaryBlue.withOpacity(0.12),
+                        color: AppColors.primaryBlue.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
@@ -1125,7 +1125,7 @@ class _HeartbeatAdminPageState extends State<HeartbeatAdminPage>
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
-                            AppColors.primaryBlue.withOpacity(0.06),
+                            AppColors.primaryBlue.withValues(alpha: 0.06),
                             Colors.white,
                           ],
                           begin: Alignment.topLeft,
@@ -1133,11 +1133,11 @@ class _HeartbeatAdminPageState extends State<HeartbeatAdminPage>
                         ),
                         borderRadius: BorderRadius.circular(18),
                         border: Border.all(
-                          color: AppColors.primaryBlue.withOpacity(0.12),
+                          color: AppColors.primaryBlue.withValues(alpha: 0.12),
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.04),
+                            color: Colors.black.withValues(alpha: 0.04),
                             blurRadius: 18,
                             offset: const Offset(0, 6),
                           ),
@@ -1185,7 +1185,7 @@ class _HeartbeatAdminPageState extends State<HeartbeatAdminPage>
                             vertical: 5,
                           ),
                           decoration: BoxDecoration(
-                            color: AppColors.accentGreen.withOpacity(0.14),
+                            color: AppColors.accentGreen.withValues(alpha: 0.14),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
@@ -1233,7 +1233,7 @@ class _HeartbeatAdminPageState extends State<HeartbeatAdminPage>
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.primaryBlue.withOpacity(0.12),
+                      color: AppColors.primaryBlue.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(

@@ -24,7 +24,7 @@ class _CCPAdminDashboardScreenState extends State<CCPAdminDashboardScreen> {
   final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
   
   bool _isLoading = true;
-  Map<String, dynamic> _dashboardData = {};
+  final Map<String, dynamic> _dashboardData = {};
   List<dynamic> _volunteers = [];
   List<dynamic> _mentees = [];
   List<dynamic> _queries = [];
@@ -478,7 +478,7 @@ class _CCPAdminDashboardScreenState extends State<CCPAdminDashboardScreen> {
                 children: [
                   CircleAvatar(
                     radius: 30,
-                    backgroundColor: AppColors.primaryBlue.withOpacity(0.1),
+                    backgroundColor: AppColors.primaryBlue.withValues(alpha: 0.1),
                     child: Icon(Icons.person, color: AppColors.primaryBlue, size: 30),
                   ),
                   SizedBox(width: 16),
@@ -592,9 +592,9 @@ class _CCPAdminDashboardScreenState extends State<CCPAdminDashboardScreen> {
                 Container(
                   padding: EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: AppColors.accentGreen.withOpacity(0.1),
+                    color: AppColors.accentGreen.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.accentGreen.withOpacity(0.3)),
+                    border: Border.all(color: AppColors.accentGreen.withValues(alpha: 0.3)),
                   ),
                   child: Row(
                     children: [
@@ -655,10 +655,10 @@ class _CCPAdminDashboardScreenState extends State<CCPAdminDashboardScreen> {
                                     margin: EdgeInsets.only(bottom: 12),
                                     padding: EdgeInsets.all(12),
                                     decoration: BoxDecoration(
-                                      color: hasRedFlags ? Colors.red.withOpacity(0.05) : Colors.grey.shade50,
+                                      color: hasRedFlags ? Colors.red.withValues(alpha: 0.05) : Colors.grey.shade50,
                                       borderRadius: BorderRadius.circular(8),
                                       border: Border.all(
-                                        color: hasRedFlags ? Colors.red.withOpacity(0.3) : Colors.grey.shade200,
+                                        color: hasRedFlags ? Colors.red.withValues(alpha: 0.3) : Colors.grey.shade200,
                                         width: hasRedFlags ? 2 : 1,
                                       ),
                                     ),
@@ -673,7 +673,7 @@ class _CCPAdminDashboardScreenState extends State<CCPAdminDashboardScreen> {
                                                   Container(
                                                     padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                                     decoration: BoxDecoration(
-                                                      color: AppColors.primaryBlue.withOpacity(0.1),
+                                                      color: AppColors.primaryBlue.withValues(alpha: 0.1),
                                                       borderRadius: BorderRadius.circular(6),
                                                     ),
                                                     child: Text(
@@ -773,7 +773,7 @@ class _CCPAdminDashboardScreenState extends State<CCPAdminDashboardScreen> {
                   Container(
                     padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: AppColors.primaryBlue.withOpacity(0.1),
+                      color: AppColors.primaryBlue.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
@@ -790,7 +790,7 @@ class _CCPAdminDashboardScreenState extends State<CCPAdminDashboardScreen> {
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: Colors.red.withOpacity(0.1),
+                        color: Colors.red.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Row(
@@ -884,8 +884,8 @@ class _CCPAdminDashboardScreenState extends State<CCPAdminDashboardScreen> {
                               topic.toString(),
                               style: GoogleFonts.poppins(fontSize: 12),
                             ),
-                            backgroundColor: Colors.blue.withOpacity(0.1),
-                            side: BorderSide(color: Colors.blue.withOpacity(0.3)),
+                            backgroundColor: Colors.blue.withValues(alpha: 0.1),
+                            side: BorderSide(color: Colors.blue.withValues(alpha: 0.3)),
                           )).toList(),
                         ),
                         if (topics.contains('Others') && call['otherTopicDetail'] != null && call['otherTopicDetail'].toString().isNotEmpty) ...[
@@ -894,9 +894,9 @@ class _CCPAdminDashboardScreenState extends State<CCPAdminDashboardScreen> {
                             width: double.infinity,
                             padding: EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: Colors.blue.withOpacity(0.05),
+                              color: Colors.blue.withValues(alpha: 0.05),
                               borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: Colors.blue.withOpacity(0.2)),
+                              border: Border.all(color: Colors.blue.withValues(alpha: 0.2)),
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -936,9 +936,9 @@ class _CCPAdminDashboardScreenState extends State<CCPAdminDashboardScreen> {
                                 margin: EdgeInsets.only(bottom: 8),
                                 padding: EdgeInsets.all(12),
                                 decoration: BoxDecoration(
-                                  color: AppColors.accentGreen.withOpacity(0.05),
+                                  color: AppColors.accentGreen.withValues(alpha: 0.05),
                                   borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(color: AppColors.accentGreen.withOpacity(0.2)),
+                                  border: Border.all(color: AppColors.accentGreen.withValues(alpha: 0.2)),
                                 ),
                                 child: Row(
                                   children: [
@@ -952,7 +952,7 @@ class _CCPAdminDashboardScreenState extends State<CCPAdminDashboardScreen> {
                                     ),
                                   ],
                                 ),
-                              )).toList(),
+                              )),
                               SizedBox(height: 20),
                             ],
                           );
@@ -971,8 +971,8 @@ class _CCPAdminDashboardScreenState extends State<CCPAdminDashboardScreen> {
                               request.toString(),
                               style: GoogleFonts.poppins(fontSize: 12),
                             ),
-                            backgroundColor: Colors.purple.withOpacity(0.1),
-                            side: BorderSide(color: Colors.purple.withOpacity(0.3)),
+                            backgroundColor: Colors.purple.withValues(alpha: 0.1),
+                            side: BorderSide(color: Colors.purple.withValues(alpha: 0.3)),
                           )).toList(),
                         ),
                         if (assistanceRequests.contains('Other Concern') && call['assistanceRequestOtherDetail'] != null && call['assistanceRequestOtherDetail'].toString().isNotEmpty) ...[
@@ -981,9 +981,9 @@ class _CCPAdminDashboardScreenState extends State<CCPAdminDashboardScreen> {
                             width: double.infinity,
                             padding: EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: Colors.purple.withOpacity(0.05),
+                              color: Colors.purple.withValues(alpha: 0.05),
                               borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: Colors.purple.withOpacity(0.2)),
+                              border: Border.all(color: Colors.purple.withValues(alpha: 0.2)),
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1034,9 +1034,9 @@ class _CCPAdminDashboardScreenState extends State<CCPAdminDashboardScreen> {
                           width: double.infinity,
                           padding: EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: Colors.red.withOpacity(0.1),
+                            color: Colors.red.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.red.withOpacity(0.5), width: 2),
+                            border: Border.all(color: Colors.red.withValues(alpha: 0.5), width: 2),
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1077,9 +1077,9 @@ class _CCPAdminDashboardScreenState extends State<CCPAdminDashboardScreen> {
                           width: double.infinity,
                           padding: EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Colors.blue.withOpacity(0.05),
+                            color: Colors.blue.withValues(alpha: 0.05),
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.blue.withOpacity(0.2)),
+                            border: Border.all(color: Colors.blue.withValues(alpha: 0.2)),
                           ),
                           child: Text(
                             call['volunteerNote'],
@@ -1193,9 +1193,9 @@ class _CCPAdminDashboardScreenState extends State<CCPAdminDashboardScreen> {
       child: Container(
         padding: EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+          color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: color.withOpacity(0.3)),
+          border: Border.all(color: color.withValues(alpha: 0.3)),
         ),
         child: Column(
           children: [
@@ -1783,7 +1783,7 @@ class _CCPAdminDashboardScreenState extends State<CCPAdminDashboardScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: Offset(0, 2),
           ),
@@ -1799,7 +1799,7 @@ class _CCPAdminDashboardScreenState extends State<CCPAdminDashboardScreen> {
               Container(
                 padding: EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
+                  color: color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(icon, color: color, size: 20),
@@ -1839,7 +1839,7 @@ class _CCPAdminDashboardScreenState extends State<CCPAdminDashboardScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: Offset(0, 2),
           ),
@@ -1892,9 +1892,9 @@ class _CCPAdminDashboardScreenState extends State<CCPAdminDashboardScreen> {
     return Container(
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1931,12 +1931,12 @@ class _CCPAdminDashboardScreenState extends State<CCPAdminDashboardScreen> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            AppColors.primaryBlue.withOpacity(0.1),
-            AppColors.accentGreen.withOpacity(0.05),
+            AppColors.primaryBlue.withValues(alpha: 0.1),
+            AppColors.accentGreen.withValues(alpha: 0.05),
           ],
         ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.primaryBlue.withOpacity(0.3)),
+        border: Border.all(color: AppColors.primaryBlue.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -2050,7 +2050,7 @@ class _CCPAdminDashboardScreenState extends State<CCPAdminDashboardScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: Offset(0, 2),
           ),
@@ -2161,7 +2161,7 @@ class _CCPAdminDashboardScreenState extends State<CCPAdminDashboardScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: Offset(0, 2),
           ),
@@ -2190,7 +2190,7 @@ class _CCPAdminDashboardScreenState extends State<CCPAdminDashboardScreen> {
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                   decoration: BoxDecoration(
-                    color: Colors.red.withOpacity(0.1),
+                    color: Colors.red.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -2222,10 +2222,10 @@ class _CCPAdminDashboardScreenState extends State<CCPAdminDashboardScreen> {
                 margin: EdgeInsets.only(bottom: 12),
                 padding: EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: isPending ? Colors.red.withOpacity(0.05) : Colors.grey.shade50,
+                  color: isPending ? Colors.red.withValues(alpha: 0.05) : Colors.grey.shade50,
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: isPending ? Colors.red.withOpacity(0.3) : Colors.grey.shade200,
+                    color: isPending ? Colors.red.withValues(alpha: 0.3) : Colors.grey.shade200,
                   ),
                 ),
                 child: Column(
@@ -2272,7 +2272,7 @@ class _CCPAdminDashboardScreenState extends State<CCPAdminDashboardScreen> {
                   ],
                 ),
               );
-            }).toList(),
+            }),
         ],
       ),
     );
@@ -2286,7 +2286,7 @@ class _CCPAdminDashboardScreenState extends State<CCPAdminDashboardScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: Offset(0, 2),
           ),
@@ -2394,7 +2394,7 @@ class _CCPAdminDashboardScreenState extends State<CCPAdminDashboardScreen> {
                   ],
                 ),
               );
-            }).toList(),
+            }),
           ],
         ],
       ),
@@ -2414,7 +2414,7 @@ class _CCPAdminDashboardScreenState extends State<CCPAdminDashboardScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: Offset(0, 2),
           ),
@@ -2493,7 +2493,7 @@ class _CCPAdminDashboardScreenState extends State<CCPAdminDashboardScreen> {
                 ],
               ),
             );
-          }).toList(),
+          }),
         ],
       ),
     );
@@ -2510,7 +2510,7 @@ class _CCPAdminDashboardScreenState extends State<CCPAdminDashboardScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: Offset(0, 2),
           ),
@@ -2589,7 +2589,7 @@ class _CCPAdminDashboardScreenState extends State<CCPAdminDashboardScreen> {
                   ],
                 ),
               );
-            }).toList(),
+            }),
         ],
       ),
     );
@@ -2606,7 +2606,7 @@ class _CCPAdminDashboardScreenState extends State<CCPAdminDashboardScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: Offset(0, 2),
           ),
@@ -2651,8 +2651,8 @@ class _CCPAdminDashboardScreenState extends State<CCPAdminDashboardScreen> {
                     '${entry.key}: ${entry.value}',
                     style: GoogleFonts.poppins(fontSize: 12),
                   ),
-                  backgroundColor: Colors.purple.withOpacity(0.1),
-                  side: BorderSide(color: Colors.purple.withOpacity(0.3)),
+                  backgroundColor: Colors.purple.withValues(alpha: 0.1),
+                  side: BorderSide(color: Colors.purple.withValues(alpha: 0.3)),
                 );
               }).toList(),
             ),
@@ -2672,7 +2672,7 @@ class _CCPAdminDashboardScreenState extends State<CCPAdminDashboardScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: Offset(0, 2),
           ),
@@ -2753,7 +2753,7 @@ class _CCPAdminDashboardScreenState extends State<CCPAdminDashboardScreen> {
                 ],
               ),
             );
-          }).toList(),
+          }),
         ],
       ),
     );
@@ -2767,7 +2767,7 @@ class _CCPAdminDashboardScreenState extends State<CCPAdminDashboardScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: Offset(0, 2),
           ),
@@ -2791,7 +2791,7 @@ class _CCPAdminDashboardScreenState extends State<CCPAdminDashboardScreen> {
             ],
           ),
           SizedBox(height: 16),
-          Container(
+          SizedBox(
             height: 200,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
@@ -2873,7 +2873,7 @@ class _CCPAdminDashboardScreenState extends State<CCPAdminDashboardScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: Offset(0, 2),
           ),
@@ -2943,7 +2943,7 @@ class _CCPAdminDashboardScreenState extends State<CCPAdminDashboardScreen> {
                 ],
               ),
             );
-          }).toList(),
+          }),
         ],
       ),
     );
@@ -2960,7 +2960,7 @@ class _CCPAdminDashboardScreenState extends State<CCPAdminDashboardScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: Offset(0, 2),
           ),
@@ -2984,7 +2984,7 @@ class _CCPAdminDashboardScreenState extends State<CCPAdminDashboardScreen> {
             ],
           ),
           SizedBox(height: 16),
-          Container(
+          SizedBox(
             height: 150,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
@@ -3231,12 +3231,12 @@ class _DashVolunteerHoverCardState extends State<_DashVolunteerHoverCard> {
       child: Row(
         children: [
           Icon(icon, size: 11,
-              color: AppColors.accentGreen.withOpacity(0.7)),
+              color: AppColors.accentGreen.withValues(alpha: 0.7)),
           const SizedBox(width: 5),
           Text('$label: ',
               style: GoogleFonts.poppins(
                   fontSize: 10,
-                  color: AppColors.accentGreen.withOpacity(0.8))),
+                  color: AppColors.accentGreen.withValues(alpha: 0.8))),
           Expanded(
             child: Text(value,
                 style: GoogleFonts.poppins(
@@ -3263,10 +3263,10 @@ class _DashVolunteerHoverCardState extends State<_DashVolunteerHoverCard> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.primaryBlue.withOpacity(0.18)),
+        border: Border.all(color: AppColors.primaryBlue.withValues(alpha: 0.18)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.14),
+            color: Colors.black.withValues(alpha: 0.14),
             blurRadius: 24,
             offset: const Offset(0, 8),
           ),
@@ -3281,7 +3281,7 @@ class _DashVolunteerHoverCardState extends State<_DashVolunteerHoverCard> {
             children: [
               CircleAvatar(
                 radius: 20,
-                backgroundColor: AppColors.primaryBlue.withOpacity(0.12),
+                backgroundColor: AppColors.primaryBlue.withValues(alpha: 0.12),
                 child: Text(
                   (v['fullName'] ?? 'V')[0].toUpperCase(),
                   style: GoogleFonts.poppins(
@@ -3349,12 +3349,12 @@ class _DashVolunteerHoverCardState extends State<_DashVolunteerHoverCard> {
                   const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
               decoration: BoxDecoration(
                 color: mentee != null
-                    ? AppColors.accentGreen.withOpacity(0.08)
+                    ? AppColors.accentGreen.withValues(alpha: 0.08)
                     : Colors.grey.shade100,
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
                   color: mentee != null
-                      ? AppColors.accentGreen.withOpacity(0.35)
+                      ? AppColors.accentGreen.withValues(alpha: 0.35)
                       : Colors.grey.shade300,
                 ),
               ),
@@ -3518,7 +3518,7 @@ class _DashVolunteerHoverCardState extends State<_DashVolunteerHoverCard> {
                         const Icon(Icons.star,
                             size: 10, color: Colors.amber),
                         Text(
-                          '${widget.avgRating.toStringAsFixed(1)}',
+                          widget.avgRating.toStringAsFixed(1),
                           style: GoogleFonts.poppins(
                               fontSize: 10,
                               color: Colors.grey.shade600),

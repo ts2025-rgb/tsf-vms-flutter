@@ -83,11 +83,11 @@ class AppColors {
   static const Color border = Color(0xFFE5E7EB);
   
   // Opacity variations
-  static Color primaryBlueLight = primaryBlue.withOpacity(0.1);
-  static Color primaryBlueMedium = primaryBlue.withOpacity(0.3);
-  static Color secondaryBlueLight = secondaryBlue.withOpacity(0.1);
-  static Color accentGreenLight = accentGreen.withOpacity(0.1);
-  static Color accentOrangeLight = accentOrange.withOpacity(0.1);
+  static Color primaryBlueLight = primaryBlue.withValues(alpha: 0.1);
+  static Color primaryBlueMedium = primaryBlue.withValues(alpha: 0.3);
+  static Color secondaryBlueLight = secondaryBlue.withValues(alpha: 0.1);
+  static Color accentGreenLight = accentGreen.withValues(alpha: 0.1);
+  static Color accentOrangeLight = accentOrange.withValues(alpha: 0.1);
 
   // Helper method to get gradient colors as list
   static List<Color> getPrimaryGradientColors() => [primaryBlue, secondaryBlue];

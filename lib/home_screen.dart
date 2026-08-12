@@ -108,20 +108,20 @@ class _HomePageState extends State<HomePage> {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              AppColors.accentYellow.withOpacity(0.15),
-              AppColors.accentOrange.withOpacity(0.1),
+              AppColors.accentYellow.withValues(alpha: 0.15),
+              AppColors.accentOrange.withValues(alpha: 0.1),
             ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: AppColors.accentOrange.withOpacity(0.3),
+            color: AppColors.accentOrange.withValues(alpha: 0.3),
             width: 2,
           ),
           boxShadow: [
             BoxShadow(
-              color: AppColors.accentOrange.withOpacity(0.1),
+              color: AppColors.accentOrange.withValues(alpha: 0.1),
               blurRadius: 12,
               offset: Offset(0, 4),
             ),
@@ -132,7 +132,7 @@ class _HomePageState extends State<HomePage> {
             Container(
               padding: EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppColors.accentOrange.withOpacity(0.2),
+                color: AppColors.accentOrange.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -181,7 +181,7 @@ class _HomePageState extends State<HomePage> {
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: AppColors.primaryBlue.withOpacity(0.3),
+                color: AppColors.primaryBlue.withValues(alpha: 0.3),
                 blurRadius: 12,
                 offset: Offset(0, 4),
               ),
@@ -195,7 +195,7 @@ class _HomePageState extends State<HomePage> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
+                      color: Colors.white.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Icon(Icons.verified, color: Colors.white, size: 28),
@@ -218,7 +218,7 @@ class _HomePageState extends State<HomePage> {
                           "You're approved and ready to volunteer ✨",
                           style: GoogleFonts.poppins(
                             fontSize: 14,
-                            color: Colors.white.withOpacity(0.9),
+                            color: Colors.white.withValues(alpha: 0.9),
                           ),
                         ),
                       ],
@@ -234,7 +234,7 @@ class _HomePageState extends State<HomePage> {
                     vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
@@ -316,12 +316,12 @@ class _HomePageState extends State<HomePage> {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  AppColors.primaryBlue.withOpacity(0.1),
-                  AppColors.secondaryBlue.withOpacity(0.05),
+                  AppColors.primaryBlue.withValues(alpha: 0.1),
+                  AppColors.secondaryBlue.withValues(alpha: 0.05),
                 ],
               ),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.primaryBlue.withOpacity(0.2)),
+              border: Border.all(color: AppColors.primaryBlue.withValues(alpha: 0.2)),
             ),
             child: Row(
               children: [
@@ -334,7 +334,7 @@ class _HomePageState extends State<HomePage> {
                     borderRadius: BorderRadius.circular(8),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.primaryBlue.withOpacity(0.3),
+                        color: AppColors.primaryBlue.withValues(alpha: 0.3),
                         blurRadius: 8,
                         offset: Offset(0, 2),
                       ),
@@ -360,7 +360,7 @@ class _HomePageState extends State<HomePage> {
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: AppColors.accentGreen.withOpacity(0.2),
+                    color: AppColors.accentGreen.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -430,20 +430,20 @@ class _HomePageState extends State<HomePage> {
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
-                          _getProgramColor(index).withOpacity(0.15),
-                          _getProgramColor(index).withOpacity(0.08),
+                          _getProgramColor(index).withValues(alpha: 0.15),
+                          _getProgramColor(index).withValues(alpha: 0.08),
                         ],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
                       borderRadius: BorderRadius.circular(14),
                       border: Border.all(
-                        color: _getProgramColor(index).withOpacity(0.4),
+                        color: _getProgramColor(index).withValues(alpha: 0.4),
                         width: 2,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: _getProgramColor(index).withOpacity(0.2),
+                          color: _getProgramColor(index).withValues(alpha: 0.2),
                           blurRadius: 8,
                           offset: Offset(0, 3),
                         ),
@@ -456,14 +456,14 @@ class _HomePageState extends State<HomePage> {
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
                               colors: [
-                                _getProgramColor(index).withOpacity(0.3),
-                                _getProgramColor(index).withOpacity(0.2),
+                                _getProgramColor(index).withValues(alpha: 0.3),
+                                _getProgramColor(index).withValues(alpha: 0.2),
                               ],
                             ),
                             borderRadius: BorderRadius.circular(10),
                             boxShadow: [
                               BoxShadow(
-                                color: _getProgramColor(index).withOpacity(0.3),
+                                color: _getProgramColor(index).withValues(alpha: 0.3),
                                 blurRadius: 4,
                                 spreadRadius: 1,
                               ),

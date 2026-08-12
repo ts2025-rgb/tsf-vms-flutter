@@ -9,10 +9,10 @@ Future<void> showHeartbeatDialog(
   BuildContext context,
   HeartbeatSaveCallback onSave,
 ) {
-  final _formKey = GlobalKey<FormState>();
-  final TextEditingController _hoursController = TextEditingController();
-  final TextEditingController _detailController = TextEditingController();
-  String _selectedActivity = 'Awareness';
+  final formKey = GlobalKey<FormState>();
+  final TextEditingController hoursController = TextEditingController();
+  final TextEditingController detailController = TextEditingController();
+  String selectedActivity = 'Awareness';
 
   final List<String> activityTypes = [
     'Awareness',
@@ -38,14 +38,14 @@ Future<void> showHeartbeatDialog(
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.08),
+                  color: Colors.black.withValues(alpha: 0.08),
                   blurRadius: 24,
                   offset: const Offset(0, 10),
                 ),
               ],
             ),
             child: Form(
-              key: _formKey,
+              key: formKey,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -67,7 +67,7 @@ Future<void> showHeartbeatDialog(
                   ),
                   const SizedBox(height: 12),
                   TextFormField(
-                    controller: _hoursController,
+                    controller: hoursController,
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
                       labelText: 'Hours volunteered',
@@ -97,7 +97,7 @@ Future<void> showHeartbeatDialog(
                   ),
                   const SizedBox(height: 12),
                   DropdownButtonFormField<String>(
-                    value: _selectedActivity,
+                    initialValue: selectedActivity,
                     items:
                         activityTypes
                             .map(
@@ -105,7 +105,7 @@ Future<void> showHeartbeatDialog(
                             )
                             .toList(),
                     onChanged:
-                        (v) => _selectedActivity = v ?? activityTypes.first,
+                        (v) => selectedActivity = v ?? activityTypes.first,
                     decoration: InputDecoration(
                       labelText: 'Activity type',
                       border: OutlineInputBorder(
@@ -119,7 +119,7 @@ Future<void> showHeartbeatDialog(
                   ),
                   const SizedBox(height: 12),
                   TextFormField(
-                    controller: _detailController,
+                    controller: detailController,
                     decoration: InputDecoration(
                       labelText:
                           'If Field activity, mention details (optional)',
@@ -168,15 +168,15 @@ Future<void> showHeartbeatDialog(
                       Expanded(
                         child: ElevatedButton(
                           onPressed: () async {
-                            if (_formKey.currentState?.validate() ?? false) {
+                            if (formKey.currentState?.validate() ?? false) {
                               final hours = int.parse(
-                                _hoursController.text.trim(),
+                                hoursController.text.trim(),
                               );
                               final detail =
-                                  _detailController.text.trim().isEmpty
+                                  detailController.text.trim().isEmpty
                                       ? null
-                                      : _detailController.text.trim();
-                              await onSave(hours, _selectedActivity, detail);
+                                      : detailController.text.trim();
+                              await onSave(hours, selectedActivity, detail);
                               Navigator.of(context).pop();
                             }
                           },

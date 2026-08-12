@@ -29,7 +29,7 @@ class LifecycleProgressIndicator extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -129,7 +129,7 @@ class LifecycleProgressIndicator extends StatelessWidget {
                 boxShadow: stage.isActive
                     ? [
                         BoxShadow(
-                          color: stage.color.withOpacity(0.4),
+                          color: stage.color.withValues(alpha: 0.4),
                           blurRadius: 8,
                           offset: const Offset(0, 2),
                         ),
@@ -178,9 +178,9 @@ class LifecycleProgressIndicator extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         color: stage.isCompleted 
-                            ? Colors.green.withOpacity(0.1)
+                            ? Colors.green.withValues(alpha: 0.1)
                             : stage.isActive 
-                                ? stage.color.withOpacity(0.1)
+                                ? stage.color.withValues(alpha: 0.1)
                                 : Colors.grey[200],
                         borderRadius: BorderRadius.circular(8),
                       ),

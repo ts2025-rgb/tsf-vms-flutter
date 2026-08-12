@@ -243,7 +243,7 @@ class _SendTabState extends State<_SendTab> {
             _sectionCard(children: [
               _label('Type'),
               DropdownButtonFormField<NotificationType>(
-                value: _type,
+                initialValue: _type,
                 decoration: _inputDecor(null),
                 items: NotificationType.values
                     .map((t) => DropdownMenuItem(
@@ -306,7 +306,7 @@ class _SendTabState extends State<_SendTab> {
                     style: GoogleFonts.poppins(
                         fontSize: 12, color: Colors.grey.shade600)),
                 value: _sendEmail,
-                activeColor: AppColors.primaryBlue,
+                activeThumbColor: AppColors.primaryBlue,
                 onChanged: (v) => setState(() => _sendEmail = v),
               ),
             ]),
@@ -447,7 +447,7 @@ class _SendTabState extends State<_SendTab> {
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -677,11 +677,11 @@ class _SentLogTabState extends State<_SentLogTab> {
           borderRadius: BorderRadius.circular(14),
           boxShadow: [
             BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: Colors.black.withValues(alpha: 0.05),
                 blurRadius: 8,
                 offset: const Offset(0, 2))
           ],
-          border: Border.all(color: color.withOpacity(0.2)),
+          border: Border.all(color: color.withValues(alpha: 0.2)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -736,7 +736,7 @@ class _SentLogTabState extends State<_SentLogTab> {
           boxShadow: selected
               ? [
                   BoxShadow(
-                      color: color.withOpacity(0.3),
+                      color: color.withValues(alpha: 0.3),
                       blurRadius: 6,
                       offset: const Offset(0, 2))
                 ]
@@ -774,12 +774,12 @@ class _SentLogTabState extends State<_SentLogTab> {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: isExpanded
-              ? typeColor.withOpacity(0.35)
+              ? typeColor.withValues(alpha: 0.35)
               : Colors.grey.shade100,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),
@@ -792,7 +792,7 @@ class _SentLogTabState extends State<_SentLogTab> {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: typeColor.withOpacity(0.12),
+              color: typeColor.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(n.type.icon, color: typeColor, size: 20),
@@ -816,7 +816,7 @@ class _SentLogTabState extends State<_SentLogTab> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8, vertical: 2),
                       decoration: BoxDecoration(
-                        color: typeColor.withOpacity(0.12),
+                        color: typeColor.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(n.type.label,

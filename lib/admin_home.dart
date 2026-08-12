@@ -65,7 +65,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                         height: 200,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: Colors.white.withOpacity(0.1),
+                          color: Colors.white.withValues(alpha: 0.1),
                         ),
                       ),
                     ),
@@ -77,7 +77,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                         height: 100,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: Colors.white.withOpacity(0.1),
+                          color: Colors.white.withValues(alpha: 0.1),
                         ),
                       ),
                     ),
@@ -211,7 +211,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                               end: Alignment.bottomRight,
                               colors: [
                                 AppColors.accentGreen,
-                                AppColors.accentGreen.withOpacity(0.7),
+                                AppColors.accentGreen.withValues(alpha: 0.7),
                               ],
                             ),
                             onTap: () {
@@ -283,7 +283,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                               end: Alignment.bottomRight,
                               colors: [
                                 AppColors.accentGreen,
-                                AppColors.accentGreen.withOpacity(0.7),
+                                AppColors.accentGreen.withValues(alpha: 0.7),
                               ],
                             ),
                             onTap: () {
@@ -332,7 +332,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
             borderRadius: BorderRadius.circular(24),
             boxShadow: [
               BoxShadow(
-                color: color.withOpacity(0.3),
+                color: color.withValues(alpha: 0.3),
                 blurRadius: 20,
                 offset: const Offset(0, 10),
               ),
@@ -347,7 +347,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(icon, color: Colors.white, size: 32),
@@ -369,7 +369,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                       subtitle,
                       style: GoogleFonts.poppins(
                         fontSize: 12,
-                        color: Colors.white.withOpacity(0.9),
+                        color: Colors.white.withValues(alpha: 0.9),
                       ),
                     ),
                   ],

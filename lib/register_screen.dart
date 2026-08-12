@@ -10,7 +10,7 @@ import 'config/api_config.dart';
 import 'config/app_colors.dart';
 
 class RegisterPage extends StatefulWidget {
-  const RegisterPage({Key? key}) : super(key: key);
+  const RegisterPage({super.key});
 
   @override
   State<RegisterPage> createState() => _RegisterPageState();
@@ -50,17 +50,17 @@ class _RegisterPageState extends State<RegisterPage> {
   // Section 3: Volunteering Intent & Preferences
   bool _priorVolunteering = false;
   final TextEditingController _priorVolunteeringDescController = TextEditingController();
-  List<String> _interestedProgramIds = []; // Changed to store IDs instead of names
+  final List<String> _interestedProgramIds = []; // Changed to store IDs instead of names
   final TextEditingController _whyVolunteerController = TextEditingController();
   String? _hoursPerWeek;
 
   // Section 4: Skills & Role Preferences
-  List<String> _skills = [];
-  List<String> _customSkills = []; // Custom skills added by user
+  final List<String> _skills = [];
+  final List<String> _customSkills = []; // Custom skills added by user
   final TextEditingController _customSkillController = TextEditingController();
   final TextEditingController _skillsDescController = TextEditingController();
-  List<String> _preferredRoles = [];
-  List<String> _customRoles = []; // Custom roles added by user
+  final List<String> _preferredRoles = [];
+  final List<String> _customRoles = []; // Custom roles added by user
   final TextEditingController _customRoleController = TextEditingController();
   final TextEditingController _specialRequirementsController = TextEditingController();
   String? _meiteilon;
@@ -737,7 +737,7 @@ class _RegisterPageState extends State<RegisterPage> {
           ),
           const SizedBox(height: 16),
           DropdownButtonFormField<String>(
-            value: _gender,
+            initialValue: _gender,
             items: _genderOptions.map((g) => DropdownMenuItem(
               value: g, 
               child: Text(g, style: GoogleFonts.poppins())
@@ -780,7 +780,7 @@ class _RegisterPageState extends State<RegisterPage> {
           ),
           const SizedBox(height: 16),
           DropdownButtonFormField<String>(
-            value: _currentLocationController.text.isEmpty ? null : _currentLocationController.text,
+            initialValue: _currentLocationController.text.isEmpty ? null : _currentLocationController.text,
             items: _locationOptions.map((l) => DropdownMenuItem(
               value: l, 
               child: Text(l, style: GoogleFonts.poppins())
@@ -797,7 +797,7 @@ class _RegisterPageState extends State<RegisterPage> {
           ),
           const SizedBox(height: 16),
           DropdownButtonFormField<String>(
-            value: _bloodGroupController.text.isEmpty ? null : _bloodGroupController.text,
+            initialValue: _bloodGroupController.text.isEmpty ? null : _bloodGroupController.text,
             items: _bloodGroups.map((b) => DropdownMenuItem(
               value: b, 
               child: Text(b, style: GoogleFonts.poppins())
@@ -978,7 +978,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600])),
               value: _corporateExperience,
               onChanged: (v) => setState(() => _corporateExperience = v),
-              activeColor: Colors.teal,
+              activeThumbColor: Colors.teal,
             ),
           ),
           if (_corporateExperience) ...[
@@ -1014,7 +1014,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600])),
               value: _priorVolunteering,
               onChanged: (v) => setState(() => _priorVolunteering = v),
-              activeColor: Colors.teal,
+              activeThumbColor: Colors.teal,
             ),
           ),
           if (_priorVolunteering) ...[
@@ -1150,7 +1150,7 @@ class _RegisterPageState extends State<RegisterPage> {
           ),
           const SizedBox(height: 16),
           DropdownButtonFormField<String>(
-            value: _hoursPerWeek,
+            initialValue: _hoursPerWeek,
             items: _hoursOptions.map((h) => DropdownMenuItem(
               value: h, 
               child: Text(h, style: GoogleFonts.poppins())
@@ -1465,7 +1465,7 @@ class _RegisterPageState extends State<RegisterPage> {
           ),
           const SizedBox(height: 16),
           DropdownButtonFormField<String>(
-            value: _meiteilon,
+            initialValue: _meiteilon,
             items: _meiteilonOptions.map((m) => DropdownMenuItem(
               value: m, 
               child: Text(m, style: GoogleFonts.poppins())
@@ -1922,7 +1922,7 @@ class _RegisterPageState extends State<RegisterPage> {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.white.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(Icons.app_registration, size: 24),
@@ -1942,7 +1942,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     color: Colors.white,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
+                        color: Colors.black.withValues(alpha: 0.05),
                         blurRadius: 10,
                         offset: Offset(0, 2),
                       ),
@@ -2015,7 +2015,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           borderRadius: BorderRadius.circular(16),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.08),
+                              color: Colors.black.withValues(alpha: 0.08),
                               blurRadius: 16,
                               offset: Offset(0, 4),
                             ),
@@ -2047,7 +2047,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                   borderRadius: BorderRadius.circular(12),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: AppColors.primaryBlue.withOpacity(0.3),
+                                      color: AppColors.primaryBlue.withValues(alpha: 0.3),
                                       blurRadius: 12,
                                       offset: Offset(0, 4),
                                     ),
@@ -2097,7 +2097,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
                 if (_isSubmitting)
                   Container(
-                    color: Colors.black.withOpacity(0.3),
+                    color: Colors.black.withValues(alpha: 0.3),
                     child: Center(
                       child: Container(
                         padding: const EdgeInsets.all(24),
@@ -2106,7 +2106,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           borderRadius: BorderRadius.circular(16),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
+                              color: Colors.black.withValues(alpha: 0.1),
                               blurRadius: 10,
                               spreadRadius: 2,
                             ),
@@ -2228,7 +2228,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 borderRadius: BorderRadius.circular(12),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: AppColors.primaryBlue.withOpacity(0.3),
+                                    color: AppColors.primaryBlue.withValues(alpha: 0.3),
                                     blurRadius: 8,
                                     offset: Offset(0, 4),
                                   ),
@@ -2268,7 +2268,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 borderRadius: BorderRadius.circular(12),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: AppColors.accentGreen.withOpacity(0.3),
+                                    color: AppColors.accentGreen.withValues(alpha: 0.3),
                                     blurRadius: 8,
                                     offset: Offset(0, 4),
                                   ),

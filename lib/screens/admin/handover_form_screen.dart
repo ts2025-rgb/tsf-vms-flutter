@@ -160,9 +160,9 @@ class _HandoverFormScreenState extends State<HandoverFormScreen> {
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Colors.blue.withOpacity(0.1),
+                        color: Colors.blue.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.blue.withOpacity(0.2)),
+                        border: Border.all(color: Colors.blue.withValues(alpha: 0.2)),
                       ),
                       child: Row(
                         children: [
@@ -278,7 +278,7 @@ class _HandoverFormScreenState extends State<HandoverFormScreen> {
                             borderRadius: BorderRadius.circular(16),
                           ),
                           elevation: 4,
-                          shadowColor: AppColors.accentGreen.withOpacity(0.4),
+                          shadowColor: AppColors.accentGreen.withValues(alpha: 0.4),
                         ),
                         child: _isLoading
                             ? const SizedBox(
@@ -320,7 +320,7 @@ class _HandoverFormScreenState extends State<HandoverFormScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -333,7 +333,7 @@ class _HandoverFormScreenState extends State<HandoverFormScreen> {
             backgroundImage: _volunteer!.photoUrl != null
                 ? NetworkImage(_volunteer!.photoUrl!)
                 : null,
-            backgroundColor: primaryColor.withOpacity(0.1),
+            backgroundColor: primaryColor.withValues(alpha: 0.1),
             child: _volunteer!.photoUrl == null
                 ? Icon(Icons.person_rounded, size: 28, color: primaryColor)
                 : null,
@@ -347,7 +347,7 @@ class _HandoverFormScreenState extends State<HandoverFormScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                     decoration: BoxDecoration(
-                      color: primaryColor.withOpacity(0.1),
+                      color: primaryColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
@@ -381,7 +381,7 @@ class _HandoverFormScreenState extends State<HandoverFormScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
-              color: Colors.orange.withOpacity(0.1),
+              color: Colors.orange.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(

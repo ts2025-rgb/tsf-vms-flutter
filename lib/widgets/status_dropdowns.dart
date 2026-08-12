@@ -138,7 +138,7 @@ class StageFilterDropdown extends StatelessWidget {
         border: Border.all(color: Colors.grey[300]!),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -264,11 +264,11 @@ class _StatusDropdown<T> extends StatelessWidget {
             color: Colors.white,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: onChanged != null ? getColor(value).withOpacity(0.5) : Colors.grey[300]!,
+              color: onChanged != null ? getColor(value).withValues(alpha: 0.5) : Colors.grey[300]!,
             ),
             boxShadow: [
               BoxShadow(
-                color: getColor(value).withOpacity(0.1),
+                color: getColor(value).withValues(alpha: 0.1),
                 blurRadius: 4,
                 offset: const Offset(0, 2),
               ),
@@ -296,7 +296,7 @@ class _StatusDropdown<T> extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: getColor(item).withOpacity(0.1),
+                          color: getColor(item).withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
@@ -478,9 +478,9 @@ class StatusChip extends StatelessWidget {
     return Container(
       padding: padding,
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(small ? 8 : 12),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

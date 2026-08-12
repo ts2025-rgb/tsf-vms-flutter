@@ -255,12 +255,12 @@ class _EnhancedVMSDashboardScreenState
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [primaryColor, primaryColor.withOpacity(0.7)],
+          colors: [primaryColor, primaryColor.withValues(alpha: 0.7)],
         ),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: primaryColor.withOpacity(0.3),
+            color: primaryColor.withValues(alpha: 0.3),
             blurRadius: 15,
             offset: const Offset(0, 5),
           ),
@@ -275,7 +275,7 @@ class _EnhancedVMSDashboardScreenState
               Icons.phone_rounded,
             ),
           ),
-          Container(width: 1, height: 60, color: Colors.white.withOpacity(0.3)),
+          Container(width: 1, height: 60, color: Colors.white.withValues(alpha: 0.3)),
           Expanded(
             child: _buildHighlightMetric(
               'Call Hours',
@@ -305,7 +305,7 @@ class _EnhancedVMSDashboardScreenState
           title,
           style: GoogleFonts.poppins(
             fontSize: 13,
-            color: Colors.white.withOpacity(0.9),
+            color: Colors.white.withValues(alpha: 0.9),
           ),
         ),
       ],
@@ -465,7 +465,7 @@ class _EnhancedVMSDashboardScreenState
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.purple.withOpacity(0.1),
+                    color: Colors.purple.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Icon(
@@ -542,7 +542,7 @@ class _EnhancedVMSDashboardScreenState
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: Colors.green.withOpacity(0.1),
+                color: Colors.green.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(

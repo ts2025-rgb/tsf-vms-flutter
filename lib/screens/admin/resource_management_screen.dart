@@ -93,7 +93,7 @@ class _AdminResourceManagementScreenState extends State<AdminResourceManagementS
   bool _isLoading = true;
   bool _isCreating = false;
   String _selectedFilter = 'all';
-  String _searchQuery = '';
+  final String _searchQuery = '';
   int _currentPage = 1;
   int _totalPages = 1;
   Map<String, dynamic> _stats = {};
@@ -415,7 +415,7 @@ class _AdminResourceManagementScreenState extends State<AdminResourceManagementS
                       ),
                       SizedBox(height: 16),
                       DropdownButtonFormField<String>(
-                        value: _selectedType,
+                        initialValue: _selectedType,
                         decoration: InputDecoration(
                           labelText: 'Type *',
                           border: OutlineInputBorder(
@@ -434,7 +434,7 @@ class _AdminResourceManagementScreenState extends State<AdminResourceManagementS
                       ),
                       SizedBox(height: 16),
                       DropdownButtonFormField<String>(
-                        value: _selectedCategory,
+                        initialValue: _selectedCategory,
                         decoration: InputDecoration(
                           labelText: 'Category *',
                           border: OutlineInputBorder(
@@ -593,7 +593,7 @@ class _AdminResourceManagementScreenState extends State<AdminResourceManagementS
                     end: Alignment.bottomRight,
                     colors: [
                       AppColors.accentGreen,
-                      AppColors.accentGreen.withOpacity(0.7),
+                      AppColors.accentGreen.withValues(alpha: 0.7),
                     ],
                   ),
                 ),
@@ -607,7 +607,7 @@ class _AdminResourceManagementScreenState extends State<AdminResourceManagementS
                         height: 200,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: Colors.white.withOpacity(0.1),
+                          color: Colors.white.withValues(alpha: 0.1),
                         ),
                       ),
                     ),
@@ -685,7 +685,7 @@ class _AdminResourceManagementScreenState extends State<AdminResourceManagementS
                 children: [
                   Expanded(
                     child: DropdownButtonFormField<String>(
-                      value: _selectedFilter,
+                      initialValue: _selectedFilter,
                       decoration: InputDecoration(
                         labelText: 'Filter',
                         border: OutlineInputBorder(
@@ -806,7 +806,7 @@ class _AdminResourceManagementScreenState extends State<AdminResourceManagementS
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.08),
+              color: Colors.black.withValues(alpha: 0.08),
               blurRadius: 15,
               offset: const Offset(0, 8),
             ),
@@ -857,7 +857,7 @@ class _AdminResourceManagementScreenState extends State<AdminResourceManagementS
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withValues(alpha: 0.08),
             blurRadius: 15,
             offset: const Offset(0, 8),
           ),
@@ -886,7 +886,7 @@ class _AdminResourceManagementScreenState extends State<AdminResourceManagementS
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
-                            color: AppColors.primaryBlue.withOpacity(0.1),
+                            color: AppColors.primaryBlue.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
@@ -902,7 +902,7 @@ class _AdminResourceManagementScreenState extends State<AdminResourceManagementS
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
-                            color: AppColors.accentGreen.withOpacity(0.1),
+                            color: AppColors.accentGreen.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
@@ -919,7 +919,7 @@ class _AdminResourceManagementScreenState extends State<AdminResourceManagementS
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
-                              color: Colors.grey.withOpacity(0.1),
+                              color: Colors.grey.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(

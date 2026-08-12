@@ -52,7 +52,7 @@ class _AdminCompanionConnectScreenState
                     end: Alignment.bottomRight,
                     colors: [
                       AppColors.accentGreen,
-                      AppColors.accentGreen.withOpacity(0.7),
+                      AppColors.accentGreen.withValues(alpha: 0.7),
                     ],
                   ),
                 ),
@@ -66,7 +66,7 @@ class _AdminCompanionConnectScreenState
                         height: 200,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: Colors.white.withOpacity(0.1),
+                          color: Colors.white.withValues(alpha: 0.1),
                         ),
                       ),
                     ),
@@ -218,7 +218,7 @@ class _AdminCompanionConnectScreenState
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.08),
+                color: Colors.black.withValues(alpha: 0.08),
                 blurRadius: 15,
                 offset: const Offset(0, 8),
               ),
@@ -229,7 +229,7 @@ class _AdminCompanionConnectScreenState
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
+                  color: color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Icon(

@@ -34,7 +34,7 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
   // Search and filter variables
   late TextEditingController _searchController;
   String _searchQuery = '';
-  String _menteeSearchQuery = '';
+  final String _menteeSearchQuery = '';
   String _volunteerFilterStatus = 'all'; // all, assigned, available
   String _viewMode = 'mentees'; // mentees, volunteers
 
@@ -474,7 +474,7 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
+                        color: Colors.black.withValues(alpha: 0.05),
                         blurRadius: 10,
                         offset: Offset(0, 2),
                       ),
@@ -603,7 +603,7 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                           decoration: BoxDecoration(
-                            color: AppColors.primaryBlue.withOpacity(0.05),
+                            color: AppColors.primaryBlue.withValues(alpha: 0.05),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
@@ -754,7 +754,7 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: Offset(0, 2),
           ),
@@ -857,7 +857,7 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: Offset(0, 2),
           ),
@@ -1007,7 +1007,7 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withValues(alpha: 0.08),
             blurRadius: 15,
             offset: const Offset(0, 8),
           ),
@@ -1031,7 +1031,7 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
                     height: 56,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: AppColors.primaryBlue.withOpacity(0.1),
+                      color: AppColors.primaryBlue.withValues(alpha: 0.1),
                     ),
                     child: volunteer['photoUrl'] != null && volunteer['photoUrl'].toString().isNotEmpty
                         ? ClipOval(
@@ -1106,8 +1106,8 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     decoration: BoxDecoration(
                       color: assignedMentee != null
-                          ? Colors.green.withOpacity(0.1)
-                          : Colors.orange.withOpacity(0.1),
+                          ? Colors.green.withValues(alpha: 0.1)
+                          : Colors.orange.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Row(
@@ -1139,9 +1139,9 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.green.withOpacity(0.05),
+                    color: Colors.green.withValues(alpha: 0.05),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.green.withOpacity(0.2)),
+                    border: Border.all(color: Colors.green.withValues(alpha: 0.2)),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -1168,7 +1168,7 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
                             height: 36,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: Colors.green.withOpacity(0.1),
+                              color: Colors.green.withValues(alpha: 0.1),
                             ),
                             child: assignedMentee['photoUrl'] != null && assignedMentee['photoUrl'].toString().isNotEmpty
                                 ? ClipOval(
@@ -1220,7 +1220,7 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
                             icon: Icon(Icons.close_rounded, size: 18, color: Colors.red),
                             constraints: BoxConstraints.tight(const Size(32, 32)),
                             style: IconButton.styleFrom(
-                              backgroundColor: Colors.red.withOpacity(0.1),
+                              backgroundColor: Colors.red.withValues(alpha: 0.1),
                               padding: EdgeInsets.zero,
                             ),
                           ),
@@ -1233,9 +1233,9 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
                 Container(
                   padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
                   decoration: BoxDecoration(
-                    color: Colors.orange.withOpacity(0.05),
+                    color: Colors.orange.withValues(alpha: 0.05),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.orange.withOpacity(0.2)),
+                    border: Border.all(color: Colors.orange.withValues(alpha: 0.2)),
                   ),
                   child: Row(
                     children: [
@@ -1304,7 +1304,7 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
             borderRadius: BorderRadius.circular(24),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.black.withValues(alpha: 0.1),
                 blurRadius: 20,
                 offset: const Offset(0, 10),
               ),
@@ -1343,7 +1343,7 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
-                  color: AppColors.primaryBlue.withOpacity(0.1),
+                  color: AppColors.primaryBlue.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
@@ -1398,7 +1398,7 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         leading: CircleAvatar(
-                          backgroundColor: AppColors.primaryBlue.withOpacity(0.1),
+                          backgroundColor: AppColors.primaryBlue.withValues(alpha: 0.1),
                           backgroundImage: mentee['photoUrl'] != null
                               ? NetworkImage(mentee['photoUrl'])
                               : null,
@@ -1461,7 +1461,7 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
             borderRadius: BorderRadius.circular(24),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.black.withValues(alpha: 0.1),
                 blurRadius: 20,
                 offset: const Offset(0, 10),
               ),
@@ -1500,7 +1500,7 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
-                  color: AppColors.primaryBlue.withOpacity(0.1),
+                  color: AppColors.primaryBlue.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
@@ -1572,7 +1572,7 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
                         });
                       },
                       backgroundColor: Colors.white,
-                      selectedColor: AppColors.primaryBlue.withOpacity(0.2),
+                      selectedColor: AppColors.primaryBlue.withValues(alpha: 0.2),
                       side: BorderSide(
                         color: _volunteerFilterStatus == 'all' ? AppColors.primaryBlue : Colors.grey.shade300,
                       ),
@@ -1587,7 +1587,7 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
                         });
                       },
                       backgroundColor: Colors.white,
-                      selectedColor: Colors.green.withOpacity(0.2),
+                      selectedColor: Colors.green.withValues(alpha: 0.2),
                       side: BorderSide(
                         color: _volunteerFilterStatus == 'available' ? Colors.green : Colors.grey.shade300,
                       ),
@@ -1602,7 +1602,7 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
                         });
                       },
                       backgroundColor: Colors.white,
-                      selectedColor: Colors.orange.withOpacity(0.2),
+                      selectedColor: Colors.orange.withValues(alpha: 0.2),
                       side: BorderSide(
                         color: _volunteerFilterStatus == 'assigned' ? Colors.orange : Colors.grey.shade300,
                       ),
@@ -1669,7 +1669,7 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
                                 children: [
                                   CircleAvatar(
                                     radius: 24,
-                                    backgroundColor: AppColors.primaryBlue.withOpacity(0.1),
+                                    backgroundColor: AppColors.primaryBlue.withValues(alpha: 0.1),
                                     backgroundImage: volunteer['photoUrl'] != null
                                         ? NetworkImage(volunteer['photoUrl'])
                                         : null,
@@ -1820,7 +1820,7 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
             children: [
               CircleAvatar(
                 radius: 20,
-                backgroundColor: AppColors.primaryBlue.withOpacity(0.1),
+                backgroundColor: AppColors.primaryBlue.withValues(alpha: 0.1),
                 child: mentee['photoUrl'] != null && mentee['photoUrl'].toString().isNotEmpty
                     ? ClipOval(
                         child: Image.network(
@@ -1901,7 +1901,7 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
                             Text('Gender', style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.grey.shade700)),
                             const SizedBox(height: 8),
                             DropdownButtonFormField<String>(
-                              value: selectedGender,
+                              initialValue: selectedGender,
                               decoration: InputDecoration(
                                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                                 contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -1943,7 +1943,7 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
                   Text('Status', style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.grey.shade700)),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<String>(
-                    value: selectedStatus,
+                    initialValue: selectedStatus,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                       contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -2183,7 +2183,7 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
             borderRadius: BorderRadius.circular(24),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.black.withValues(alpha: 0.1),
                 blurRadius: 20,
                 offset: const Offset(0, 10),
               ),
@@ -2381,7 +2381,7 @@ class _AdminMenteeManagementPageState extends State<AdminMenteeManagementPage> {
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withValues(alpha: 0.1),
                   blurRadius: 20,
                   offset: const Offset(0, 10),
                 ),
@@ -2646,10 +2646,10 @@ class _MenteeHoverCardState extends State<_MenteeHoverCard> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.primaryBlue.withOpacity(0.18)),
+          border: Border.all(color: AppColors.primaryBlue.withValues(alpha: 0.18)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.14),
+              color: Colors.black.withValues(alpha: 0.14),
               blurRadius: 24,
               offset: const Offset(0, 8),
             ),
@@ -2664,7 +2664,7 @@ class _MenteeHoverCardState extends State<_MenteeHoverCard> {
               children: [
                 CircleAvatar(
                   radius: 22,
-                  backgroundColor: AppColors.primaryBlue.withOpacity(0.1),
+                  backgroundColor: AppColors.primaryBlue.withValues(alpha: 0.1),
                   child: mentee['photoUrl'] != null &&
                           mentee['photoUrl'].toString().isNotEmpty
                       ? ClipOval(
@@ -2699,7 +2699,7 @@ class _MenteeHoverCardState extends State<_MenteeHoverCard> {
                             horizontal: 7, vertical: 2),
                         decoration: BoxDecoration(
                           color: status == 'active'
-                              ? AppColors.accentGreen.withOpacity(0.15)
+                              ? AppColors.accentGreen.withValues(alpha: 0.15)
                               : Colors.grey.shade200,
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -2758,13 +2758,13 @@ class _MenteeHoverCardState extends State<_MenteeHoverCard> {
                   const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
               decoration: BoxDecoration(
                 color: isAssigned
-                    ? AppColors.accentGreen.withOpacity(0.08)
-                    : AppColors.accentOrange.withOpacity(0.08),
+                    ? AppColors.accentGreen.withValues(alpha: 0.08)
+                    : AppColors.accentOrange.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
                   color: isAssigned
-                      ? AppColors.accentGreen.withOpacity(0.35)
-                      : AppColors.accentOrange.withOpacity(0.35),
+                      ? AppColors.accentGreen.withValues(alpha: 0.35)
+                      : AppColors.accentOrange.withValues(alpha: 0.35),
                 ),
               ),
               child: Row(
@@ -2943,7 +2943,7 @@ class _MenteeHoverCardState extends State<_MenteeHoverCard> {
               children: [
                 CircleAvatar(
                   radius: 30,
-                  backgroundColor: AppColors.primaryBlue.withOpacity(0.1),
+                  backgroundColor: AppColors.primaryBlue.withValues(alpha: 0.1),
                   child: mentee['photoUrl'] != null &&
                           mentee['photoUrl'].toString().isNotEmpty
                       ? ClipOval(
@@ -2988,7 +2988,7 @@ class _MenteeHoverCardState extends State<_MenteeHoverCard> {
                                 horizontal: 8, vertical: 2),
                             decoration: BoxDecoration(
                               color: status == 'active'
-                                  ? AppColors.accentGreen.withOpacity(0.1)
+                                  ? AppColors.accentGreen.withValues(alpha: 0.1)
                                   : Colors.grey.shade200,
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -3011,7 +3011,7 @@ class _MenteeHoverCardState extends State<_MenteeHoverCard> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: AppColors.primaryBlue.withOpacity(0.1),
+                    color: AppColors.primaryBlue.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
@@ -3030,13 +3030,13 @@ class _MenteeHoverCardState extends State<_MenteeHoverCard> {
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: isAssigned
-                    ? AppColors.accentGreen.withOpacity(0.1)
-                    : AppColors.accentOrange.withOpacity(0.1),
+                    ? AppColors.accentGreen.withValues(alpha: 0.1)
+                    : AppColors.accentOrange.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
                   color: isAssigned
-                      ? AppColors.accentGreen.withOpacity(0.3)
-                      : AppColors.accentOrange.withOpacity(0.3),
+                      ? AppColors.accentGreen.withValues(alpha: 0.3)
+                      : AppColors.accentOrange.withValues(alpha: 0.3),
                 ),
               ),
               child: Row(

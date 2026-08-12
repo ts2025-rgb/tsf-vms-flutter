@@ -326,7 +326,7 @@ class _VolunteerResourcesScreenState extends State<VolunteerResourcesScreen> {
                     end: Alignment.bottomRight,
                     colors: [
                       AppColors.primaryBlue,
-                      AppColors.primaryBlue.withOpacity(0.7),
+                      AppColors.primaryBlue.withValues(alpha: 0.7),
                     ],
                   ),
                 ),
@@ -340,7 +340,7 @@ class _VolunteerResourcesScreenState extends State<VolunteerResourcesScreen> {
                         height: 200,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: Colors.white.withOpacity(0.1),
+                          color: Colors.white.withValues(alpha: 0.1),
                         ),
                       ),
                     ),
@@ -404,7 +404,7 @@ class _VolunteerResourcesScreenState extends State<VolunteerResourcesScreen> {
                   const SizedBox(height: 16),
                   // Filters
                   DropdownButtonFormField<String>(
-                    value: _selectedCategory,
+                    initialValue: _selectedCategory,
                     decoration: InputDecoration(
                       labelText: 'Category',
                       border: OutlineInputBorder(
@@ -420,7 +420,7 @@ class _VolunteerResourcesScreenState extends State<VolunteerResourcesScreen> {
                           value: category['value'] as String,
                           child: Text('${category['label']} (${category['count']})'),
                         );
-                      }).toList(),
+                      }),
                     ],
                     onChanged: (value) {
                       setState(() => _selectedCategory = value!);
@@ -429,7 +429,7 @@ class _VolunteerResourcesScreenState extends State<VolunteerResourcesScreen> {
                   ),
                   const SizedBox(height: 16),
                   DropdownButtonFormField<String>(
-                    value: _selectedType,
+                    initialValue: _selectedType,
                     decoration: InputDecoration(
                       labelText: 'Type',
                       border: OutlineInputBorder(
@@ -445,7 +445,7 @@ class _VolunteerResourcesScreenState extends State<VolunteerResourcesScreen> {
                           value: type['value'] as String,
                           child: Text('${type['label']} (${type['count']})'),
                         );
-                      }).toList(),
+                      }),
                     ],
                     onChanged: (value) {
                       setState(() => _selectedType = value!);
@@ -559,7 +559,7 @@ class _VolunteerResourcesScreenState extends State<VolunteerResourcesScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withValues(alpha: 0.08),
             blurRadius: 15,
             offset: const Offset(0, 8),
           ),
@@ -598,7 +598,7 @@ class _VolunteerResourcesScreenState extends State<VolunteerResourcesScreen> {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
-                                color: AppColors.primaryBlue.withOpacity(0.1),
+                                color: AppColors.primaryBlue.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Text(
@@ -614,7 +614,7 @@ class _VolunteerResourcesScreenState extends State<VolunteerResourcesScreen> {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
-                                color: AppColors.accentGreen.withOpacity(0.1),
+                                color: AppColors.accentGreen.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Text(

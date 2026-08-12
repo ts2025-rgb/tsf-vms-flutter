@@ -49,7 +49,7 @@ class _LoginPageState extends State<LoginPage> {
 
       // Safely parse response body only if present
       Map<String, dynamic>? data;
-      if (res.body != null && res.body.isNotEmpty) {
+      if (res.body.isNotEmpty) {
         try {
           data = json.decode(res.body) as Map<String, dynamic>;
         } catch (_) {
@@ -110,7 +110,7 @@ class _LoginPageState extends State<LoginPage> {
       );
 
       Map<String, dynamic>? data;
-      if (res.body != null && res.body.isNotEmpty) {
+      if (res.body.isNotEmpty) {
         try {
           data = json.decode(res.body) as Map<String, dynamic>;
         } catch (_) {

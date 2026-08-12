@@ -113,7 +113,7 @@ class _CertificateManagementScreenState extends State<CertificateManagementScree
       context: context,
       barrierDismissible: false,
       builder: (context) => Container(
-        color: Colors.black.withOpacity(0.3),
+        color: Colors.black.withValues(alpha: 0.3),
         child: Center(
           child: Container(
             padding: const EdgeInsets.all(24),
@@ -298,7 +298,7 @@ class _CertificateManagementScreenState extends State<CertificateManagementScree
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -316,7 +316,7 @@ class _CertificateManagementScreenState extends State<CertificateManagementScree
                   backgroundImage: volunteer.photoUrl != null
                       ? NetworkImage(volunteer.photoUrl!)
                       : null,
-                  backgroundColor: primaryColor.withOpacity(0.1),
+                  backgroundColor: primaryColor.withValues(alpha: 0.1),
                   child: volunteer.photoUrl == null
                       ? Icon(Icons.person_rounded, size: 28, color: primaryColor)
                       : null,
@@ -333,7 +333,7 @@ class _CertificateManagementScreenState extends State<CertificateManagementScree
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                           decoration: BoxDecoration(
-                            color: primaryColor.withOpacity(0.1),
+                            color: primaryColor.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
@@ -392,8 +392,8 @@ class _CertificateManagementScreenState extends State<CertificateManagementScree
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: isEligible
-                        ? Colors.amber.withOpacity(0.1)
-                        : Colors.green.withOpacity(0.1),
+                        ? Colors.amber.withValues(alpha: 0.1)
+                        : Colors.green.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
@@ -441,7 +441,7 @@ class _CertificateManagementScreenState extends State<CertificateManagementScree
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
-                  color: Colors.green.withOpacity(0.1),
+                  color: Colors.green.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(

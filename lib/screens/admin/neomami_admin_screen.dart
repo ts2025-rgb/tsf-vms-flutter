@@ -41,7 +41,7 @@ class _NeomamAdminScreenState extends State<NeomamAdminScreen>
   String? _entriesError;
   String _entriesSearch = '';
   String _entriesSort = 'latest';
-  String _filterVolunteerId = '';
+  final String _filterVolunteerId = '';
   int _currentPage = 1;
   int _totalPages = 1;
 
@@ -261,13 +261,13 @@ class _NeomamAdminScreenState extends State<NeomamAdminScreen>
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: (info['color'] as Color).withOpacity(0.3),
+          color: (info['color'] as Color).withValues(alpha: 0.3),
           width: 2,
         ),
         gradient: LinearGradient(
           colors: [
-            (info['color'] as Color).withOpacity(0.05),
-            (info['color'] as Color).withOpacity(0.02),
+            (info['color'] as Color).withValues(alpha: 0.05),
+            (info['color'] as Color).withValues(alpha: 0.02),
           ],
         ),
       ),
@@ -276,7 +276,7 @@ class _NeomamAdminScreenState extends State<NeomamAdminScreen>
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: (info['color'] as Color).withOpacity(0.15),
+              color: (info['color'] as Color).withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(
@@ -312,7 +312,7 @@ class _NeomamAdminScreenState extends State<NeomamAdminScreen>
           Icon(
             Icons.open_in_new,
             size: 16,
-            color: (info['color'] as Color).withOpacity(0.6),
+            color: (info['color'] as Color).withValues(alpha: 0.6),
           ),
         ],
       ),
@@ -386,7 +386,7 @@ class _NeomamAdminScreenState extends State<NeomamAdminScreen>
             fontWeight: FontWeight.w600,
           ),
           unselectedLabelStyle: GoogleFonts.poppins(
-            color: Colors.white.withOpacity(0.7),
+            color: Colors.white.withValues(alpha: 0.7),
           ),
           tabs: [
             Tab(
@@ -435,7 +435,7 @@ class _NeomamAdminScreenState extends State<NeomamAdminScreen>
             Icon(
               Icons.error_outline,
               size: 64,
-              color: Colors.red.withOpacity(0.5),
+              color: Colors.red.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
             Text(
@@ -582,7 +582,7 @@ class _NeomamAdminScreenState extends State<NeomamAdminScreen>
             trailing: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               decoration: BoxDecoration(
-                color: AppColors.accentGreen.withOpacity(0.2),
+                color: AppColors.accentGreen.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
@@ -614,8 +614,8 @@ class _NeomamAdminScreenState extends State<NeomamAdminScreen>
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                AppColors.primaryBlue.withOpacity(0.1),
-                AppColors.secondaryBlue.withOpacity(0.05),
+                AppColors.primaryBlue.withValues(alpha: 0.1),
+                AppColors.secondaryBlue.withValues(alpha: 0.05),
               ],
             ),
           ),
@@ -654,7 +654,7 @@ class _NeomamAdminScreenState extends State<NeomamAdminScreen>
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: AppColors.accentGreen.withOpacity(0.2),
+                  color: AppColors.accentGreen.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -780,7 +780,7 @@ class _NeomamAdminScreenState extends State<NeomamAdminScreen>
                   Icon(
                     Icons.error_outline,
                     size: 64,
-                    color: Colors.red.withOpacity(0.5),
+                    color: Colors.red.withValues(alpha: 0.5),
                   ),
                   const SizedBox(height: 16),
                   Text(
@@ -944,10 +944,10 @@ class _NeomamAdminScreenState extends State<NeomamAdminScreen>
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [color.withOpacity(0.1), color.withOpacity(0.05)],
+            colors: [color.withValues(alpha: 0.1), color.withValues(alpha: 0.05)],
           ),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: color.withOpacity(0.2)),
+          border: Border.all(color: color.withValues(alpha: 0.2)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1011,7 +1011,7 @@ class _NeomamAdminScreenState extends State<NeomamAdminScreen>
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: AppColors.primaryBlue.withOpacity(0.2),
+            color: AppColors.primaryBlue.withValues(alpha: 0.2),
             width: 1,
           ),
         ),
@@ -1024,8 +1024,8 @@ class _NeomamAdminScreenState extends State<NeomamAdminScreen>
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    AppColors.primaryBlue.withOpacity(0.08),
-                    AppColors.secondaryBlue.withOpacity(0.04),
+                    AppColors.primaryBlue.withValues(alpha: 0.08),
+                    AppColors.secondaryBlue.withValues(alpha: 0.04),
                   ],
                 ),
               ),
@@ -1067,7 +1067,7 @@ class _NeomamAdminScreenState extends State<NeomamAdminScreen>
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.accentGreen.withOpacity(0.2),
+                          color: AppColors.accentGreen.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
@@ -1155,7 +1155,7 @@ class _NeomamAdminScreenState extends State<NeomamAdminScreen>
                                       decoration: BoxDecoration(
                                         border: Border.all(
                                           color: AppColors.primaryBlue
-                                              .withOpacity(0.3),
+                                              .withValues(alpha: 0.3),
                                           width: 1,
                                         ),
                                         borderRadius: BorderRadius.circular(8),
@@ -1421,7 +1421,7 @@ class _AdminEditEntryDialogState extends State<_AdminEditEntryDialog> {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
+                      color: Colors.white.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Icon(
@@ -1496,7 +1496,7 @@ class _AdminEditEntryDialogState extends State<_AdminEditEntryDialog> {
               decoration: BoxDecoration(
                 border: Border(
                   top: BorderSide(
-                    color: AppColors.primaryBlue.withOpacity(0.1),
+                    color: AppColors.primaryBlue.withValues(alpha: 0.1),
                     width: 1,
                   ),
                 ),
@@ -1592,17 +1592,17 @@ class _AdminEditEntryDialogState extends State<_AdminEditEntryDialog> {
               color: Colors.grey.shade400,
             ),
             filled: true,
-            fillColor: AppColors.primaryBlue.withOpacity(0.05),
+            fillColor: AppColors.primaryBlue.withValues(alpha: 0.05),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(
-                color: AppColors.primaryBlue.withOpacity(0.2),
+                color: AppColors.primaryBlue.withValues(alpha: 0.2),
               ),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(
-                color: AppColors.primaryBlue.withOpacity(0.2),
+                color: AppColors.primaryBlue.withValues(alpha: 0.2),
               ),
             ),
             focusedBorder: OutlineInputBorder(
