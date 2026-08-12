@@ -1,25 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
-    <!-- Deny cleartext by default; only allow trusted local development hosts. -->
-    <base-config cleartextTrafficPermitted="false" />
-
-    <!-- Android emulator localhost mapping -->
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
+    </base-config>
     <domain-config cleartextTrafficPermitted="true">
-        <domain>10.0.2.2</domain>
+        <domain includeSubdomains="true">10.0.2.2</domain>
+        <domain includeSubdomains="true">localhost</domain>
+        <domain includeSubdomains="true">tsf-backend-production.up.railway.app</domain>
+        <domain includeSubdomains="true">vms.py4p.org</domain>
     </domain-config>
-
-    <!-- Genymotion emulator localhost mapping -->
-    <domain-config cleartextTrafficPermitted="true">
-        <domain>10.0.3.2</domain>
-    </domain-config>
-
-    <!-- Add specific local development IPs here. -->
-    <domain-config cleartextTrafficPermitted="true">
-        <domain>192.168.1.100</domain>
-    </domain-config>
-    <!-- Add more exact local IPs as needed, for example:
-         <domain-config cleartextTrafficPermitted="true">
-             <domain>192.168.0.101</domain>
-         </domain-config>
-    -->
 </network-security-config>
