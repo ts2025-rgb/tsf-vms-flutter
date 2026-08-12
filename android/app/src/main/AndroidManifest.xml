@@ -2,7 +2,9 @@
     <application
         android:label="py4p_vms"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:usesCleartextTraffic="true"
+        android:networkSecurityConfig="@xml/network_security_config">
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -43,3 +45,4 @@
         </intent>
     </queries>
 </manifest>
+
