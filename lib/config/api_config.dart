@@ -9,7 +9,7 @@ class ApiConfig {
   static const String _debugBaseUrl =
       "https://shrew-concrete-cobra.ngrok-free.app";
   static const String _productionBaseUrl =
-      "https://api.py4p.org";
+      "https://tsf-backend-production.up.railway.app/";
 
   // Current base URL based on debug flag
   static String get baseUrl => kIsDebug ? _debugBaseUrl : _productionBaseUrl;
