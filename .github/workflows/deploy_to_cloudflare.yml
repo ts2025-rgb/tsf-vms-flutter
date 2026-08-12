@@ -1,8 +1,9 @@
 name: Deploy Flutter Web to Cloudflare
 
 on:
-  push:
-    branches: [ main ]
+  workflow_dispatch:
+    # Disabled automatic deployment - using GitHub Pages instead
+    # To re-enable: change to "push:" with "branches: [ main ]"
 
 jobs:
   deploy:

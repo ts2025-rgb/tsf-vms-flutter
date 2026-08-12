@@ -1,9 +1,9 @@
 name: Build and Deploy Flutter Web to Cloudflare
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
+    # Disabled - using GitHub Pages deployment instead
+    # Original trigger: push to main
 
 jobs:
   deploy:

@@ -1,9 +1,9 @@
 name: Deploy Flutter Web
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
+    # Disabled - using flutter_web_deploy.yml instead (optimized GitHub Pages deployment)
+    # Original trigger: push to main
 
 permissions:
   contents: write
