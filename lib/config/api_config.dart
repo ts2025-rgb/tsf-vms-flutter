@@ -1,40 +1,103 @@
-/// API Configuration
-/// Set [kIsDebug] to true for development (ngrok/local tunnel), false for production (Koyeb)
-class ApiConfig {
-  // Toggle this flag to switch between development and production.
-  // Production must use HTTPS only.
-  // Set to `true` while developing on the Android emulator and using the local tunnel URL below.
-  static const bool kIsDebug = true; // Set to true for local development (ngrok/local tunnel)
 
-  // Toggle this to use a direct local development host on Android.
-  // Enable this only when you need plain HTTP to a known local IP from the emulator/device.
-  // When using a local tunnel (https) you should keep this false.
+/// API Configuration
+/// Updated to work without ngrok dependency
+/// 
+/// THREE WAYS TO USE:
+/// 1. PRODUCTION (Recommended for testing): Set kIsDebug = false (uses Railway)
+/// 2. CLOUDFLARE TUNNEL (Dev with local backend): Set kIsDebug = true (use Cloudflare URL)
+/// 3. LOCAL IP (Same WiFi only): Set kUseLocalDevHost = true (no setup needed)
+
+class ApiConfig {
+  // ============ CONFIGURATION FLAGS ============
+  
+  /// Set to true to use Cloudflare Tunnel (development)
+  /// Set to false to use production Railway URL
+  static const bool kIsDebug = true;  // ✅ Set to true for Cloudflare Tunnel development
+
+  /// Set to true ONLY for local development on same WiFi (HTTP only)
+  /// DO NOT use this in production
   static const bool kUseLocalDevHost = false;
 
-  // Base URLs
-  static const String _debugBaseUrl =
-      "https://shiny-jobs-grab.loca.lt"; // local tunnel for emulator/device
-  static const String _productionBaseUrl =
-      "https://tsf-backend-production.up.railway.app";
+  // ============ BASE URLS ============
   
-
-  // Use an explicit emulator/device local host IP when developing against a direct backend.
-  // Examples:
-  //   Android emulator: http://10.0.2.2:8080
-  //   Genymotion emulator: http://10.0.3.2:8080
-  //   Physical device: http://192.168.1.100:8080
+  /// Local development via direct IP (HTTP only, same WiFi required)
+  /// Android Emulator: http://10.0.2.2:8080
+  /// Physical Device: http://192.168.x.x:8080 (replace with your laptop's IP)
   static const String _localBaseUrl = "http://10.0.2.2:8080";
 
-  // Current base URL based on debug/local selection.
+  /// Production backend (Railway - works everywhere)
+  static const String _productionBaseUrl =
+      "https://tsf-backend-production.up.railway.app";
+
+  /// Cloudflare Tunnel URL (free ngrok replacement - dev only)
+  /// ✅ Active Tunnel URL - Your current development tunnel
+  static const String _cloudflareBaseUrl =
+      "https://essentially-contacting-cfr-promotions.trycloudflare.com";
+
+  // ============ SELECTED URL ============
+  
+  /// Returns the current API base URL based on configuration
   static String get baseUrl {
-    if (kUseLocalDevHost) return _localBaseUrl;
-    return kIsDebug ? _debugBaseUrl : _productionBaseUrl;
+    if (kUseLocalDevHost) {
+      return _localBaseUrl;  // Local IP mode
+    }
+    return kIsDebug ? _cloudflareBaseUrl : _productionBaseUrl;
   }
 
-  // API endpoint (adds /api to base URL)
+  /// Returns the full API endpoint URL (adds /api)
   static String get apiUrl => "$baseUrl/api";
 
-  // Environment name for logging/display
-  static String get environmentName =>
-      kIsDebug ? "Development (local tunnel)" : "Production (Railway)";
+  /// Returns human-readable environment name for debugging
+  static String get environmentName {
+    if (kUseLocalDevHost) {
+      return "Development (Local IP - Same WiFi)";
+    }
+    if (kIsDebug) {
+      return "Development (Cloudflare Tunnel)";
+    }
+    return "Production (Railway)";
+  }
+
+  // ============ QUICK START GUIDE ============
+  
+  /// YOUR SETUP IS READY! Here's what to do next:
+  /// 
+  /// 1. ✅ Backend tunnel is running
+  ///    URL: https://essentially-contacting-cfr-promotions.trycloudflare.com
+  /// 
+  /// 2. ✅ Flutter config updated (kIsDebug = true)
+  /// 
+  /// 3. NEXT: Rebuild and run the app
+  ///    flutter clean
+  ///    flutter pub get
+  ///    flutter run
+  /// 
+  /// 4. Test the connection
+  ///    - Open Login screen
+  ///    - Try sending OTP
+  ///    - Check if it works!
+  /// 
+  /// ⚠️ IMPORTANT: Keep the cloudflared tunnel running in background
+  /// If tunnel stops, the URL won't work. Restart with:
+  ///    cloudflared tunnel --url http://localhost:8080
+  
+  // ============ ENVIRONMENT VERIFICATION ============
+  
+  /// Debug info: logs current configuration
+  static String getConfigInfo() {
+    return '''
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📱 API Configuration Info
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Environment:  $environmentName
+API URL:      $apiUrl
+Base URL:     $baseUrl
+Debug Mode:   $kIsDebug
+Local Mode:   $kUseLocalDevHost
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ Cloudflare Tunnel URL: 
+   https://essentially-contacting-cfr-promotions.trycloudflare.com
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    ''';
+  }
 }
