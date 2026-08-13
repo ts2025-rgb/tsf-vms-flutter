@@ -28,7 +28,7 @@ class ApiConfig {
 
   /// Production backend (Railway / Koyeb)
   static const String _productionBaseUrl =
-      "https://tsf-backend-production.up.railway.app";
+      "https://corsproxy.io/?https://tsf-backend-production.up.railway.app";
 
   /// ngrok Tunnel URL (dev only)
   /// Example (your current active tunnel):
