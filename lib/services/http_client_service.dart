@@ -2,8 +2,9 @@ import 'package:http/http.dart' as http;
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 
-/// Custom HTTP Client Service for handling modern Android CORS issues
+/// Custom HTTP Client Service for handling modern Android network requests
 /// Provides proper certificate handling and request configuration
+/// Works with: Local IP, Cloudflare Tunnel, and Production URLs
 class HttpClientService {
   static final HttpClientService _instance = HttpClientService._internal();
 
@@ -26,10 +27,13 @@ class HttpClientService {
         (X509Certificate cert, String host, int port) {
       // Allow self-signed certificates only in debug/development
       if (kDebugMode) {
-        // Allow ngrok and development URLs
-        if (host.contains('ngrok') || 
-            host.contains('localhost') || 
-            host.contains('127.0.0.1')) {
+        // Allow development URLs
+        if (host.contains('localhost') || 
+            host.contains('127.0.0.1') ||
+            host.contains('10.0.2.2') ||
+            host.contains('192.168') ||
+            host.contains('loca.lt') ||  // localtunnel.me alternative
+            host.contains('trycloudflare.com')) {  // Cloudflare Tunnel
           return true;  // Accept self-signed certificate
         }
       }
@@ -132,14 +136,14 @@ class HttpClientService {
     );
   }
 
-  /// Get default headers needed for modern Android and ngrok
+  /// Get default headers needed for modern Android
+  /// Updated: Removed ngrok-specific header, works with all tunnel types
   static Map<String, String> _getDefaultHeaders() {
     return {
       'Content-Type': 'application/json; charset=utf-8',
       'Accept': 'application/json',
       'Accept-Encoding': 'gzip, deflate, br',
       'User-Agent': 'TSF-VMS-Flutter/1.0',
-      'ngrok-skip-browser-warning': '69420',
       'X-Forwarded-Proto': 'https',
       'Connection': 'keep-alive',
     };
