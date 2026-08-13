@@ -7,8 +7,7 @@ class ApiConfig {
   static const bool kUseLocalDevHost = false;
 
   // Raw Backend URLs
-  static const String _productionBaseUrl = "https://tsf-backend-production.up.railway.app";
-  static const String _corsProxyPrefix = "https://corsproxy.io/?";
+  static const String _productionBaseUrl = "https://corsproxy.io/?https://tsf-backend-production.up.railway.app";
   static const String _ngrokBaseUrl = "https://bobbing-sterility-subheader.ngrok-free.dev";
   static const String _cloudflareBaseUrl = "https://essentially-contacting-cfr-promotions.trycloudflare.com";
 
@@ -16,13 +15,11 @@ class ApiConfig {
     if (kIsDebug) {
       return kUseNgrok ? _ngrokBaseUrl : _cloudflareBaseUrl;
     }
+     if (!kIsDebug) return _productionBaseUrl;
+    // kIsDebug == true -> choose tunnel provider
+    return kUseNgrok ? _ngrokBaseUrl : _cloudflareBaseUrl;
 
     // Production environment logic
-    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
-      return _productionBaseUrl; // Direct connection for Android native APK
-    } else if (kIsWeb) {
-      return "$_corsProxyPrefix$_productionBaseUrl"; // CORS proxy for web builds
-    }
 
     return _productionBaseUrl;
   }
