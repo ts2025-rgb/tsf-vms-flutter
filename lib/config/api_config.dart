@@ -19,9 +19,7 @@ class ApiConfig {
     // kIsDebug == true -> choose tunnel provider
     return kUseNgrok ? _ngrokBaseUrl : _cloudflareBaseUrl;
 
-    // Production environment logic
 
-    return _productionBaseUrl;
   }
 
   static String get apiUrl => "$baseUrl/api";
