@@ -33,6 +33,12 @@ migrate_working_dir/
 .pub/
 /build/
 
+# Wrangler cache and temporary files
+.wrangler/
+
+# Ignore local build output for web
+/build/web/
+
 # Symbolication related
 app.*.symbols
 
