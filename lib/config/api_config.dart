@@ -26,31 +26,37 @@ class ApiConfig {
   /// Physical Device: http://192.168.x.x:8080 (replace with your laptop's IP)
   static const String _localBaseUrl = "http://10.0.2.2:8080";
 
-  /// Production backend (Railway / Koyeb)
-  static const String _productionBaseUrl =
-      "https://corsproxy.io/?https://tsf-backend-production.up.railway.app";
+  static const String _rawProductionUrl = "https://tsf-backend-production.up.railway.app";
+  static const String _corsProxyPrefix = "https://corsproxy.io/?";
 
-  /// ngrok Tunnel URL (dev only)
-  /// Example (your current active tunnel):
-  static const String _ngrokBaseUrl =
-      "https://bobbing-sterility-subheader.ngrok-free.dev";
+  static const String _ngrokBaseUrl = "https://bobbing-sterility-subheader.ngrok-free.dev";
+  static const String _cloudflareBaseUrl = "https://essentially-contacting-cfr-promotions.trycloudflare.com";
 
-  /// Cloudflare Tunnel URL (alternate dev option)
-  static const String _cloudflareBaseUrl =
-      "https://essentially-contacting-cfr-promotions.trycloudflare.com";
-
-  // ============ SELECTED URL ============
-  /// Returns the current API base URL based on configuration
+  /// Returns the current API base URL dynamically based on environment and platform
   static String get baseUrl {
     if (kUseLocalDevHost) return _localBaseUrl;
-    if (!kIsDebug) return _productionBaseUrl;
-    // kIsDebug == true -> choose tunnel provider
-    return kUseNgrok ? _ngrokBaseUrl : _cloudflareBaseUrl;
+    
+    if (kIsDebug) {
+      return kUseNgrok ? _ngrokBaseUrl : _cloudflareBaseUrl;
+    }
+
+    // PRODUCTION LOGIC:
+    // Native Android / iOS / Desktop DO NOT suffer from browser CORS.
+    // Only Flutter Web requires the CORS proxy.
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+      // Direct connection for Android APK/App
+      return _rawProductionUrl;
+    } else if (kIsWeb) {
+      // Browsers enforce CORS, route via proxy
+      return "$_corsProxyPrefix$_rawProductionUrl";
+    }
+
+    // Default fallback (e.g. iOS or Desktop native builds)
+    return _rawProductionUrl;
   }
 
-  /// Returns the full API endpoint URL (adds /api)
   static String get apiUrl => "$baseUrl/api";
-
+  }
   /// Returns human-readable environment name for debugging
   static String get environmentName {
     if (kUseLocalDevHost) return "Development (Local IP - Same WiFi)";
