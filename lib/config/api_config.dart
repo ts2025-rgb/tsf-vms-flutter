@@ -1,18 +1,19 @@
-
 /// API Configuration
-/// Set [kIsDebug] to true for development (ngrok), false for production (Koyeb)
+/// Set [kIsDebug] to true for development (ngrok/local tunnel), false for production (Koyeb)
 class ApiConfig {
   // Toggle this flag to switch between development and production.
   // Production must use HTTPS only.
-  static const bool kIsDebug = false; // Set to false for production
+  // Set to `true` while developing on the Android emulator and using the local tunnel URL below.
+  static const bool kIsDebug = true; // Set to true for local development (ngrok/local tunnel)
 
   // Toggle this to use a direct local development host on Android.
   // Enable this only when you need plain HTTP to a known local IP from the emulator/device.
+  // When using a local tunnel (https) you should keep this false.
   static const bool kUseLocalDevHost = false;
 
   // Base URLs
   static const String _debugBaseUrl =
-      "https://shrew-concrete-cobra.ngrok-free.app";
+      "https://shiny-jobs-grab.loca.lt"; // local tunnel for emulator/device
   static const String _productionBaseUrl =
       "https://tsf-backend-production.up.railway.app";
   
@@ -35,5 +36,5 @@ class ApiConfig {
 
   // Environment name for logging/display
   static String get environmentName =>
-      kIsDebug ? "Development (ngrok)" : "Production (Railway)";
+      kIsDebug ? "Development (local tunnel)" : "Production (Railway)";
 }
