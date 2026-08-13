@@ -26,9 +26,10 @@ class ApiConfig {
   /// Physical Device: http://192.168.x.x:8080 (replace with your laptop's IP)
   static const String _localBaseUrl = "http://10.0.2.2:8080";
 
-  /// Production backend (Railway / Koyeb)
-  static const String _productionBaseUrl =
-      "https://corsproxy.io/?https://tsf-backend-production.up.railway.app";
+    /// Production backend (Railway / Koyeb)
+    /// Use the real backend host directly so the server's CORS policy can allow the Pages origin.
+    static const String _productionBaseUrl =
+      "https://tsf-backend-production.up.railway.app";
 
   /// ngrok Tunnel URL (dev only)
   /// Example (your current active tunnel):
