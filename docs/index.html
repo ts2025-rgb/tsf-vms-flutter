@@ -33,25 +33,26 @@
   <link rel="manifest" href="./manifest.json">
   <script>
     (function(){
-      // Determine base path: prefer repo subpath if present in URL, otherwise root
       var repoPath = '/tsf-vms-flutter';
       var pathname = window.location.pathname || '/';
-      var basePath = '/';
-      if (pathname.indexOf(repoPath) === 0 || pathname.indexOf(repoPath + '/') === 0) {
-        basePath = repoPath + '/';
-      }
-      // Always use relative paths so assets load correctly regardless of hosting path
+      var host = window.location.hostname || '';
+      var isPagesDev = host.endsWith('.pages.dev');
+
+      // For Cloudflare Pages preview domains, files are served at the site root.
+      // If the URL contains the repo subpath, we should reference root assets.
+      var useRoot = isPagesDev && (pathname.indexOf(repoPath) === 0 || pathname.indexOf(repoPath + '/') === 0);
+
       var manifestLink = document.querySelector('link[rel="manifest"]');
-      if (manifestLink) manifestLink.href = './manifest.json';
+      if (manifestLink) manifestLink.href = (useRoot ? '/' : './') + 'manifest.json';
       else {
         var l = document.createElement('link');
         l.rel = 'manifest';
-        l.href = './manifest.json';
+        l.href = (useRoot ? '/' : './') + 'manifest.json';
         document.head.appendChild(l);
       }
-      // Adjust bootstrap script path if present
+
       var bs = document.querySelector('script[src="flutter_bootstrap.js"]');
-      if (bs) bs.src = './flutter_bootstrap.js';
+      if (bs) bs.src = (useRoot ? '/' : './') + 'flutter_bootstrap.js';
     })();
   </script>
 </head>

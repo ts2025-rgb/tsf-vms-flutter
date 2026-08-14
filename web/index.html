@@ -14,7 +14,7 @@
     This is a placeholder for base href that will be replaced by the value of
     the `--base-href` argument provided to `flutter build`.
   -->
-  <base href="/">
+  <base href="$FLUTTER_BASE_HREF">
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
@@ -31,6 +31,27 @@
 
   <title>py4p_vms</title>
   <link rel="manifest" href="./manifest.json">
+  <script>
+    (function(){
+      var repoPath = '/tsf-vms-flutter';
+      var pathname = window.location.pathname || '/';
+      var host = window.location.hostname || '';
+      var isPagesDev = host.endsWith('.pages.dev');
+      var useRoot = isPagesDev && (pathname.indexOf(repoPath) === 0 || pathname.indexOf(repoPath + '/') === 0);
+
+      var manifestLink = document.querySelector('link[rel="manifest"]');
+      if (manifestLink) manifestLink.href = (useRoot ? '/' : './') + 'manifest.json';
+      else {
+        var l = document.createElement('link');
+        l.rel = 'manifest';
+        l.href = (useRoot ? '/' : './') + 'manifest.json';
+        document.head.appendChild(l);
+      }
+
+      var bs = document.querySelector('script[src="flutter_bootstrap.js"]');
+      if (bs) bs.src = (useRoot ? '/' : './') + 'flutter_bootstrap.js';
+    })();
+  </script>
 </head>
 <body>
   <script src="flutter_bootstrap.js" async></script>
