@@ -1,9 +1,7 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:http/http.dart' as http;
-import 'config/api_config.dart';
+import 'services/api_client.dart';
 import 'config/app_colors.dart';
 
 class AdminLoginScreen extends StatefulWidget {
@@ -21,7 +19,6 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
   
   bool _isLoading = false;
   bool _obscurePassword = true;
-  final String baseUrl = ApiConfig.apiUrl;
 
   Future<void> _adminLogin() async {
     if (!_formKey.currentState!.validate()) return;
@@ -29,50 +26,58 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
     setState(() => _isLoading = true);
 
     try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/admin/login'),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({
+      final response = await ApiClient.post(
+        '/admin/login',
+        body: {
           'email': _emailController.text.trim(),
           'password': _passwordController.text.trim(),
-        }),
+        },
       );
 
-      final data = json.decode(response.body);
-
-      if (response.statusCode == 200 && data['success']) {
+      if (response.success && response.data?['success'] == true) {
         // Store admin token
-        await secureStorage.write(key: "adminToken", value: data['token']);
+        final token = response.data?['token'];
+        if (token != null) {
+          await secureStorage.write(key: "adminToken", value: token);
+        }
         
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Login successful!', style: GoogleFonts.poppins()),
-            backgroundColor: Colors.green,
-          ),
-        );
-
-        Navigator.pushReplacementNamed(context, '/admin');
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              data['message'] ?? 'Login failed',
-              style: GoogleFonts.poppins(),
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Login successful!', style: GoogleFonts.poppins()),
+              backgroundColor: Colors.green,
             ),
+          );
+
+          Navigator.pushReplacementNamed(context, '/admin');
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                response.data?['message'] ?? response.error ?? 'Login failed',
+                style: GoogleFonts.poppins(),
+              ),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Network error: $e', style: GoogleFonts.poppins()),
             backgroundColor: Colors.red,
           ),
         );
       }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Network error: $e', style: GoogleFonts.poppins()),
-          backgroundColor: Colors.red,
-        ),
-      );
     }
 
-    setState(() => _isLoading = false);
+    if (mounted) {
+      setState(() => _isLoading = false);
+    }
   }
 
   @override
