@@ -37,9 +37,6 @@
       var pathname = window.location.pathname || '/';
       var host = window.location.hostname || '';
       var isPagesDev = host.endsWith('.pages.dev');
-
-      // For Cloudflare Pages preview domains, files are served at the site root.
-      // If the URL contains the repo subpath, we should reference root assets.
       var useRoot = isPagesDev && (pathname.indexOf(repoPath) === 0 || pathname.indexOf(repoPath + '/') === 0);
 
       var manifestLink = document.querySelector('link[rel="manifest"]');
@@ -60,7 +57,6 @@
   <script>
     (function(){
       var repoPath = '/tsf-vms-flutter/';
-      // Try root-first for Pages preview; fall back to relative and repo-paths.
       function loadScriptWithFallback() {
         var tried = 0;
         var candidates = ['/' + 'flutter_bootstrap.js', './flutter_bootstrap.js', repoPath + 'flutter_bootstrap.js'];
@@ -79,7 +75,6 @@
       function loadManifestWithFallback() {
         var repoCandidate = repoPath + 'manifest.json';
         var candidates = ['/' + 'manifest.json', './manifest.json', repoCandidate];
-        // Try fetch candidates sequentially until we find a JSON response
         (function tryNext(i){
           if (i >= candidates.length) return;
           fetch(candidates[i], {cache: 'no-store'}).then(function(resp){
