@@ -40,18 +40,18 @@
       if (pathname.indexOf(repoPath) === 0 || pathname.indexOf(repoPath + '/') === 0) {
         basePath = repoPath + '/';
       }
-      // If served from a nested path (e.g., /tsf-vms-flutter/), use that; else root
+      // Always use relative paths so assets load correctly regardless of hosting path
       var manifestLink = document.querySelector('link[rel="manifest"]');
-      if (manifestLink) manifestLink.href = basePath + 'manifest.json';
+      if (manifestLink) manifestLink.href = './manifest.json';
       else {
         var l = document.createElement('link');
         l.rel = 'manifest';
-        l.href = basePath + 'manifest.json';
+        l.href = './manifest.json';
         document.head.appendChild(l);
       }
       // Adjust bootstrap script path if present
       var bs = document.querySelector('script[src="flutter_bootstrap.js"]');
-      if (bs) bs.src = basePath + 'flutter_bootstrap.js';
+      if (bs) bs.src = './flutter_bootstrap.js';
     })();
   </script>
 </head>
