@@ -36,20 +36,26 @@
       var repoPath = '/tsf-vms-flutter';
       var pathname = window.location.pathname || '/';
       var host = window.location.hostname || '';
-      var isPagesDev = host.endsWith('.pages.dev');
-      var useRoot = isPagesDev && (pathname.indexOf(repoPath) === 0 || pathname.indexOf(repoPath + '/') === 0);
+      var isRepoPath = pathname.indexOf(repoPath) === 0 || pathname.indexOf(repoPath + '/') === 0;
+      var base = isRepoPath ? '/tsf-vms-flutter/' : '/';
+
+      var iconLink = document.querySelector('link[rel="icon"]');
+      if (iconLink) iconLink.href = base + 'favicon.png';
+
+      var appleLink = document.querySelector('link[rel="apple-touch-icon"]');
+      if (appleLink) appleLink.href = base + 'icons/Icon-192.png';
 
       var manifestLink = document.querySelector('link[rel="manifest"]');
-      if (manifestLink) manifestLink.href = (useRoot ? '/' : './') + 'manifest.json';
+      if (manifestLink) manifestLink.href = base + 'manifest.json';
       else {
         var l = document.createElement('link');
         l.rel = 'manifest';
-        l.href = (useRoot ? '/' : './') + 'manifest.json';
+        l.href = base + 'manifest.json';
         document.head.appendChild(l);
       }
 
       var bs = document.querySelector('script[src="flutter_bootstrap.js"]');
-      if (bs) bs.src = (useRoot ? '/' : './') + 'flutter_bootstrap.js';
+      if (bs) bs.src = base + 'flutter_bootstrap.js';
     })();
   </script>
 </head>
