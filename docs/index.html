@@ -57,6 +57,19 @@
   </script>
 </head>
 <body>
-  <script src="flutter_bootstrap.js" async></script>
+  <script>
+    (function(){
+      var repoPath = '/tsf-vms-flutter';
+      var pathname = window.location.pathname || '/';
+      var host = window.location.hostname || '';
+      var isPagesDev = host.endsWith('.pages.dev');
+      var useRoot = isPagesDev && (pathname.indexOf(repoPath) === 0 || pathname.indexOf(repoPath + '/') === 0);
+      var src = (useRoot ? '/' : './') + 'flutter_bootstrap.js';
+      var s = document.createElement('script');
+      s.src = src;
+      s.async = true;
+      document.body.appendChild(s);
+    })();
+  </script>
 </body>
 </html>
