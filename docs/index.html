@@ -31,6 +31,29 @@
 
   <title>py4p_vms</title>
   <link rel="manifest" href="./manifest.json">
+  <script>
+    (function(){
+      // Determine base path: prefer repo subpath if present in URL, otherwise root
+      var repoPath = '/tsf-vms-flutter';
+      var pathname = window.location.pathname || '/';
+      var basePath = '/';
+      if (pathname.indexOf(repoPath) === 0 || pathname.indexOf(repoPath + '/') === 0) {
+        basePath = repoPath + '/';
+      }
+      // If served from a nested path (e.g., /tsf-vms-flutter/), use that; else root
+      var manifestLink = document.querySelector('link[rel="manifest"]');
+      if (manifestLink) manifestLink.href = basePath + 'manifest.json';
+      else {
+        var l = document.createElement('link');
+        l.rel = 'manifest';
+        l.href = basePath + 'manifest.json';
+        document.head.appendChild(l);
+      }
+      // Adjust bootstrap script path if present
+      var bs = document.querySelector('script[src="flutter_bootstrap.js"]');
+      if (bs) bs.src = basePath + 'flutter_bootstrap.js';
+    })();
+  </script>
 </head>
 <body>
   <script src="flutter_bootstrap.js" async></script>
