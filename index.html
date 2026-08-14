@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <!--
+    If you are serving your web app in a path other than the root, change the
+    href value below to reflect the base path you are serving from.
+
+    The path provided below has to start and end with a slash "/" in order for
+    it to work correctly.
+
+    For more details:
+    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
+
+    This is a placeholder for base href that will be replaced by the value of
+    the `--base-href` argument provided to `flutter build`.
+  -->
+  <base href="/">
+
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="A new Flutter project.">
+
+  <!-- iOS meta tags & icons -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="py4p_vms">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png"/>
+
+  <title>py4p_vms</title>
+  <link rel="manifest" href="./manifest.json">
+  <script>
+    (function(){
+      var repoPath = '/tsf-vms-flutter';
+      var pathname = window.location.pathname || '/';
+      var host = window.location.hostname || '';
+      var isPagesDev = host.endsWith('.pages.dev');
+      var useRoot = isPagesDev && (pathname.indexOf(repoPath) === 0 || pathname.indexOf(repoPath + '/') === 0);
+
+      var manifestLink = document.querySelector('link[rel="manifest"]');
+      if (manifestLink) manifestLink.href = (useRoot ? '/' : './') + 'manifest.json';
+      else {
+        var l = document.createElement('link');
+        l.rel = 'manifest';
+        l.href = (useRoot ? '/' : './') + 'manifest.json';
+        document.head.appendChild(l);
+      }
+
+      var bs = document.querySelector('script[src="flutter_bootstrap.js"]');
+      if (bs) bs.src = (useRoot ? '/' : './') + 'flutter_bootstrap.js';
+    })();
+  </script>
+</head>
+<body>
+  <script>
+    (function(){
+      var repoPath = '/tsf-vms-flutter/';
+      function loadScriptWithFallback() {
+        var tried = 0;
+        var candidates = ['/' + 'flutter_bootstrap.js', './flutter_bootstrap.js', repoPath + 'flutter_bootstrap.js'];
+        var s = document.createElement('script');
+        s.async = true;
+        s.onerror = function(){
+          tried++;
+          if (tried < candidates.length) {
+            s.src = candidates[tried];
+          }
+        };
+        s.src = candidates[0];
+        document.body.appendChild(s);
+      }
+
+      function loadManifestWithFallback() {
+        var repoCandidate = repoPath + 'manifest.json';
+        var candidates = ['/' + 'manifest.json', './manifest.json', repoCandidate];
+        (function tryNext(i){
+          if (i >= candidates.length) return;
+          fetch(candidates[i], {cache: 'no-store'}).then(function(resp){
+            var ct = resp.headers.get('content-type') || '';
+            if (resp.ok && ct.indexOf('application/json') !== -1) {
+              var link = document.querySelector('link[rel="manifest"]') || document.createElement('link');
+              link.rel = 'manifest';
+              link.href = candidates[i];
+              if (!document.querySelector('link[rel="manifest"]')) document.head.appendChild(link);
+            } else {
+              tryNext(i+1);
+            }
+          }).catch(function(){ tryNext(i+1); });
+        })(0);
+      }
+
+      loadManifestWithFallback();
+      loadScriptWithFallback();
+    })();
+  </script>
+</body>
+</html>
