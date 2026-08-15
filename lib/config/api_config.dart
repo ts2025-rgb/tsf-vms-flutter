@@ -30,7 +30,7 @@ class ApiConfig {
     /// Production backend (Railway / Koyeb)
     /// Use the real backend host directly so the server's CORS policy can allow the Pages origin.
     static const String _productionBaseUrl =
-      "https://tsf-backend-production.up.railway.app";
+      "https://api.py4p.org";
 
   /// ngrok Tunnel URL (dev only)
   /// Example (your current active tunnel):

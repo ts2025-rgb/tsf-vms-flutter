@@ -20,6 +20,7 @@
     <!-- 3. Production: Explicitly trust base domains for Railway, Heroku, and Cloudflare -->
     <domain-config cleartextTrafficPermitted="false">
         <domain includeSubdomains="true">py4p.org</domain>
+        <domain includeSubdomains="true">api.py4p.org</domain>
         <domain includeSubdomains="true">railway.app</domain>
         <domain includeSubdomains="true">pages.dev</domain>
         <domain includeSubdomains="true">herokuapp.com</domain>
