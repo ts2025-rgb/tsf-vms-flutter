@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
-    <!-- HTTPS only for production and Cloudflare Tunnel -->
+    <!-- HTTPS only for production and tunnels -->
     <domain-config cleartextTrafficPermitted="false">
         <!-- Production domains -->
         <domain includeSubdomains="true">tsf-backend-production.up.railway.app</domain>
-        <domain includeSubdomains="true">*.railway.app</domain>
-        <domain includeSubdomains="true">*.herokuapp.com</domain>
-        <!-- Cloudflare Tunnel (free ngrok replacement) -->
-        <domain includeSubdomains="true">*.trycloudflare.com</domain>
+        <domain includeSubdomains="true">railway.app</domain>
+        <domain includeSubdomains="true">herokuapp.com</domain>
+        <!-- Tunnels -->
+        <domain includeSubdomains="true">ngrok-free.dev</domain>
+        <domain includeSubdomains="true">loca.lt</domain>
+        <domain includeSubdomains="true">trycloudflare.com</domain>
     </domain-config>
 
     <!-- Allow HTTP for local development only -->

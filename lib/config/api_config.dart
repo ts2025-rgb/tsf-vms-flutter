@@ -11,7 +11,7 @@ class ApiConfig {
   // ============ CONFIGURATION FLAGS ============
   /// Set to true to use a development tunnel (ngrok or Cloudflare).
   /// Set to false to use production Railway/Koyeb URL.
-  static const bool kIsDebug = false;
+  static const bool kIsDebug = true;
 
   /// When kIsDebug == true, set this to true to pick the ngrok tunnel.
   /// If false, Cloudflare tunnel will be used.
@@ -23,9 +23,9 @@ class ApiConfig {
 
   // ============ BASE URLS ============
   /// Local development via direct IP (HTTP only, same WiFi required)
-  /// Android Emulator: http://10.0.2.2:8080
-  /// Physical Device: http://192.168.x.x:8080 (replace with your laptop's IP)
-  static const String _localBaseUrl = "http://10.0.2.2:8080";
+  /// Android Emulator: http://10.0.2.2:8081
+  /// Physical Device: http://localhost:8081
+  static const String _localBaseUrl = "http://localhost:8081";
 
     /// Production backend (Railway / Koyeb)
     /// Use the real backend host directly so the server's CORS policy can allow the Pages origin.
