@@ -14,13 +14,15 @@
         <domain includeSubdomains="true">pages.dev</domain>
     </domain-config>
 
-    <!-- Allow HTTP for local development only -->
+    <!-- Allow HTTP for local development and carrier-specific issues -->
     <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="true">localhost</domain>
         <domain includeSubdomains="true">127.0.0.1</domain>
         <domain includeSubdomains="true">10.0.2.2</domain>
-        <!-- Physical device local IP: 192.168.*.* -->
         <domain includeSubdomains="true">192.168.*</domain>
+        <!-- Temporary: Allow cleartext for Railway if the carrier proxy strips SSL -->
+        <domain includeSubdomains="true">tsf-backend-production.up.railway.app</domain>
+        <domain includeSubdomains="true">up.railway.app</domain>
     </domain-config>
 
     <!-- Trust custom certificates for self-signed development servers -->
