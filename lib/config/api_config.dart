@@ -5,6 +5,7 @@
 ///  - Local IP (kUseLocalDevHost = true)
 ///
 /// Toggle kIsDebug to switch between production and development base URL.
+library;
 
 class ApiConfig {
   // ============ CONFIGURATION FLAGS ============
@@ -18,13 +19,15 @@ class ApiConfig {
 
   /// Set to true ONLY for local development on same WiFi (HTTP only)
   /// DO NOT use this in production
-  static const bool kUseLocalDevHost = false;
+  /// IMPORTANT: 10.0.2.2 is for Android Emulator only. Physical devices must use the PC's LAN IP.
+  static const bool kUseLocalDevHost = true;
 
   // ============ BASE URLS ============
   /// Local development via direct IP (HTTP only, same WiFi required)
   /// Android Emulator: http://10.0.2.2:8080
-  /// Physical Device: http://192.168.x.x:8080 (replace with your laptop's IP)
-  static const String _localBaseUrl = "http://10.0.2.2:8080";
+  /// Physical Device: http://192.168.x.x:8000 (replace with your laptop's actual LAN IP)
+  /// Example: http://192.168.1.25:8000
+  static const String _localBaseUrl = "http://192.168.1.25:8000";
 
     /// Production backend (Railway / Koyeb)
     /// Use the real backend host directly so the server's CORS policy can allow the Pages origin.
