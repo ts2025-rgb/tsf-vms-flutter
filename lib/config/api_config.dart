@@ -30,7 +30,7 @@ class ApiConfig {
     /// Production backend (Railway / Koyeb)
     /// Use the real backend host directly so the server's CORS policy can allow the Pages origin.
     static const String _productionBaseUrl =
-      "http://yamanote.proxy.rlwy.net:36306";
+      "https://tsf-backend-production.up.railway.app";
 
   /// ngrok Tunnel URL (dev only)
   /// Example (your current active tunnel):
