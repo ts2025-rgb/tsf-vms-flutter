@@ -11,7 +11,7 @@ class ApiConfig {
   // ============ CONFIGURATION FLAGS ============
   /// Set to true to use a development tunnel (ngrok or Cloudflare).
   /// Set to false to use production Railway/Koyeb URL.
-  static const bool kIsDebug = true;
+  static const bool kIsDebug = false;
 
   /// When kIsDebug == true, set this to true to pick the ngrok tunnel.
   /// If false, Cloudflare tunnel will be used.

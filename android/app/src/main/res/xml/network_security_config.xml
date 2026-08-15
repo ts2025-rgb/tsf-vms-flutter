@@ -6,10 +6,12 @@
         <domain includeSubdomains="true">tsf-backend-production.up.railway.app</domain>
         <domain includeSubdomains="true">railway.app</domain>
         <domain includeSubdomains="true">herokuapp.com</domain>
+        <domain includeSubdomains="true">py4p.org</domain>
         <!-- Tunnels -->
         <domain includeSubdomains="true">ngrok-free.dev</domain>
         <domain includeSubdomains="true">loca.lt</domain>
         <domain includeSubdomains="true">trycloudflare.com</domain>
+        <domain includeSubdomains="true">pages.dev</domain>
     </domain-config>
 
     <!-- Allow HTTP for local development only -->
