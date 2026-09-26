@@ -409,28 +409,31 @@ class _SendTabState extends State<_SendTab> {
                     final code =
                         v['volunteerCode'] as String? ?? '';
                     final selected = _selectedIds.contains(id);
-                    return CheckboxListTile(
-                      dense: true,
-                      value: selected,
-                      onChanged: (val) {
-                        setState(() {
-                          if (val == true) {
-                            _selectedIds.add(id);
-                          } else {
-                            _selectedIds.remove(id);
-                          }
-                        });
-                      },
-                      title: Text(name,
-                          style: GoogleFonts.poppins(fontSize: 13)),
-                      subtitle: code.isNotEmpty
-                          ? Text(code,
-                              style: GoogleFonts.poppins(
-                                  fontSize: 11,
-                                  color: Colors.grey.shade500))
-                          : null,
-                      activeColor: AppColors.primaryBlue,
-                      controlAffinity: ListTileControlAffinity.leading,
+                    return Material(
+                      color: Colors.transparent,
+                      child: CheckboxListTile(
+                        dense: true,
+                        value: selected,
+                        onChanged: (val) {
+                          setState(() {
+                            if (val == true) {
+                              _selectedIds.add(id);
+                            } else {
+                              _selectedIds.remove(id);
+                            }
+                          });
+                        },
+                        title: Text(name,
+                            style: GoogleFonts.poppins(fontSize: 13)),
+                        subtitle: code.isNotEmpty
+                            ? Text(code,
+                                style: GoogleFonts.poppins(
+                                    fontSize: 11,
+                                    color: Colors.grey.shade500))
+                            : null,
+                        activeColor: AppColors.primaryBlue,
+                        controlAffinity: ListTileControlAffinity.leading,
+                      ),
                     );
                   },
                 ),

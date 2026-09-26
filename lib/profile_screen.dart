@@ -429,40 +429,43 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 final programName = program['name'] ?? 'Unknown Program';
                 final programDescription = program['description'] ?? '';
 
-                return CheckboxListTile(
-                  title: Text(
-                    programName,
-                    style: GoogleFonts.poppins(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
+                return Material(
+                  color: Colors.transparent,
+                  child: CheckboxListTile(
+                    title: Text(
+                      programName,
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
-                  ),
-                  subtitle: programDescription.isNotEmpty
-                      ? Text(
-                          programDescription,
-                          style: GoogleFonts.poppins(
-                            fontSize: 12,
-                            color: Colors.grey.shade600,
-                          ),
-                        )
-                      : null,
-                  value: _selectedProgramIds.contains(programId),
-                  onChanged: (bool? value) {
-                    setState(() {
-                      if (value == true) {
-                        if (!_selectedProgramIds.contains(programId)) {
-                          _selectedProgramIds.add(programId);
+                    subtitle: programDescription.isNotEmpty
+                        ? Text(
+                            programDescription,
+                            style: GoogleFonts.poppins(
+                              fontSize: 12,
+                              color: Colors.grey.shade600,
+                            ),
+                          )
+                        : null,
+                    value: _selectedProgramIds.contains(programId),
+                    onChanged: (bool? value) {
+                      setState(() {
+                        if (value == true) {
+                          if (!_selectedProgramIds.contains(programId)) {
+                            _selectedProgramIds.add(programId);
+                          }
+                        } else {
+                          _selectedProgramIds.remove(programId);
                         }
-                      } else {
-                        _selectedProgramIds.remove(programId);
-                      }
-                    });
-                  },
-                  activeColor: AppColors.primaryBlue,
-                  checkColor: Colors.white,
-                  contentPadding: EdgeInsets.zero,
-                  controlAffinity: ListTileControlAffinity.leading,
-                  dense: true,
+                      });
+                    },
+                    activeColor: AppColors.primaryBlue,
+                    checkColor: Colors.white,
+                    contentPadding: EdgeInsets.zero,
+                    controlAffinity: ListTileControlAffinity.leading,
+                    dense: true,
+                  ),
                 );
               }),
           ],

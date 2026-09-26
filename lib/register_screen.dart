@@ -19,6 +19,7 @@ class RegisterPage extends StatefulWidget {
 
 class _RegisterPageState extends State<RegisterPage> {
   final _formKey = GlobalKey<FormState>();
+  final PageController _pageController = PageController();
   int _currentStep = 0;
 
   // OTP step state
@@ -123,6 +124,35 @@ class _RegisterPageState extends State<RegisterPage> {
     _fetchPrograms();
   }
 
+  @override
+  void dispose() {
+    _pageController.dispose();
+    _emailController.dispose();
+    _otpController.dispose();
+    _fullNameController.dispose();
+    _dobController.dispose();
+    _phoneController.dispose();
+    _addressController.dispose();
+    _currentLocationController.dispose();
+    _bloodGroupController.dispose();
+    _socialMediaController.dispose();
+    _highestQualificationController.dispose();
+    _currentOccupationController.dispose();
+    _organizationNameController.dispose();
+    _priorVolunteeringDescController.dispose();
+    _whyVolunteerController.dispose();
+    _customSkillController.dispose();
+    _skillsDescController.dispose();
+    _customRoleController.dispose();
+    _specialRequirementsController.dispose();
+    _referenceNameController.dispose();
+    _referenceRelationController.dispose();
+    _referencePhoneController.dispose();
+    _trustworthyMeaningController.dispose();
+    _conflictSituationController.dispose();
+    super.dispose();
+  }
+
   Future<void> _fetchPrograms() async {
     setState(() {
       _loadingPrograms = true;
@@ -155,13 +185,13 @@ class _RegisterPageState extends State<RegisterPage> {
         setState(() {
           _loadingPrograms = false;
         });
-        print('Failed to load programs: ${response.statusCode}');
+        debugPrint('Failed to load programs: ${response.statusCode}');
       }
     } catch (e) {
       setState(() {
         _loadingPrograms = false;
       });
-      print('Error fetching programs: $e');
+      debugPrint('Error fetching programs: $e');
     }
   }
 
@@ -220,6 +250,7 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   Future<void> _showChildProtectionDialog() async {
+    if (!mounted) return;
     final result = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
@@ -352,6 +383,7 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   Future<void> _showPOSHDialog() async {
+    if (!mounted) return;
     final result = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
@@ -487,6 +519,7 @@ class _RegisterPageState extends State<RegisterPage> {
         headers: {"Content-Type": "application/json"},
         body: json.encode({"email": _emailController.text.trim()}),
       );
+      if (!mounted) return;
       final decoded = json.decode(res.body);
       if (res.statusCode == 200 && decoded["success"] == true) {
         setState(() { _otpSent = true; });
@@ -499,11 +532,14 @@ class _RegisterPageState extends State<RegisterPage> {
         );
       }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Failed to send OTP", style: GoogleFonts.poppins())),
       );
     } finally {
-      setState(() { _sendingOtp = false; });
+      if (mounted) {
+        setState(() { _sendingOtp = false; });
+      }
     }
   }
 
@@ -517,6 +553,7 @@ class _RegisterPageState extends State<RegisterPage> {
           "otp": _otpController.text.trim(),
         }),
       );
+      if (!mounted) return;
       final decoded = json.decode(res.body);
       if (res.statusCode == 200 && decoded["success"] == true) {
         setState(() { _emailVerified = true; });
@@ -529,28 +566,34 @@ class _RegisterPageState extends State<RegisterPage> {
         );
       }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Failed to verify OTP", style: GoogleFonts.poppins())),
       );
     } finally {
-      setState(() { _verifyingOtp = false; });
+      if (mounted) {
+        setState(() { _verifyingOtp = false; });
+      }
     }
   }
 
   Future<void> _submitForm() async {
     if (!_formKey.currentState!.validate()) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Please fill all required fields", style: GoogleFonts.poppins())),
       );
       return;
     }
     if (_photoFile == null || _aadharFile == null) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Please upload all required files", style: GoogleFonts.poppins())),
       );
       return;
     }
     if (_fileError != null) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(_fileError!, style: GoogleFonts.poppins())),
       );
@@ -561,13 +604,13 @@ class _RegisterPageState extends State<RegisterPage> {
       _isSubmitting = true;
     });
 
-    print('=== REGISTRATION VALIDATION DEBUG ===');
-    print('Form validation passed: ${_formKey.currentState!.validate()}');
-    print('Files check:');
-    print('  _photoFile: ${_photoFile?.name ?? 'null'}');
-    print('  _aadharFile: ${_aadharFile?.name ?? 'null'}');
-    print('  _fileError: $_fileError');
-    print('=====================================');
+    debugPrint('=== REGISTRATION VALIDATION DEBUG ===');
+    debugPrint('Form validation passed: ${_formKey.currentState!.validate()}');
+    debugPrint('Files check:');
+    debugPrint('  _photoFile: ${_photoFile?.name ?? 'null'}');
+    debugPrint('  _aadharFile: ${_aadharFile?.name ?? 'null'}');
+    debugPrint('  _fileError: $_fileError');
+    debugPrint('=====================================');
 
     final uri = Uri.parse('$baseUrl/auth/register');
     final request = http.MultipartRequest("POST", uri);
@@ -630,31 +673,32 @@ class _RegisterPageState extends State<RegisterPage> {
     await addFile('aadhar', _aadharFile);
 
     try {
-      print('=== REGISTRATION REQUEST DEBUG ===');
-      print('Sending registration request to: ${uri.toString()}');
-      print('Request fields:');
+      debugPrint('=== REGISTRATION REQUEST DEBUG ===');
+      debugPrint('Sending registration request to: ${uri.toString()}');
+      debugPrint('Request fields:');
       request.fields.forEach((key, value) {
-        print('  $key: $value');
+        debugPrint('  $key: $value');
       });
-      print('Request files:');
+      debugPrint('Request files:');
       for (var file in request.files) {
-        print('  ${file.field}: ${file.filename} (${file.length} bytes)');
+        debugPrint('  ${file.field}: ${file.filename} (${file.length} bytes)');
       }
-      print('=====================================');
+      debugPrint('=====================================');
 
       final response = await request.send();
       final responseBody = await response.stream.bytesToString();
       
-      print('=== REGISTRATION RESPONSE DEBUG ===');
-      print('Status Code: ${response.statusCode}');
-      print('Response Headers: ${response.headers}');
-      print('Response Body: $responseBody');
-      print('====================================');
+      debugPrint('=== REGISTRATION RESPONSE DEBUG ===');
+      debugPrint('Status Code: ${response.statusCode}');
+      debugPrint('Response Headers: ${response.headers}');
+      debugPrint('Response Body: $responseBody');
+      debugPrint('====================================');
 
+      if (!mounted) return;
       final decoded = json.decode(responseBody);
 
       if (response.statusCode == 200 && decoded["success"] == true) {
-        print('Registration successful!');
+        debugPrint('Registration successful!');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text("Registration successful! Redirecting to login...", style: GoogleFonts.poppins()),
@@ -663,10 +707,11 @@ class _RegisterPageState extends State<RegisterPage> {
         );
         // Wait a moment to show the success message, then navigate to login
         await Future.delayed(const Duration(milliseconds: 1500));
+        if (!mounted) return;
         Navigator.pushReplacementNamed(context, "/login");
       } else {
-        print('Registration failed - Status: ${response.statusCode}, Success: ${decoded["success"]}');
-        print('Error message: ${decoded["message"]}');
+        debugPrint('Registration failed - Status: ${response.statusCode}, Success: ${decoded["success"]}');
+        debugPrint('Error message: ${decoded["message"]}');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(decoded["message"] ?? "Registration failed", style: GoogleFonts.poppins()),
@@ -675,10 +720,11 @@ class _RegisterPageState extends State<RegisterPage> {
         );
       }
     } catch (e, stackTrace) {
-      print('=== REGISTRATION ERROR DEBUG ===');
-      print('Error: $e');
-      print('Stack trace: $stackTrace');
-      print('=================================');
+      debugPrint('=== REGISTRATION ERROR DEBUG ===');
+      debugPrint('Error: $e');
+      debugPrint('Stack trace: $stackTrace');
+      debugPrint('=================================');
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text("Failed to register. Please try again.", style: GoogleFonts.poppins()),
@@ -686,9 +732,11 @@ class _RegisterPageState extends State<RegisterPage> {
         ),
       );
     } finally {
-      setState(() {
-        _isSubmitting = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+        });
+      }
     }
   }
 
@@ -967,18 +1015,21 @@ class _RegisterPageState extends State<RegisterPage> {
             validator: (v) => v == null || v.isEmpty ? "Required" : null,
           ),
           const SizedBox(height: 16),
-          Container(
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey.shade300),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: SwitchListTile(
-              title: Text("Do you have corporate experience?", style: GoogleFonts.poppins()),
-              subtitle: Text("Toggle if you have worked in corporate environment", 
-                style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600])),
-              value: _corporateExperience,
-              onChanged: (v) => setState(() => _corporateExperience = v),
-              activeThumbColor: Colors.teal,
+          Material(
+            color: Colors.transparent,
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey.shade300),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: SwitchListTile(
+                title: Text("Do you have corporate experience?", style: GoogleFonts.poppins()),
+                subtitle: Text("Toggle if you have worked in corporate environment", 
+                  style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600])),
+                value: _corporateExperience,
+                onChanged: (v) => setState(() => _corporateExperience = v),
+                activeThumbColor: Colors.teal,
+              ),
             ),
           ),
           if (_corporateExperience) ...[
@@ -1003,18 +1054,21 @@ class _RegisterPageState extends State<RegisterPage> {
       isActive: _currentStep >= 2,
       content: Column(
         children: [
-          Container(
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey.shade300),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: SwitchListTile(
-              title: Text("Have you volunteered before?", style: GoogleFonts.poppins()),
-              subtitle: Text("Toggle if you have prior volunteering experience", 
-                style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600])),
-              value: _priorVolunteering,
-              onChanged: (v) => setState(() => _priorVolunteering = v),
-              activeThumbColor: Colors.teal,
+          Material(
+            color: Colors.transparent,
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey.shade300),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: SwitchListTile(
+                title: Text("Have you volunteered before?", style: GoogleFonts.poppins()),
+                subtitle: Text("Toggle if you have prior volunteering experience", 
+                  style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600])),
+                value: _priorVolunteering,
+                onChanged: (v) => setState(() => _priorVolunteering = v),
+                activeThumbColor: Colors.teal,
+              ),
             ),
           ),
           if (_priorVolunteering) ...[
@@ -1666,59 +1720,62 @@ class _RegisterPageState extends State<RegisterPage> {
             ),
           ),
           const SizedBox(height: 16),
-          Container(
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: _childProtectionAccepted ? Colors.green.shade300 : Colors.grey.shade300,
-                width: 2,
+          Material(
+            color: Colors.transparent,
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: _childProtectionAccepted ? Colors.green.shade300 : Colors.grey.shade300,
+                  width: 2,
+                ),
+                borderRadius: BorderRadius.circular(12),
+                color: _childProtectionAccepted ? Colors.green.shade50 : null,
               ),
-              borderRadius: BorderRadius.circular(12),
-              color: _childProtectionAccepted ? Colors.green.shade50 : null,
-            ),
-            child: CheckboxListTile(
-              title: Text(
-                "I accept the Child Protection Policy Undertaking",
-                style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
-              ),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 4),
-                  Text(
-                    "Click to read the full policy and accept",
-                    style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600]),
-                  ),
-                  if (_childProtectionAccepted) ...[
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Icon(Icons.check_circle, color: Colors.green.shade700, size: 16),
-                        const SizedBox(width: 6),
-                        Text(
-                          "Accepted",
-                          style: GoogleFonts.poppins(
-                            fontSize: 12,
-                            color: Colors.green.shade700,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
+              child: CheckboxListTile(
+                title: Text(
+                  "I accept the Child Protection Policy Undertaking",
+                  style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
+                ),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 4),
+                    Text(
+                      "Click to read the full policy and accept",
+                      style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600]),
                     ),
+                    if (_childProtectionAccepted) ...[
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Icon(Icons.check_circle, color: Colors.green.shade700, size: 16),
+                          const SizedBox(width: 6),
+                          Text(
+                            "Accepted",
+                            style: GoogleFonts.poppins(
+                              fontSize: 12,
+                              color: Colors.green.shade700,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ],
-                ],
+                ),
+                value: _childProtectionAccepted,
+                onChanged: (bool? value) {
+                  if (value == true) {
+                    _showChildProtectionDialog();
+                  } else {
+                    setState(() {
+                      _childProtectionAccepted = false;
+                    });
+                  }
+                },
+                activeColor: Colors.red.shade700,
+                controlAffinity: ListTileControlAffinity.leading,
               ),
-              value: _childProtectionAccepted,
-              onChanged: (bool? value) {
-                if (value == true) {
-                  _showChildProtectionDialog();
-                } else {
-                  setState(() {
-                    _childProtectionAccepted = false;
-                  });
-                }
-              },
-              activeColor: Colors.red.shade700,
-              controlAffinity: ListTileControlAffinity.leading,
             ),
           ),
           if (!_childProtectionAccepted)
@@ -1749,59 +1806,62 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
             ),
           const SizedBox(height: 16),
-          Container(
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: _poshPolicyAccepted ? Colors.green.shade300 : Colors.grey.shade300,
-                width: 2,
+          Material(
+            color: Colors.transparent,
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: _poshPolicyAccepted ? Colors.green.shade300 : Colors.grey.shade300,
+                  width: 2,
+                ),
+                borderRadius: BorderRadius.circular(12),
+                color: _poshPolicyAccepted ? Colors.green.shade50 : null,
               ),
-              borderRadius: BorderRadius.circular(12),
-              color: _poshPolicyAccepted ? Colors.green.shade50 : null,
-            ),
-            child: CheckboxListTile(
-              title: Text(
-                "I accept the POSH Policy",
-                style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
-              ),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 4),
-                  Text(
-                    "Prevention of Sexual Harassment - Click to read and accept",
-                    style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600]),
-                  ),
-                  if (_poshPolicyAccepted) ...[
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Icon(Icons.check_circle, color: Colors.green.shade700, size: 16),
-                        const SizedBox(width: 6),
-                        Text(
-                          "Accepted",
-                          style: GoogleFonts.poppins(
-                            fontSize: 12,
-                            color: Colors.green.shade700,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
+              child: CheckboxListTile(
+                title: Text(
+                  "I accept the POSH Policy",
+                  style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
+                ),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 4),
+                    Text(
+                      "Prevention of Sexual Harassment - Click to read and accept",
+                      style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600]),
                     ),
+                    if (_poshPolicyAccepted) ...[
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Icon(Icons.check_circle, color: Colors.green.shade700, size: 16),
+                          const SizedBox(width: 6),
+                          Text(
+                            "Accepted",
+                            style: GoogleFonts.poppins(
+                              fontSize: 12,
+                              color: Colors.green.shade700,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ],
-                ],
+                ),
+                value: _poshPolicyAccepted,
+                onChanged: (bool? value) {
+                  if (value == true) {
+                    _showPOSHDialog();
+                  } else {
+                    setState(() {
+                      _poshPolicyAccepted = false;
+                    });
+                  }
+                },
+                activeColor: Colors.purple.shade700,
+                controlAffinity: ListTileControlAffinity.leading,
               ),
-              value: _poshPolicyAccepted,
-              onChanged: (bool? value) {
-                if (value == true) {
-                  _showPOSHDialog();
-                } else {
-                  setState(() {
-                    _poshPolicyAccepted = false;
-                  });
-                }
-              },
-              activeColor: Colors.purple.shade700,
-              controlAffinity: ListTileControlAffinity.leading,
             ),
           ),
           if (!_poshPolicyAccepted)
@@ -1935,7 +1995,6 @@ class _RegisterPageState extends State<RegisterPage> {
       body: _emailVerified
           ? Column(
               children: [
-                // Progress Indicator
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
@@ -1954,7 +2013,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            "Step ${_currentStep + 1} of ${_steps.length}",
+                            "Page ${_currentStep + 1} of ${_steps.length}",
                             style: GoogleFonts.poppins(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
@@ -1987,167 +2046,191 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
                 Expanded(
                   child: Stack(
-              children: [
-                Form(
-                  key: _formKey,
-                  child: Stepper(
-                    type: StepperType.vertical,
-                    currentStep: _currentStep,
-                    onStepContinue: () {
-                      if (_currentStep == _steps.length - 1) {
-                        _submitForm();
-                      } else {
-                        setState(() => _currentStep += 1);
-                      }
-                    },
-                    onStepCancel: () {
-                      if (_currentStep > 0) {
-                        setState(() => _currentStep -= 1);
-                      }
-                    },
-                    steps: _steps,
-                    controlsBuilder: (context, details) {
-                      return Container(
-                        margin: const EdgeInsets.only(top: 20.0),
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.08),
-                              blurRadius: 16,
-                              offset: Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            if (_currentStep > 0)
-                              Expanded(
-                                child: OutlinedButton.icon(
-                                  onPressed: _isSubmitting ? null : details.onStepCancel,
-                                  icon: Icon(Icons.arrow_back, size: 18),
-                                  label: Text("Back", style: GoogleFonts.poppins()),
-                                  style: OutlinedButton.styleFrom(
-                                    padding: const EdgeInsets.symmetric(vertical: 16),
-                                    side: BorderSide(color: Colors.grey.shade300, width: 1.5),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            if (_currentStep > 0) const SizedBox(width: 12),
-                            Expanded(
-                              flex: 2,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  gradient: AppColors.primaryGradient,
-                                  borderRadius: BorderRadius.circular(12),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: AppColors.primaryBlue.withValues(alpha: 0.3),
-                                      blurRadius: 12,
-                                      offset: Offset(0, 4),
-                                    ),
-                                  ],
-                                ),
-                                child: ElevatedButton.icon(
-                                  onPressed: _isSubmitting ? null : details.onStepContinue,
-                                  icon: _isSubmitting
-                                      ? const SizedBox(
-                                          height: 18,
-                                          width: 18,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2,
-                                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                          ),
-                                        )
-                                      : Icon(
-                                          _currentStep == _steps.length - 1
-                                              ? Icons.check_circle
-                                              : Icons.arrow_forward,
-                                          size: 20,
-                                        ),
-                                  label: Text(
-                                    _currentStep == _steps.length - 1 ? "Submit" : "Continue",
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.transparent,
-                                    foregroundColor: Colors.white,
-                                    shadowColor: Colors.transparent,
-                                    padding: const EdgeInsets.symmetric(vertical: 16),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                if (_isSubmitting)
-                  Container(
-                    color: Colors.black.withValues(alpha: 0.3),
-                    child: Center(
-                      child: Container(
-                        padding: const EdgeInsets.all(24),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.1),
-                              blurRadius: 10,
-                              spreadRadius: 2,
-                            ),
-                          ],
-                        ),
+                    children: [
+                      Form(
+                        key: _formKey,
                         child: Column(
-                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            SizedBox(
-                              width: 50,
-                              height: 50,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 3,
-                                valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryBlue),
+                            Expanded(
+                              child: PageView.builder(
+                                controller: _pageController,
+                                physics: const NeverScrollableScrollPhysics(),
+                                itemCount: _steps.length,
+                                onPageChanged: (index) {
+                                  setState(() => _currentStep = index);
+                                },
+                                itemBuilder: (context, index) {
+                                  return Center(
+                                    child: ConstrainedBox(
+                                      constraints: const BoxConstraints(maxWidth: 980),
+                                      child: SingleChildScrollView(
+                                        padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
+                                        child: _steps[index].content,
+                                      ),
+                                    ),
+                                  );
+                                },
                               ),
                             ),
-                            const SizedBox(height: 20),
-                            Text(
-                              "Submitting Registration",
-                              style: GoogleFonts.poppins(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.primaryBlue,
+                            Container(
+                              padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.06),
+                                    blurRadius: 12,
+                                    offset: const Offset(0, -2),
+                                  ),
+                                ],
                               ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              "Please wait while we process your application...",
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.poppins(
-                                fontSize: 14,
-                                color: Colors.grey[600],
+                              child: Row(
+                                children: [
+                                  if (_currentStep > 0)
+                                    Expanded(
+                                      child: OutlinedButton.icon(
+                                        onPressed: _isSubmitting
+                                            ? null
+                                            : () {
+                                                _pageController.previousPage(
+                                                  duration: const Duration(milliseconds: 250),
+                                                  curve: Curves.easeInOut,
+                                                );
+                                              },
+                                        icon: const Icon(Icons.arrow_back, size: 18),
+                                        label: Text("Back", style: GoogleFonts.poppins()),
+                                        style: OutlinedButton.styleFrom(
+                                          padding: const EdgeInsets.symmetric(vertical: 16),
+                                          side: BorderSide(color: Colors.grey.shade300, width: 1.5),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                        ),
+                                      ),
+                                    )
+                                  else
+                                    const Expanded(child: SizedBox()),
+                                  if (_currentStep > 0) const SizedBox(width: 12),
+                                  Expanded(
+                                    flex: 2,
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        gradient: AppColors.primaryGradient,
+                                        borderRadius: BorderRadius.circular(12),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: AppColors.primaryBlue.withValues(alpha: 0.3),
+                                            blurRadius: 12,
+                                            offset: const Offset(0, 4),
+                                          ),
+                                        ],
+                                      ),
+                                      child: ElevatedButton.icon(
+                                        onPressed: _isSubmitting
+                                            ? null
+                                            : () {
+                                                if (_currentStep == _steps.length - 1) {
+                                                  _submitForm();
+                                                } else {
+                                                  _pageController.nextPage(
+                                                    duration: const Duration(milliseconds: 250),
+                                                    curve: Curves.easeInOut,
+                                                  );
+                                                }
+                                              },
+                                        icon: _isSubmitting
+                                            ? const SizedBox(
+                                                height: 18,
+                                                width: 18,
+                                                child: CircularProgressIndicator(
+                                                  strokeWidth: 2,
+                                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                                ),
+                                              )
+                                            : Icon(
+                                                _currentStep == _steps.length - 1
+                                                    ? Icons.check_circle
+                                                    : Icons.arrow_forward,
+                                                size: 20,
+                                              ),
+                                        label: Text(
+                                          _currentStep == _steps.length - 1 ? "Submit" : "Continue",
+                                          style: GoogleFonts.poppins(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.transparent,
+                                          foregroundColor: Colors.white,
+                                          shadowColor: Colors.transparent,
+                                          padding: const EdgeInsets.symmetric(vertical: 16),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ],
                         ),
                       ),
-                    ),
+                      if (_isSubmitting)
+                        Container(
+                          color: Colors.black.withValues(alpha: 0.3),
+                          child: Center(
+                            child: Container(
+                              padding: const EdgeInsets.all(24),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(16),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.1),
+                                    blurRadius: 10,
+                                    spreadRadius: 2,
+                                  ),
+                                ],
+                              ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  SizedBox(
+                                    width: 50,
+                                    height: 50,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 3,
+                                      valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryBlue),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 20),
+                                  Text(
+                                    "Submitting Registration",
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.primaryBlue,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    "Please wait while we process your application...",
+                                    textAlign: TextAlign.center,
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 14,
+                                      color: Colors.grey[600],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
-              ],
-            ),
                 ),
               ],
             )

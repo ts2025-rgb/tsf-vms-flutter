@@ -1997,44 +1997,50 @@ class _CompanionConnectPageState extends State<CompanionConnectPage> {
               ),
             ),
           ..._checklistItems.map((item) {
-            return CheckboxListTile(
-              title: Text(
-                item['label'] == 'Other' ? 'Other' : item['label'],
-                style: GoogleFonts.poppins(fontSize: 13),
+            return Material(
+              color: Colors.transparent,
+              child: CheckboxListTile(
+                title: Text(
+                  item['label'] == 'Other' ? 'Other' : item['label'],
+                  style: GoogleFonts.poppins(fontSize: 13),
+                ),
+                value: item['isAchieved'],
+                activeColor: AppColors.primaryBlue,
+                dense: true,
+                contentPadding: EdgeInsets.zero,
+                controlAffinity: ListTileControlAffinity.leading,
+                onChanged: (v) {
+                  setState(() {
+                    if (item['label'] == 'Other' && v == false) {
+                      // If unchecking "Other", remove it from the list
+                      _checklistItems.removeWhere((i) => i['label'] == 'Other');
+                      _otherFocusAreaController.clear();
+                    } else {
+                      item['isAchieved'] = v;
+                    }
+                  });
+                },
               ),
-              value: item['isAchieved'],
-              activeColor: AppColors.primaryBlue,
-              dense: true,
-              contentPadding: EdgeInsets.zero,
-              controlAffinity: ListTileControlAffinity.leading,
-              onChanged: (v) {
-                setState(() {
-                  if (item['label'] == 'Other' && v == false) {
-                    // If unchecking "Other", remove it from the list
-                    _checklistItems.removeWhere((i) => i['label'] == 'Other');
-                    _otherFocusAreaController.clear();
-                  } else {
-                    item['isAchieved'] = v;
-                  }
-                });
-              },
             );
           }),
           if (!_checklistItems.any((item) => item['label'] == 'Other'))
-            CheckboxListTile(
-              title: Text('Other', style: GoogleFonts.poppins(fontSize: 13)),
-              value: false,
-              activeColor: AppColors.primaryBlue,
-              dense: true,
-              contentPadding: EdgeInsets.zero,
-              controlAffinity: ListTileControlAffinity.leading,
-              onChanged: (v) {
-                if (v == true) {
-                  setState(() {
-                    _checklistItems.add({'label': 'Other', 'isAchieved': true});
-                  });
-                }
-              },
+            Material(
+              color: Colors.transparent,
+              child: CheckboxListTile(
+                title: Text('Other', style: GoogleFonts.poppins(fontSize: 13)),
+                value: false,
+                activeColor: AppColors.primaryBlue,
+                dense: true,
+                contentPadding: EdgeInsets.zero,
+                controlAffinity: ListTileControlAffinity.leading,
+                onChanged: (v) {
+                  if (v == true) {
+                    setState(() {
+                      _checklistItems.add({'label': 'Other', 'isAchieved': true});
+                    });
+                  }
+                },
+              ),
             ),
           if (_checklistItems.any(
             (item) => item['label'] == 'Other' && item['isAchieved'] == true,
